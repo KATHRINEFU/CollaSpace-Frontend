@@ -17,4 +17,13 @@ export interface IUser {
 export enum environment {
     PRODUCTION = "production",
     DEVELOPMENT = "development",
-  }
+}
+
+export interface GoogleUserData {
+firstName: string;
+lastName: string;
+email: string;
+profilePicture: string;
+token: string;
+}
+  
