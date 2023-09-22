@@ -5,7 +5,11 @@ export enum HTTP {
     DELETE = "DELETE",
     PUT = "PUT",
 }
-
+export interface ISignIn {
+    email: string;
+    password?: string;
+    token?: string;
+}
 export interface IUser {
     id: string;
     firstName: string;
