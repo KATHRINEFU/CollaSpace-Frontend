@@ -4,7 +4,7 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { useUser } from "../../hooks/useUser";
 import { useEffect } from "react";
-import { Login } from "../../pages/public/Login";
+// import { Login } from "../../pages/public/Login";
 
 export default function DefaultLayout() {
 	const user = useUser();
@@ -21,10 +21,9 @@ export default function DefaultLayout() {
 		<div className="flex flex-col">
 			<Navbar />
 			<main className="">
-				<Login/>
-				{/* <ErrorBoundary> */}
-					{/* <Outlet /> */}
-				{/* </ErrorBoundary> */}
+				<ErrorBoundary>
+					<Outlet />
+				</ErrorBoundary>
 			</main>
 			<Footer />
 		</div>

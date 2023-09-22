@@ -36,8 +36,9 @@ export default function Navbar() {
 										<li className="px-5 py-3">
 											<Button
 												type="primary"
-												className="bg-primary-purple text-center w-24"
+												className="bg-primary-blue text-center w-24"
 												onClick={handleSigninClicked}
+												style={{background: '#0A81AB'}}
 											>
 												Log In
 											</Button>
@@ -47,7 +48,7 @@ export default function Navbar() {
 												type="primary"
 												className="text-center w-24"
 												onClick={handleSignupClicked}
-												style={{ backgroundColor: "black", color: "white" }}
+												style={{ background: '#F9DFDC', color: 'black'}}
 											>
 												Sign Up
 											</Button>
