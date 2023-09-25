@@ -48,7 +48,7 @@ export const Login = () => {
 				type: "success",
 				message: "Login successful",
 			});
-			// navigate("/user/dashboard");
+			navigate("/user/dashboard");
 		} catch (error: any) {
 			setError(error?.data?.message ?? error?.message);
 		}

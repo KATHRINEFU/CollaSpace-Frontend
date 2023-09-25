@@ -1,11 +1,13 @@
 import { GoogleAuthButton } from "../../components/common/GoogleAuth"
 import { Alert, Button, Form, Input, notification, Select, Spin } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { departmentOptions, roleOptions } from "../../utils/constants";
 import moment from 'moment-timezone';
 import { useAppDispatch } from "../../redux/hooks";
 import { setCredentials } from "../../redux/auth/authSlice";
 import { useSignUpMutation } from "../../redux/auth/authApiSlice";
+import { useNavigate } from "react-router-dom";
+import axios from "../../api/axios";
 
 
 export const SignUp = () => {
@@ -13,9 +15,24 @@ export const SignUp = () => {
     const [error, setError] = useState("");
     const [registerFormRef] = Form.useForm();
     const dispatch = useAppDispatch();
-    const [signUp, { isLoading: isSubmitting }] = useSignUpMutation();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
 
     moment.tz.setDefault("America/New_York");
+
+    const [countries, setCountries] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState({});
+
+    useEffect(() => {
+        fetch(
+          "https://valid.layercode.workers.dev/list/countries?format=select&flags=true&value=code"
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            setCountries(data.countries);
+            setSelectedCountry(data.userSelectValue);
+          });
+      }, []);
 
 
     const handleSignup = async (values: {
@@ -23,33 +40,54 @@ export const SignUp = () => {
         lastname: string;
         email: string;
         phone: string;
-        location: string;
+        locationCountry: string;
+        locationCity: string;
         department: string;
         role: string;
 		password: string;
 	}) => {
+        console.log(values)
+        setIsSubmitting(true)
 
-		try {
-            console.log(values)
-			const { data } = await signUp({
-				...values,
-			}).unwrap();
+        axios.get('/employee/all')
+        .then((r) => {
+            console.log(r.data)
+        })
 
-			dispatch(
-				setCredentials({
-					user: {
-						...data,
-					},
-				})
-			);
-			notification.success({
-				type: "success",
-				message: "Register successful",
-			});
-			// navigate("/user/dashboard");
-		} catch (error: any) {
-			setError(error?.data?.message ?? error?.message);
-		}
+        let payload = {
+            employeeFirstname: values.firstname,
+            employeeLastname: values.lastname,
+            employeeEmail:  values.email,
+            employeeLocationCountry: values.locationCountry,
+            employeeLocationCity: values.locationCity,
+            employeePhone: values.phone,
+            department: values.department,
+            employeeRole: values.role,
+            employeePassword: values.password
+        }
+        axios.post('/employee/create', payload)
+        .then((r) => {
+            setIsSubmitting(false)
+            localStorage.setItem('token', r.data.token)
+            navigate("/dashboard");
+
+            dispatch(
+            setCredentials({
+                    user: {
+                        ...r.data,
+                    },
+                })
+            );
+
+            notification.success({
+                type: "success",
+                message: "Register successful",
+            });
+        })
+        .catch((error: any) => {
+            setIsSubmitting(false)
+            setError(error?.data?.message ?? error?.message);
+        });
 	};
 
 
@@ -171,10 +209,30 @@ export const SignUp = () => {
                         rules={[
                             {
                                 required: true,
-                                message: "Please enter your location",
+                                message: "Please enter your location country",
                             },
                         ]}
-                        name="location"
+                        name="locationCountry"
+                    >
+                        <Select
+                            options={countries}
+                            value={selectedCountry}
+                            onChange={(selectedOption) => setSelectedCountry(selectedOption)}
+                        />
+                    </Form.Item>
+
+                </div>
+
+                <div className="mb-4">
+                    <Form.Item
+                        className="mb-4"
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please enter your location city",
+                            },
+                        ]}
+                        name="locationCity"
                     >
                         <Input
                             size="small"

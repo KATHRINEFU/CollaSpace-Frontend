@@ -82,13 +82,6 @@ import type {
     endpoints: () => ({}),
     tagTypes: [
       "User",
-      "Me",
-      "Preferences",
-      "TechnologyStack",
-      "Insights",
-      "Recommendation",
-      "Feed",
-      "Spur Score"
     ],
   });
   

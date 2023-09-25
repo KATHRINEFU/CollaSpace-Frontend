@@ -1,3 +1,5 @@
+import * as AntdIcons from "@ant-design/icons"
+
 export enum HTTP {
     POST = "POST",
     GET = "GET",
@@ -17,6 +19,13 @@ export interface IUser {
     email: string;
     token?: string;
 }
+
+export type IconName = keyof typeof AntdIcons;
+export interface INav {
+    name: string;
+    path: string;
+    icon: React.ReactNode;
+  }
 
 export enum environment {
     PRODUCTION = "production",
