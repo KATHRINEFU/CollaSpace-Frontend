@@ -1,12 +1,13 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { useLocation } from "react-router-dom";
-import { Layout, Menu, Breadcrumb } from "antd";
-import { INav } from "../../types";
-import {HomeOutlined, TeamOutlined} from "@ant-design/icons"
+import { Layout, Menu, Button, Badge, Image, ConfigProvider } from "antd";
+import {HomeOutlined, TeamOutlined, BellOutlined} from "@ant-design/icons"
 import ErrorBoundary from "../ErrorBoundary";
 import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
+import ProfileAvatar from "/profile-avatar.png";
+import type { MenuProps } from 'antd';
 
 export default function UserLayout() {
   let { pathname } = useLocation();
@@ -14,21 +15,36 @@ export default function UserLayout() {
 
   const { Header, Content, Footer, Sider } = Layout;
 
-  const navItems: INav[] = [
-    {
-        'name':'My Space',
-        'path': '/user/dashboard',
-        'icon': <HomeOutlined />
-    },
-    {
-        'name':'My Teams',
-        'path': '/user/teams',
-        'icon': <TeamOutlined/>
-    },
-  ]
+  type MenuItem = Required<MenuProps>['items'][number];
+  function getItem(
+    label: React.ReactNode,
+    key: React.Key,
+    icon?: React.ReactNode,
+    children?: MenuItem[],
+  ): MenuItem {
+    return {
+      key,
+      icon,
+      children,
+      label,
+    } as MenuItem;
+  }
+
+  const sideBarMenuItem: MenuItem[] = [
+    getItem('My Space', '1', <HomeOutlined />),
+    getItem('My Teams', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
+  ];
 
   return (
     <>
+    <ConfigProvider
+        theme={{
+        token: {
+            // Seed Token
+            colorPrimary: '#7C3E66',
+        },
+        }}
+    >
       <Layout>
         <div className="bg-white m-3 rounded-lg">
             <Sider
@@ -52,12 +68,7 @@ export default function UserLayout() {
                 <Menu
                     mode="inline"
                     defaultSelectedKeys={['1']}
-                    items={navItems.map((item, index) => ({
-                        key: String(index + 1),
-                        icon: item.icon,
-                        label: item.name,
-                        }),
-                    )}
+                    items={sideBarMenuItem}
                 />
 
             </Sider>
@@ -65,24 +76,39 @@ export default function UserLayout() {
       
 
       <Layout style={{width: '80%'}}>
-        <Header className="rounded-lg" style={{margin: '16px 16px 0', padding: 0, background: "#F2EBE9"}} />
-          <Breadcrumb style={{ margin: '24px 16px 0' }}>
-            <Breadcrumb.Item>Home</Breadcrumb.Item>
-            <Breadcrumb.Item>List</Breadcrumb.Item>
-            <Breadcrumb.Item>App</Breadcrumb.Item>
-          </Breadcrumb>
-        <Content style={{ margin: '24px 16px 0' }}>
-          <div className="rounded-lg" style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}>content</div>
+        <Header className="rounded-lg" style={{margin: '16px 16px 0', padding: 0, background: "#F2EBE9"}} >
+            <div className="flex items-center justify-between mr-24 w-full">
+                <h2 className="text-xl font-bold ml-6 "> Good Morning! Yuehao</h2>
+                <div className="w-50 flex items-center gap-3">
+                    <Badge count={5}>
+                        <Button
+                            type="primary"
+                            shape="circle"
+                            size="small"
+                            icon = {<BellOutlined />}
+                            style={{width: '42px'}}
+                            className="mr-3"
+                        />
+                    </Badge>
+
+                    <div className="flex items-center justify-center gap-2 mr-6">
+                        <Image src={ProfileAvatar} alt="Profile Avatar" width={50}/>
+                        <span className="text-black">Yuehao Fu</span>
+                    </div>
+                </div>
+            </div>
+            
+        </Header>
+
+        <Content className="content-ant">
+            <ErrorBoundary>
+                <Outlet />
+            </ErrorBoundary>
         </Content>
         <Footer style={{ textAlign: 'center' }}>CollaSpace ©2023</Footer>
       </Layout>
-
-      <Content className="content-ant">
-        <ErrorBoundary>
-            <Outlet />
-        </ErrorBoundary>
-      </Content>
     </Layout>
+    </ConfigProvider>
     </>
   );
 }

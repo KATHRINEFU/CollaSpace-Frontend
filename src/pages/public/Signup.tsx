@@ -65,7 +65,11 @@ export const SignUp = () => {
             employeeRole: values.role,
             employeePassword: values.password
         }
-        axios.post('/employee/create', payload)
+        axios.post('/employee/create', payload, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
         .then((r) => {
             setIsSubmitting(false)
             localStorage.setItem('token', r.data.token)

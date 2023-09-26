@@ -3,7 +3,7 @@ import { PublicRoutes } from "./PublicRoutes";
 import DefaultLayout from "../components/layouts/DefaultLayout";
 import ErrorBoundary from "../components/ErrorBoundary";
 import UserLayout from "../components/layouts/UserLayout";
-import AuthProvider from "../providers/AuthProvider";
+// import AuthProvider from "../providers/AuthProvider";
 import { UserRoutes } from "./UserRoutes";
 
 export const router = createBrowserRouter([
