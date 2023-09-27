@@ -76,7 +76,7 @@ export default function UserLayout() {
       
 
       <Layout style={{width: '80%'}}>
-        <Header className="rounded-lg" style={{margin: '16px 16px 0', padding: 0, background: "#F2EBE9"}} >
+        <Header className="rounded-lg" style={{margin: '16px 16px 0', padding: 0, background: "#F2EBE9", height: '120px'}} >
             <div className="flex items-center justify-between mr-24 w-full">
                 <h2 className="text-xl font-bold ml-6 "> Good Morning! Yuehao</h2>
                 <div className="w-50 flex items-center gap-3">
@@ -96,7 +96,15 @@ export default function UserLayout() {
                         <span className="text-black">Yuehao Fu</span>
                     </div>
                 </div>
-            </div>
+              </div>
+
+              <div className="w-full ml-6 flex items-center gap-6">
+                <Button type="primary" style={{width: '140px'}}>Create Event</Button>
+                <Button type="primary" style={{width: '140px'}}>Create Ticket</Button>
+                <Button type="primary" style={{width: '140px'}}>Create Team</Button>
+                <Button type="primary" style={{width: '140px'}}>My Calendar</Button>
+                <Button type="primary" style={{width: '140px'}}>My Report</Button>
+              </div>
             
         </Header>
 
