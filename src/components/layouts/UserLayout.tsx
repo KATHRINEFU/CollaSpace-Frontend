@@ -41,7 +41,7 @@ export default function UserLayout() {
         theme={{
         token: {
             // Seed Token
-            colorPrimary: '#7C3E66',
+            // colorPrimary: '#7C3E66',
         },
         }}
     >

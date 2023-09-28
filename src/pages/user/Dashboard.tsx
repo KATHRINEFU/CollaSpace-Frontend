@@ -1,8 +1,9 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
-import { Breadcrumb , Card, Layout, Checkbox, List, Avatar} from "antd"
+import { Breadcrumb , Card, Layout} from "antd"
 import AnnouncementCarousel from "../../components/user/AnnouncementCarousel";
 import {NotificationOutlined, CheckCircleOutlined} from "@ant-design/icons"
+import TodoList from "../../components/user/TodoList";
 
 export function Component() {
     const { Content } = Layout;
@@ -18,6 +19,33 @@ export function Component() {
             'creator': 'Chen Zhang',
             'creationDate': '2023-09-26'
         },
+    ]
+
+    const todayTodoList = [
+        {
+            'id': 0,
+            'content': 'Call with Dave',
+            'time': '9:30 am',
+            'checked': true,
+        },
+        {
+            'id': 1,
+            'content': 'Brunch Meeting',
+            'time': '11:00 am',
+            'checked': false,
+        },
+        {
+            'id': 2,
+            'content': 'Kickoff with Tiktok',
+            'time': '2:30 pm',
+            'checked': false,
+        },
+        {
+            'id': 3,
+            'content': 'Bug workshop with Apple',
+            'time': '4:00 pm',
+            'checked': false,
+        }
     ]
 
     return (
@@ -137,71 +165,7 @@ export function Component() {
                             
                         </div>
                         <div className="flex-auto p-6 pt-0">
-                        {/* <List
-                            itemLayout="horizontal"
-                            dataSource={todayTodoList}
-                            renderItem={(item, index) => (
-                            <List.Item>
-                                <li className="border-black/12.5 rounded-t-inherit relative block border-b border-solid py-2 px-0 text-inherit">
-                                <div className="flex">
-                                    <div>
-                                        <h6 className="mb-0 dark:text-white/80">Call with Dave</h6>
-                                        <small className="text-xs leading-tight">09:30 AM</small>
-                                    </div>
-                                    <div className="my-auto ml-auto min-h-6">
-                                        <Checkbox className="w-5 h-5 ease -ml-7 rounded-1.4 checked:bg-gradient-to-tl checked:from-blue-500 checked:to-violet-500 after:text-xxs after:font-awesome after:duration-250 after:ease-in-out duration-250 relative float-left mt-1 cursor-pointer appearance-none border border-solid border-slate-200 bg-white bg-contain bg-center bg-no-repeat align-top transition-all after:absolute after:flex after:h-full after:w-full after:items-center after:justify-center after:text-white after:opacity-0 after:transition-all after:content-['\f00c'] checked:border-0 checked:border-transparent checked:bg-transparent checked:after:opacity-100" />
-                                    </div>
-                                </div>
-                            </li>
-                            </List.Item>
-                            )}
-                        /> */}
-                        <ul className="flex flex-col pl-0 mb-0 rounded-none">
-                            <li className="border-black/12.5 rounded-t-inherit relative block border-b border-solid py-2 px-0 text-inherit">
-                                <div className="flex">
-                                    <div>
-                                        <h6 className="mb-0 dark:text-white/80">Call with Dave</h6>
-                                        <small className="text-xs leading-tight">09:30 AM</small>
-                                    </div>
-                                    <div className="my-auto ml-auto min-h-6">
-                                        <Checkbox className="w-5 h-5 ease -ml-7 rounded-1.4 checked:bg-gradient-to-tl checked:from-blue-500 checked:to-violet-500 after:text-xxs after:font-awesome after:duration-250 after:ease-in-out duration-250 relative float-left mt-1 cursor-pointer appearance-none border border-solid border-slate-200 bg-white bg-contain bg-center bg-no-repeat align-top transition-all after:absolute after:flex after:h-full after:w-full after:items-center after:justify-center after:text-white after:opacity-0 after:transition-all after:content-['\f00c'] checked:border-0 checked:border-transparent checked:bg-transparent checked:after:opacity-100" />
-                                    </div>
-                                </div>
-                            </li>
-                            <li className="border-black/12.5 relative block border-b border-t-0 border-solid py-2 px-0 text-inherit">
-                            <div className="flex">
-                            <div>
-                            <h6 className="mb-0 dark:text-white/80">Brunch Meeting</h6>
-                            <small className="text-xs leading-tight">11:00 AM</small>
-                            </div>
-                            <div className="block my-auto ml-auto min-h-6">
-                            <Checkbox className="w-5 h-5 ease -ml-7 rounded-1.4 checked:bg-gradient-to-tl checked:from-blue-500 checked:to-violet-500 after:text-xxs after:font-awesome after:duration-250 after:ease-in-out duration-250 relative float-left mt-1 cursor-pointer appearance-none border border-solid border-slate-200 bg-white bg-contain bg-center bg-no-repeat align-top transition-all after:absolute after:flex after:h-full after:w-full after:items-center after:justify-center after:text-white after:opacity-0 after:transition-all after:content-['\f00c'] checked:border-0 checked:border-transparent checked:bg-transparent checked:after:opacity-100" />
-                            </div>
-                            </div>
-                            </li>
-                            <li className="border-black/12.5 relative block border-b border-t-0 border-solid py-2 px-0 text-inherit">
-                            <div className="flex">
-                            <div>
-                            <h6 className="mb-0 dark:text-white/80">Argon Dashboard Launch</h6>
-                            <small className="text-xs leading-tight">02:00 PM</small>
-                            </div>
-                            <div className="block my-auto ml-auto min-h-6">
-                            <Checkbox className="w-5 h-5 ease -ml-7 rounded-1.4 checked:bg-gradient-to-tl checked:from-blue-500 checked:to-violet-500 after:text-xxs after:font-awesome after:duration-250 after:ease-in-out duration-250 relative float-left mt-1 cursor-pointer appearance-none border border-solid border-slate-200 bg-white bg-contain bg-center bg-no-repeat align-top transition-all after:absolute after:flex after:h-full after:w-full after:items-center after:justify-center after:text-white after:opacity-0 after:transition-all after:content-['\f00c'] checked:border-0 checked:border-transparent checked:bg-transparent checked:after:opacity-100" />
-                            </div>
-                            </div>
-                            </li>
-                            <li className="border-black/12.5 rounded-b-inherit relative block py-2 px-0 text-inherit">
-                            <div className="flex">
-                            <div>
-                            <h6 className="mb-0 dark:text-white/80">Winter Hackaton</h6>
-                            <small className="text-xs leading-tight">10:30 AM</small>
-                            </div>
-                            <div className="block my-auto ml-auto min-h-6">
-                            <Checkbox className="w-5 h-5 ease -ml-7 rounded-1.4 checked:bg-gradient-to-tl checked:from-blue-500 checked:to-violet-500 after:text-xxs after:font-awesome after:duration-250 after:ease-in-out duration-250 relative float-left mt-1 cursor-pointer appearance-none border border-solid border-slate-200 bg-white bg-contain bg-center bg-no-repeat align-top transition-all after:absolute after:flex after:h-full after:w-full after:items-center after:justify-center after:text-white after:opacity-0 after:transition-all after:content-['\f00c'] checked:border-0 checked:border-transparent checked:bg-transparent checked:after:opacity-100" />
-                            </div>
-                            </div>
-                            </li>
-                            </ul>
+                            <TodoList todos={todayTodoList}/>
                         </div>
                     </Card>
                 </div>
