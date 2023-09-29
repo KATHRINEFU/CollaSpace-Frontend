@@ -2,8 +2,13 @@ import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { Breadcrumb , Card, Layout} from "antd"
 import AnnouncementCarousel from "../../components/user/AnnouncementCarousel";
-import {NotificationOutlined, CheckCircleOutlined} from "@ant-design/icons"
+import {NotificationOutlined, CheckCircleOutlined, AppstoreOutlined} from "@ant-design/icons"
 import TodoList from "../../components/user/TodoList";
+import AppleLogo from "../../assets/img/logos/AppleLogo.png"
+import BugattiLogo from "../../assets/img/logos/BugattiLogo.svg"
+import ChanelLogo from "../../assets/img/logos/ChanelLogo.svg"
+import TiktokLogo from "../../assets/img/logos/TiktokLogo.png"
+import ZaraLogo from "../../assets/img/logos/ZaraLogo.svg"
 
 export function Component() {
     const { Content } = Layout;
@@ -46,6 +51,29 @@ export function Component() {
             'time': '4:00 pm',
             'checked': false,
         }
+    ]
+
+    const clientLogoList = [
+        {
+            'name': 'Apple',
+            'logo': AppleLogo,
+        },
+        {
+            'name': 'Bugatti',
+            'logo': BugattiLogo,
+        },
+        {
+            'name': 'Chanel',
+            'logo': ChanelLogo,
+        },
+        {
+            'name': 'Tiktok',
+            'logo': TiktokLogo,
+        },
+        {
+            'name': 'Zara',
+            'logo': ZaraLogo,
+        },
     ]
 
     return (
@@ -139,8 +167,30 @@ export function Component() {
             </div>
 
             <div className="flex flex-wrap mt-6 -mx-3">
-                <div className="w-full max-w-full px-3 mb-6 shrink-0 lg:w-6/12 md:flex-0 md:w-6/12 lg:mb-0">
-                    <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+
+                <div className="w-full max-w-full px-3 mb-6 flex flex-col gap-3 shrink-0 lg:w-6/12 md:flex-0 md:w-6/12 lg:mb-0">
+                    <Card className="relative h-50 flex flex-col min-w-0 overflow-scroll break-words bg-white border-0 shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-lg bg-clip-border">
+                        <div className="flex gap-3 ml-6">
+                            <AppstoreOutlined />
+                            <h5 className="mb-0 text-lg dark:text-white">CLIENT IN PROGRESS</h5>
+                        </div>
+                        <div className="flex flex-auto p-6 gap-9">
+                            
+                            {clientLogoList.map((item) => {
+                                return (
+                                    <div className="w-4/12 text-center flex-0 sm:w-5/12 md:w-4/12 lg:w-2/12">
+                                    <a href="javascript:;" className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-solid w-14 h-14 rounded-circle">
+                                        <img src={item.logo} alt="Client Logo" className="w-full p-1 rounded-circle"/>
+                                    </a>
+                                    <p className="mb-0 text-sm leading-normal dark:text-white dark:opacity-60">{item.name}</p>
+                                    </div>
+                                )
+                            })}
+                            
+                        </div>
+                    </Card>
+
+                    <Card className="relative flex flex-col h-80 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                         <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                             <div className="flex gap-3">
                                 <NotificationOutlined />
