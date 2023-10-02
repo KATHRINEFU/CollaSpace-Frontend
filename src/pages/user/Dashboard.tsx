@@ -1,9 +1,11 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
-import { Breadcrumb , Card, Layout} from "antd"
+import { useState } from "react";
+import { Breadcrumb , Button, Card, Layout, Modal, Select} from "antd"
 import AnnouncementCarousel from "../../components/user/AnnouncementCarousel";
-import {NotificationOutlined, CheckCircleOutlined, AppstoreOutlined} from "@ant-design/icons"
+import {NotificationOutlined, CheckCircleOutlined, AppstoreOutlined, DeploymentUnitOutlined, FilterOutlined} from "@ant-design/icons"
 import TodoList from "../../components/user/TodoList";
+import EventList from "../../components/user/EventList";
 import AppleLogo from "../../assets/img/logos/AppleLogo.png"
 import BugattiLogo from "../../assets/img/logos/BugattiLogo.svg"
 import ChanelLogo from "../../assets/img/logos/ChanelLogo.svg"
@@ -12,7 +14,37 @@ import ZaraLogo from "../../assets/img/logos/ZaraLogo.svg"
 
 export function Component() {
     const { Content } = Layout;
+    const { Option } = Select;
+    const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
+    // Define state for filter options here
+    const [filterOptions, setFilterOptions] = useState({
+        type: [],
+        team: [],
+    });
+
+    // Handle filter modal visibility
+    const showFilterModal = () => {
+        setIsFilterModalVisible(true);
+    };
+
+    const handleFilterModalOk = () => {
+        // Apply filtering logic here based on filterOptions
+        setIsFilterModalVisible(false);
+    };
+
+    const handleFilterModalCancel = () => {
+        setIsFilterModalVisible(false);
+    };
+
+    const handleResetFilter = () => {
+        setFilterOptions({
+          type: [],
+          team: [],
+        });
+      };
+
+    
     const announcementList = [
         {
             'content': 'Let\'s have dinner at 4:30pm. We need to be there in advance!',
@@ -76,6 +108,37 @@ export function Component() {
         },
     ]
 
+    const eventList = [
+        {
+            'title': 'Review Apple\'s technical implementation plan',
+            'team': 'Solution Architect',
+            'description': 'After reconsidering their requirement and business logic, a new plan is needed. But we do not have to draft a completely new one, just update parts.',
+            'type': 'document',
+        },
+        {
+            'title': 'Decoration for Max birthday party',
+            'team': 'Max Birthday',
+            'description': 'We bought some decorations from target. We need the decoration done today.',
+            'type': 'activity',
+        },
+        {
+            'title': 'Meeting with Apple',
+            'team': 'Sales',
+            'description': 'Requirement analysis, discuss data privacy',
+            'type': 'meeting',
+        },
+        {
+            'title': 'Meeting with Tiktok',
+            'team': 'Solution Architect',
+            'description': 'They met a order mismatch issue, work with their tech team to fix',
+            'type': 'meeting',
+        }
+    ]
+
+    const uniqueTeams = Array.from(
+        new Set(eventList.map((event) => event.team))
+    );
+
     return (
         <>
         <Breadcrumb style={{ margin: '24px 16px 0' }}>
@@ -84,8 +147,57 @@ export function Component() {
             <Breadcrumb.Item>App</Breadcrumb.Item>
         </Breadcrumb>
         <Content style={{ margin: '24px 16px 0' }}>
-          <div className="rounded-lg" style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}>
 
+            {/* Filter Modal */}
+      <Modal
+        title="Event Filter"
+        open={isFilterModalVisible}
+        onOk={handleFilterModalOk}
+        onCancel={handleFilterModalCancel}
+      >
+        <div className="mb-4">
+          <label>Event Type:</label>
+          <Select
+            mode="multiple"
+            className="w-full"
+            placeholder="Select event type"
+            value={filterOptions.type}
+            onChange={(value) =>
+              setFilterOptions({ ...filterOptions, type: value })
+            }
+          >
+            <Option value="activity">Activity</Option>
+            <Option value="document">Document</Option>
+            <Option value="meeting">Meeting</Option>
+            <Option value="other">Other</Option>
+          </Select>
+        </div>
+        <div className="mb-4">
+          <label>Team:</label>
+          <Select
+            mode="multiple"
+            className="w-full"
+            placeholder="Select team"
+            value={filterOptions.team}
+            onChange={(value) =>
+              setFilterOptions({ ...filterOptions, team: value })
+            }
+          >
+            {uniqueTeams.map((team) => (
+              <Select.Option key={team} value={team}>
+                {team}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
+        <div className="text-right">
+          <Button type="link" onClick={handleResetFilter}>
+            Reset
+          </Button>
+        </div>
+      </Modal>
+          <div className="rounded-lg" style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}>
             <div className="flex flex-wrap -mx-3 mt-3 flex justify-center">
                 <div className="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
                     <Card className="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
@@ -93,7 +205,7 @@ export function Component() {
                             <div className="flex flex-row -mx-3">
                                 <div className="flex-none w-2/3 max-w-full px-3">
                                     <div>
-                                        <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:text-white dark:opacity-60">Client In Progress</p>
+                                        <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:opacity-60">Client In Progress</p>
                                     </div>
                                 </div>
                                 <div className="px-3 text-right basis-1/3">
@@ -106,13 +218,13 @@ export function Component() {
                     </Card>
                 </div>
 
-                <div className="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
+                <div className="w-full max-w-full gap-3 px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
                     <Card className="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                         <div className="flex-auto p-4">
                             <div className="flex flex-row -mx-3">
                                 <div className="flex-none w-2/3 max-w-full px-3">
                                     <div>
-                                        <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:text-white dark:opacity-60">Event Involved</p>
+                                        <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:opacity-60">Event Involved</p>
                                     </div>
                                 </div>
                                 <div className="px-3 text-right basis-1/3">
@@ -131,7 +243,7 @@ export function Component() {
                             <div className="flex flex-row -mx-3">
                                 <div className="flex-none w-2/3 max-w-full px-3">
                                     <div>
-                                        <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:text-white dark:opacity-60">Ticket Assigned</p>
+                                        <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:opacity-60">Ticket Assigned</p>
                                     </div>
                                 </div>
                                 <div className="px-3 text-right basis-1/3">
@@ -150,7 +262,7 @@ export function Component() {
                             <div className="flex flex-row -mx-3">
                                 <div className="flex-none w-2/3 max-w-full px-3">
                                     <div>
-                                        <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:text-white dark:opacity-60">Ticket Involved</p>
+                                        <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:opacity-60">Ticket Involved</p>
                                     </div>
                                 </div>
                                 <div className="px-3 text-right basis-1/3">
@@ -172,7 +284,7 @@ export function Component() {
                     <Card className="relative h-50 flex flex-col min-w-0 overflow-scroll break-words bg-white border-0 shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-lg bg-clip-border">
                         <div className="flex gap-3 ml-6">
                             <AppstoreOutlined />
-                            <h5 className="mb-0 text-lg dark:text-white">CLIENT IN PROGRESS</h5>
+                            <h5 className="mb-0 text-lg">CLIENT IN PROGRESS</h5>
                         </div>
                         <div className="flex flex-auto p-6 gap-9">
                             
@@ -194,7 +306,7 @@ export function Component() {
                         <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                             <div className="flex gap-3">
                                 <NotificationOutlined />
-                                <h5 className="mb-0 text-lg dark:text-white">ANNOUNCEMENTS</h5>
+                                <h5 className="mb-0 text-lg">ANNOUNCEMENTS</h5>
                             </div>
                             
                         </div>
@@ -210,7 +322,7 @@ export function Component() {
                         <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                             <div className="flex gap-3">
                                 <CheckCircleOutlined />
-                                <h5 className="mb-0 text-lg dark:text-white">TODAY'S TODOLIST</h5>
+                                <h5 className="mb-0 text-lg">TODAY'S TODOLIST</h5>
                             </div>
                             
                         </div>
@@ -219,6 +331,24 @@ export function Component() {
                         </div>
                     </Card>
                 </div>
+
+                <div className="w-full max-w-full mt-3 px-3 mb-6 shrink-0 lg:w-6/12 md:flex-0 md:w-6/12 lg:mb-0">
+                    <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                        <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                            <div className="flex gap-3">
+                                <DeploymentUnitOutlined />
+                                <h5 className="mb-0 text-lg">EVENT INVOLVED</h5>
+                                <Button type="link" icon={<FilterOutlined />} onClick={showFilterModal}/>
+                            </div>
+                            
+                        </div>
+                        <div className="flex-auto p-6 pt-0">
+                            <EventList events={eventList} filterOptions={filterOptions}/>
+                        </div>
+                    </Card>
+                </div>
+
+
             </div>
 
           </div>
