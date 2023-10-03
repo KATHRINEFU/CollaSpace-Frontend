@@ -3,9 +3,10 @@ import "../../muse.responsive.css";
 import { useState } from "react";
 import { Breadcrumb , Button, Card, Layout, Modal, Select} from "antd"
 import AnnouncementCarousel from "../../components/user/AnnouncementCarousel";
-import {NotificationOutlined, CheckCircleOutlined, AppstoreOutlined, DeploymentUnitOutlined, FilterOutlined} from "@ant-design/icons"
+import {NotificationOutlined, CheckCircleOutlined, AppstoreOutlined, DeploymentUnitOutlined, FilterOutlined, ContainerOutlined} from "@ant-design/icons"
 import TodoList from "../../components/user/TodoList";
 import EventList from "../../components/user/EventList";
+import TicketAssignedList from "../../components/user/TicketAssignedList";
 import AppleLogo from "../../assets/img/logos/AppleLogo.png"
 import BugattiLogo from "../../assets/img/logos/BugattiLogo.svg"
 import ChanelLogo from "../../assets/img/logos/ChanelLogo.svg"
@@ -15,36 +16,60 @@ import ZaraLogo from "../../assets/img/logos/ZaraLogo.svg"
 export function Component() {
     const { Content } = Layout;
     const { Option } = Select;
-    const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+    const [isEventFilterModalVisible, setIsEventFilterModalVisible] = useState(false);
+    const [isTicketFilterModalVisible, setIsTicketFilterModalVisible] = useState(false);
 
     // Define state for filter options here
-    const [filterOptions, setFilterOptions] = useState({
+    const [eventFilterOptions, setEventFilterOptions] = useState({
         type: [],
         team: [],
     });
 
     // Handle filter modal visibility
-    const showFilterModal = () => {
-        setIsFilterModalVisible(true);
+    const showEventFilterModal = () => {
+        setIsEventFilterModalVisible(true);
     };
 
-    const handleFilterModalOk = () => {
+    const handleEventFilterModalOk = () => {
         // Apply filtering logic here based on filterOptions
-        setIsFilterModalVisible(false);
+        setIsEventFilterModalVisible(false);
     };
 
-    const handleFilterModalCancel = () => {
-        setIsFilterModalVisible(false);
+    const handleEventFilterModalCancel = () => {
+        setIsEventFilterModalVisible(false);
     };
 
-    const handleResetFilter = () => {
-        setFilterOptions({
+    const handleEventResetFilter = () => {
+        setEventFilterOptions({
           type: [],
           team: [],
         });
       };
 
-    
+    // Define state for filter options here
+    const [ticketFilterOptions, setTicketFilterOptions] = useState({
+        status: [],
+    });
+
+    // Handle filter modal visibility
+    const showTicketFilterModal = () => {
+        setIsTicketFilterModalVisible(true);
+    };
+
+    const handleTicketFilterModalOk = () => {
+        // Apply filtering logic here based on filterOptions
+        setIsTicketFilterModalVisible(false);
+    };
+
+    const handleTicketFilterModalCancel = () => {
+        setIsTicketFilterModalVisible(false);
+    };
+
+    const handleTicketResetFilter = () => {
+        setTicketFilterOptions({
+          status: [],
+        });
+      };
     const announcementList = [
         {
             'content': 'Let\'s have dinner at 4:30pm. We need to be there in advance!',
@@ -135,6 +160,33 @@ export function Component() {
         }
     ]
 
+    const ticketAssignedList = [
+        {
+            'title': 'Test Ticket 1',
+            'description': 'Test Ticket 1 Description',
+            'creator': 'Alice A',
+            'status': 'new'
+        },
+        {
+            'title': 'Test Ticket 2',
+            'description': 'Test Ticket 2 Description',
+            'creator': 'Bob B',
+            'status': 'pending acceptance'
+        },
+        {
+            'title': 'Test Ticket 3',
+            'description': 'Test Ticket 3 Description',
+            'creator': 'Celine C',
+            'status': 'in progress'
+        },
+        {
+            'title': 'Test Ticket 4',
+            'description': 'Test Ticket 4 Description',
+            'creator': 'Dave D',
+            'status': 'under review'
+        },
+    ]
+
     const uniqueTeams = Array.from(
         new Set(eventList.map((event) => event.team))
     );
@@ -151,9 +203,9 @@ export function Component() {
             {/* Filter Modal */}
       <Modal
         title="Event Filter"
-        open={isFilterModalVisible}
-        onOk={handleFilterModalOk}
-        onCancel={handleFilterModalCancel}
+        open={isEventFilterModalVisible}
+        onOk={handleEventFilterModalOk}
+        onCancel={handleEventFilterModalCancel}
       >
         <div className="mb-4">
           <label>Event Type:</label>
@@ -161,9 +213,9 @@ export function Component() {
             mode="multiple"
             className="w-full"
             placeholder="Select event type"
-            value={filterOptions.type}
+            value={eventFilterOptions.type}
             onChange={(value) =>
-              setFilterOptions({ ...filterOptions, type: value })
+              setEventFilterOptions({ ...eventFilterOptions, type: value })
             }
           >
             <Option value="activity">Activity</Option>
@@ -178,9 +230,9 @@ export function Component() {
             mode="multiple"
             className="w-full"
             placeholder="Select team"
-            value={filterOptions.team}
+            value={eventFilterOptions.team}
             onChange={(value) =>
-              setFilterOptions({ ...filterOptions, team: value })
+              setEventFilterOptions({ ...eventFilterOptions, team: value })
             }
           >
             {uniqueTeams.map((team) => (
@@ -192,11 +244,13 @@ export function Component() {
         </div>
 
         <div className="text-right">
-          <Button type="link" onClick={handleResetFilter}>
+          <Button type="link" onClick={handleEventResetFilter}>
             Reset
           </Button>
         </div>
       </Modal>
+
+      
           <div className="rounded-lg" style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}>
             <div className="flex flex-wrap -mx-3 mt-3 flex justify-center">
                 <div className="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
@@ -304,9 +358,12 @@ export function Component() {
 
                     <Card className="relative flex flex-col h-80 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                         <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-                            <div className="flex gap-3">
-                                <NotificationOutlined />
-                                <h5 className="mb-0 text-lg">ANNOUNCEMENTS</h5>
+                            <div className="flex justify-between">
+                                <div className="flex gap-3 items-center">
+                                    <NotificationOutlined />
+                                    <h5 className="mb-0 text-lg">ANNOUNCEMENTS</h5>
+                                </div>
+                                <Button type="link">View More</Button>
                             </div>
                             
                         </div>
@@ -331,19 +388,45 @@ export function Component() {
                         </div>
                     </Card>
                 </div>
-
+                
+                {/* only view four nearest*/}
                 <div className="w-full max-w-full mt-3 px-3 mb-6 shrink-0 lg:w-6/12 md:flex-0 md:w-6/12 lg:mb-0">
                     <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                         <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-                            <div className="flex gap-3">
-                                <DeploymentUnitOutlined />
-                                <h5 className="mb-0 text-lg">EVENT INVOLVED</h5>
-                                <Button type="link" icon={<FilterOutlined />} onClick={showFilterModal}/>
+                            <div className="flex justify-between">
+                                <div className="flex gap-3 items-center">
+                                    <DeploymentUnitOutlined />
+                                    <h5 className="mb-0 text-lg">EVENT INVOLVED</h5>
+                                    <Button type="link" icon={<FilterOutlined />} onClick={showEventFilterModal}/>
+                                </div>
+                                
+                                <Button type="link" className="text-right">View More</Button>
                             </div>
                             
                         </div>
                         <div className="flex-auto p-6 pt-0">
-                            <EventList events={eventList} filterOptions={filterOptions}/>
+                            <EventList events={eventList} filterOptions={eventFilterOptions}/>
+                        </div>
+                    </Card>
+                </div>
+                
+                {/* only view four nearest*/}
+                <div className="w-full max-w-full mt-3 px-3 mb-6 shrink-0 lg:w-6/12 md:flex-0 md:w-6/12 lg:mb-0">
+                    <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                        <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                            <div className="flex justify-between">
+                                <div className="flex gap-3 items-center">
+                                    <ContainerOutlined />
+                                    <h5 className="mb-0 text-lg">TICKET ASSIGNED</h5>
+                                    <Button type="link" icon={<FilterOutlined />} onClick={showEventFilterModal}/>
+                                </div>
+                                <Button type="link">View More</Button>
+                            </div>
+                            
+                            
+                        </div>
+                        <div className="flex-auto p-6 pt-0">
+                            <TicketAssignedList tickets={ticketAssignedList} filterOptions={ticketFilterOptions}/>
                         </div>
                     </Card>
                 </div>

@@ -20,13 +20,13 @@ interface EventListProps {
 function getBackgroundColor(type: string) {
     switch (type) {
       case "activity":
-        return "#FFEECC";
+        return "bg-teal-100";
       case "document":
-        return "#FFDDCC";
+        return "bg-orange-100";
       case "meeting":
-        return "#FFCCCC";
+        return "bg-pink-100";
       case "other":
-        return "#FEBBCC";
+        return "bg-teal-100";
       default:
         return "bg-white";
     }
@@ -48,7 +48,7 @@ const EventList: React.FC<EventListProps> = ({
         itemLayout="horizontal"
         dataSource={filteredEvents}
         renderItem={(item) => (
-            <List.Item className={`relative flex flex-col h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border ${
+            <List.Item className={`relative flex flex-col my-3 h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border ${
                 getBackgroundColor(item.type)
               }`}>
                 <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
