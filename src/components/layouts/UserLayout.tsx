@@ -1,6 +1,6 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Layout, Menu, Button, Badge, Image, ConfigProvider } from "antd";
 import {HomeOutlined, TeamOutlined, BellOutlined} from "@ant-design/icons"
 import ErrorBoundary from "../ErrorBoundary";
@@ -12,8 +12,13 @@ import type { MenuProps } from 'antd';
 export default function UserLayout() {
   let { pathname } = useLocation();
   pathname = pathname.split("/")[2];
+  const navigate = useNavigate();
 
   const { Header, Content, Footer, Sider } = Layout;
+
+  const handleCreateEventBtnClicked = () => {
+    navigate("/user/create-event")
+  }
 
   type MenuItem = Required<MenuProps>['items'][number];
   function getItem(
@@ -31,7 +36,7 @@ export default function UserLayout() {
   }
 
   const sideBarMenuItem: MenuItem[] = [
-    getItem('My Space', '1', <HomeOutlined />),
+    getItem('My Space', 'sub1', <HomeOutlined />, [getItem('Events', '2'), getItem('Tickets', '3'), getItem('Calendar', '4'), getItem('Report', '5')]),
     getItem('My Teams', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
   ];
 
@@ -99,7 +104,7 @@ export default function UserLayout() {
               </div>
 
               <div className="w-full ml-6 flex items-center gap-6">
-                <Button type="primary" style={{width: '140px'}}>Create Event</Button>
+                <Button type="primary" onClick={handleCreateEventBtnClicked} style={{width: '140px'}}>Create Event</Button>
                 <Button type="primary" style={{width: '140px'}}>Create Ticket</Button>
                 <Button type="primary" style={{width: '140px'}}>Create Team</Button>
                 <Button type="primary" style={{width: '140px'}}>My Calendar</Button>
