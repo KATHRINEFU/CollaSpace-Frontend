@@ -7,9 +7,11 @@ import {
   Select,
   Switch,
   DatePicker,
-  TimePicker
+  TimePicker,
+  Modal
 } from 'antd';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const formItemLayout = {
     labelCol: {
@@ -40,6 +42,9 @@ const tailFormItemLayout = {
 export function Component() {
     const [form] = Form.useForm();
     const {Option} = Select;
+    const navigate = useNavigate();
+    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+
 
     const [eventType, setEventType] = useState("");
 
@@ -47,6 +52,19 @@ export function Component() {
         setEventType(value);
         form.setFieldValue("type", value);
     }
+
+    const handleCancelCreateEvent = () => {
+        setIsConfirmModalVisible(true);
+    };
+      
+    const handleConfirmCancel = () => {
+        setIsConfirmModalVisible(false);
+        navigate('/user/dashboard/');
+    };
+    
+    const handleContinue = () => {
+        setIsConfirmModalVisible(false);
+    };
 
     const onFinish = (values: any) => {
         console.log('Received values of form: ', values);
@@ -284,8 +302,28 @@ export function Component() {
             
 
             
-            <Form.Item {...tailFormItemLayout}>
-                <Button type="primary" htmlType="submit">
+            <Form.Item 
+            {...tailFormItemLayout}>
+                <Button type="primary" className='mr-3' onClick={handleCancelCreateEvent}>
+                    Cancel
+                </Button>
+
+                <Modal
+                    title="Confirm Cancel"
+                    open={isConfirmModalVisible}
+                    cancelButtonProps={{ style: { display: 'none' } }}
+                    footer={[
+                        <Button key="cancel" onClick={handleContinue}>
+                          No, Continue
+                        </Button>,
+                        <Button key="confirm" type="primary" onClick={handleConfirmCancel}>
+                          Yes, Cancel
+                        </Button>,
+                      ]}
+                >
+                Are you sure you want to cancel creating the event?
+                </Modal>
+                <Button type="primary" htmlType="submit" className='ml-3'>
                     Create
                 </Button>
             </Form.Item>

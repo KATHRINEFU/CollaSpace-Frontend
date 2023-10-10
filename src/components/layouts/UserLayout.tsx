@@ -20,6 +20,10 @@ export default function UserLayout() {
     navigate("/user/create-event")
   }
 
+  const handleCreateTicketBtnClicked = () => {
+    navigate("/user/create-ticket")
+  }
+
   type MenuItem = Required<MenuProps>['items'][number];
   function getItem(
     label: React.ReactNode,
@@ -27,16 +31,23 @@ export default function UserLayout() {
     icon?: React.ReactNode,
     children?: MenuItem[],
   ): MenuItem {
+    const onClick = () => {
+      if (key === '1') {
+        navigate('/user/dashboard');
+      }
+    };
+
     return {
       key,
       icon,
       children,
       label,
+      onClick,
     } as MenuItem;
   }
 
   const sideBarMenuItem: MenuItem[] = [
-    getItem('My Space', 'sub1', <HomeOutlined />, [getItem('Events', '2'), getItem('Tickets', '3'), getItem('Calendar', '4'), getItem('Report', '5')]),
+    getItem('My Space', 'sub1', <HomeOutlined />, [getItem('Dashboard', '1'), getItem('Events', '2'), getItem('Tickets', '3'), getItem('Calendar', '4'), getItem('Report', '5')]),
     getItem('My Teams', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
   ];
 
@@ -105,7 +116,7 @@ export default function UserLayout() {
 
               <div className="w-full ml-6 flex items-center gap-6">
                 <Button type="primary" onClick={handleCreateEventBtnClicked} style={{width: '140px'}}>Create Event</Button>
-                <Button type="primary" style={{width: '140px'}}>Create Ticket</Button>
+                <Button type="primary" onClick={handleCreateTicketBtnClicked} style={{width: '140px'}}>Create Ticket</Button>
                 <Button type="primary" style={{width: '140px'}}>Create Team</Button>
                 <Button type="primary" style={{width: '140px'}}>My Calendar</Button>
                 <Button type="primary" style={{width: '140px'}}>My Report</Button>
