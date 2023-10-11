@@ -24,6 +24,10 @@ export default function UserLayout() {
     navigate("/user/create-ticket")
   }
 
+  const handleCreateTeamBtnClicked = () => {
+    navigate("/user/create-team")
+  }
+
   type MenuItem = Required<MenuProps>['items'][number];
   function getItem(
     label: React.ReactNode,
@@ -117,7 +121,7 @@ export default function UserLayout() {
               <div className="w-full ml-6 flex items-center gap-6">
                 <Button type="primary" onClick={handleCreateEventBtnClicked} style={{width: '140px'}}>Create Event</Button>
                 <Button type="primary" onClick={handleCreateTicketBtnClicked} style={{width: '140px'}}>Create Ticket</Button>
-                <Button type="primary" style={{width: '140px'}}>Create Team</Button>
+                <Button type="primary" onClick={handleCreateTeamBtnClicked} style={{width: '140px'}}>Create Team</Button>
                 <Button type="primary" style={{width: '140px'}}>My Calendar</Button>
                 <Button type="primary" style={{width: '140px'}}>My Report</Button>
               </div>
