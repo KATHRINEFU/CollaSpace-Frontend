@@ -36,8 +36,15 @@ export default function UserLayout() {
     children?: MenuItem[],
   ): MenuItem {
     const onClick = () => {
-      if (key === '1') {
-        navigate('/user/dashboard');
+      switch(key){
+        case '1':
+          navigate('/user/dashboard');
+          break;
+        case '2':
+          navigate('/user/events');
+          break;
+        default:
+          break;
       }
     };
 

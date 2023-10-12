@@ -64,7 +64,7 @@ export interface IEvent{
     type: string,
     title: string,
     description: string,
-    creationDate: Date,
+    creationDate?: Date,
 }
 
 export interface IDocumentEvent extends IEvent{

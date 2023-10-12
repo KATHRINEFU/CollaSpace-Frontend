@@ -17,8 +17,6 @@ export function Component() {
     const { Content } = Layout;
     const { Option } = Select;
     const [isEventFilterModalVisible, setIsEventFilterModalVisible] = useState(false);
-    const [isTicketFilterModalVisible, setIsTicketFilterModalVisible] = useState(false);
-
     // Define state for filter options here
     const [eventFilterOptions, setEventFilterOptions] = useState({
         type: [],
@@ -47,29 +45,10 @@ export function Component() {
       };
 
     // Define state for filter options here
-    const [ticketFilterOptions, setTicketFilterOptions] = useState({
+    const [ticketFilterOptions] = useState({
         status: [],
     });
 
-    // Handle filter modal visibility
-    const showTicketFilterModal = () => {
-        setIsTicketFilterModalVisible(true);
-    };
-
-    const handleTicketFilterModalOk = () => {
-        // Apply filtering logic here based on filterOptions
-        setIsTicketFilterModalVisible(false);
-    };
-
-    const handleTicketFilterModalCancel = () => {
-        setIsTicketFilterModalVisible(false);
-    };
-
-    const handleTicketResetFilter = () => {
-        setTicketFilterOptions({
-          status: [],
-        });
-      };
     const announcementList = [
         {
             'content': 'Let\'s have dinner at 4:30pm. We need to be there in advance!',
