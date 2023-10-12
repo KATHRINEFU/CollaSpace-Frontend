@@ -7,25 +7,25 @@ import { useEffect } from "react";
 // import { Login } from "../../pages/public/Login";
 
 export default function DefaultLayout() {
-	const user = useUser();
-	const navigate = useNavigate();
+  const user = useUser();
+  const navigate = useNavigate();
 
-	useEffect(() => {
-		if (user) {
-			navigate("/user/dashboard");
-		}else{
-			navigate("/login")
-		}
-	}, [navigate, user]);
-	return (
-		<div className="flex flex-col">
-			<Navbar />
-			<main className="">
-				<ErrorBoundary>
-					<Outlet />
-				</ErrorBoundary>
-			</main>
-			<Footer />
-		</div>
-	);
+  useEffect(() => {
+    if (user) {
+      navigate("/user/dashboard");
+    } else {
+      navigate("/login");
+    }
+  }, [navigate, user]);
+  return (
+    <div className="flex flex-col">
+      <Navbar />
+      <main className="">
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
+      </main>
+      <Footer />
+    </div>
+  );
 }

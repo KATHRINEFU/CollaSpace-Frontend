@@ -13,8 +13,7 @@ export const router = createBrowserRouter([
       <ErrorBoundary>
         <DefaultLayout />
       </ErrorBoundary>
-    )
-    ,
+    ),
     children: PublicRoutes,
   },
 
@@ -22,12 +21,11 @@ export const router = createBrowserRouter([
     path: "/user",
     element: (
       // <AuthProvider>
-        <ErrorBoundary>
-          <UserLayout />
-        </ErrorBoundary>
+      <ErrorBoundary>
+        <UserLayout />
+      </ErrorBoundary>
       // </AuthProvider>
     ),
     children: UserRoutes,
   },
-  
 ]);

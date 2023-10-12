@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
+import React from "react";
 
-import ErrorFallback from './ErrorFallback';
+import ErrorFallback from "./ErrorFallback";
 
-class ErrorBoundary extends React.Component<Record<string, any>, { hasError: boolean; error: string }> {
+class ErrorBoundary extends React.Component<
+  Record<string, any>,
+  { hasError: boolean; error: string }
+> {
   constructor(props: any) {
     super(props);
-    this.state = { hasError: false, error: '' };
+    this.state = { hasError: false, error: "" };
   }
 
   static getDerivedStateFromError(error: any) {
@@ -22,7 +25,7 @@ class ErrorBoundary extends React.Component<Record<string, any>, { hasError: boo
     if (this.state.hasError) {
       return (
         <div>
-          <ErrorFallback message={this.state.error.toString()}/>
+          <ErrorFallback message={this.state.error.toString()} />
         </div>
       );
     }

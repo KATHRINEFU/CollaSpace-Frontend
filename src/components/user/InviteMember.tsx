@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { Input, Button, Select, List } from 'antd';
-import {PlusOutlined} from "@ant-design/icons"
+import { useState } from "react";
+import { Input, Button, Select, List } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 const { Option } = Select;
 
 interface Member {
   employee: string;
-  authority: 'viewer' | 'supervisor' | 'editor' | 'leader';
+  authority: "viewer" | "supervisor" | "editor" | "leader";
 }
 
 function InviteTeamMember() {
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [authority, setAuthority] = useState<Member['authority']>('viewer');
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [authority, setAuthority] = useState<Member["authority"]>("viewer");
   const [membersList, setMembersList] = useState<Member[]>([]);
 
   const handleAddMember = () => {
@@ -18,8 +18,8 @@ function InviteTeamMember() {
       // Add the selected employee and their authority to the members list.
       setMembersList([...membersList, { employee: searchQuery, authority }]);
       // Clear the search input and reset authority.
-      setSearchQuery('');
-      setAuthority('viewer');
+      setSearchQuery("");
+      setAuthority("viewer");
     }
   };
 
@@ -32,7 +32,9 @@ function InviteTeamMember() {
 
   return (
     <div>
-      <h2 className='inline-block mb-1 ml-1 text-base font-semibold text-slate-700'>Invite Team Member</h2>
+      <h2 className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
+        Invite Team Member
+      </h2>
       <div>
         <Input
           placeholder="Enter employee name"
@@ -43,7 +45,7 @@ function InviteTeamMember() {
         <Select
           value={authority}
           style={{ width: 120, marginRight: 8 }}
-          onChange={(value) => setAuthority(value as Member['authority'])}
+          onChange={(value) => setAuthority(value as Member["authority"])}
         >
           <Option value="viewer">Viewer</Option>
           <Option value="supervisor">Supervisor</Option>
@@ -54,7 +56,7 @@ function InviteTeamMember() {
           type="primary"
           icon={<PlusOutlined />}
           onClick={handleAddMember}
-          style={{width:'45px', height: '50px'}}
+          style={{ width: "45px", height: "50px" }}
         />
       </div>
 
@@ -63,12 +65,9 @@ function InviteTeamMember() {
         renderItem={(member, index) => (
           <List.Item
             actions={[
-              <Button
-                type="link"
-                onClick={() => handleRemoveMember(index)}
-              >
+              <Button type="link" onClick={() => handleRemoveMember(index)}>
                 Remove
-              </Button>
+              </Button>,
             ]}
           >
             <List.Item.Meta
@@ -79,7 +78,7 @@ function InviteTeamMember() {
                   style={{ width: 120 }}
                   onChange={(value) => {
                     const updatedList = [...membersList];
-                    updatedList[index].authority = value as Member['authority'];
+                    updatedList[index].authority = value as Member["authority"];
                     setMembersList(updatedList);
                   }}
                 >

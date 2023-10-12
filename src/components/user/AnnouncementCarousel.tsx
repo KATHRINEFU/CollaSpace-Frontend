@@ -24,17 +24,15 @@ const AnnouncementCarousel: React.FC<AnnouncementCarouselProps> = ({
   const announcementsToShow = sortedAnnouncements.slice(0, 5);
 
   return (
-    <Carousel dots = {true}>
+    <Carousel dots={true}>
       {announcementsToShow.map((announcement, index) => (
-        <div key={index}>        
-            <Card style={{background: "#D2E0FB", height: "150px"}}
-                >
-
+        <div key={index}>
+          <Card style={{ background: "#D2E0FB", height: "150px" }}>
             <div className="text-base">{announcement.content}</div>
             <p className="text-sm text-right">{announcement.creator}</p>
             <p className="text-sm text-right">
-                  {moment(announcement.creationDate).format("MMMM D, YYYY")}
-                </p>
+              {moment(announcement.creationDate).format("MMMM D, YYYY")}
+            </p>
           </Card>
         </div>
       ))}

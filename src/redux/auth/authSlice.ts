@@ -18,16 +18,16 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (state, action: PayloadAction<Initialstate>) => {
       if (action.payload.user?.token) {
-        Cookies.set(CS_TOKEN, action.payload.user?.token)
-        delete action.payload.user?.token
+        Cookies.set(CS_TOKEN, action.payload.user?.token);
+        delete action.payload.user?.token;
       }
       state.user = action.payload.user;
-      saveUser(action.payload.user!)
+      saveUser(action.payload.user!);
     },
     logOut: (state) => {
       state.user = null;
-      clearState()
-      Cookies.remove(CS_TOKEN)
+      clearState();
+      Cookies.remove(CS_TOKEN);
     },
   },
 });

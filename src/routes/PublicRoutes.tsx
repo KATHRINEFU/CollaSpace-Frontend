@@ -1,8 +1,8 @@
 import { RouteObject } from "react-router-dom";
-import {Login} from "../pages/public/Login";
-import {SignUp} from "../pages/public/Signup";
-import {ForgotPassword} from "../pages/public/ForgotPassword";
-import {ResetPassword} from "../pages/public/ResetPassword";
+import { Login } from "../pages/public/Login";
+import { SignUp } from "../pages/public/Signup";
+import { ForgotPassword } from "../pages/public/ForgotPassword";
+import { ResetPassword } from "../pages/public/ResetPassword";
 
 export const PublicRoutes: RouteObject[] = [
   {
