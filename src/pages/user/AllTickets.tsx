@@ -1,7 +1,8 @@
-import { Table, Modal, Button, Tag } from "antd";
+import { Table, Modal, Button, Tag, Form, Input, Rate, Select, Avatar, Tooltip, List} from "antd";
 import { useState } from "react";
 import { ColumnsType } from "antd/es/table";
 import { ITicket } from "../../types";
+import {UserOutlined, AntDesignOutlined} from "@ant-design/icons";
 
 const fakeTickets: ITicket[] = [
   {
@@ -93,6 +94,13 @@ const fakeTickets: ITicket[] = [
   },
 ];
 
+const teamNames = [
+  "Support Team",
+  "Development Team",
+  "Testing Team",
+  "Maintenance Team"
+]
+
 const getStatusColor = (status: string) => {
   switch (status) {
     case "pending acceptance":
@@ -126,31 +134,27 @@ const getPriorityColor = (priority: number) => {
 };
 
 const getPriorityText = (priority: number) => {
-  switch (priority) {
-    case 1:
-      return "casual";
-    case 2:
-      return "not in hurry";
-    case 3:
-      return "don't delay";
-    case 4:
-      return "do it";
-    case 5:
-      return "super important";
-    default:
-      return "";
-  }
+  return priorityTexts[priority-1]
 };
+
+const priorityTexts = ['casual', 'not in hurry', 'don\'t delay', 'do it', 'super important'];
 
 export function Component() {
   const maxRows = 10;
+  const { Option } = Select;
   const ticketsWithEmptyRows = [...fakeTickets];
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
+  const [ticketForm] = Form.useForm();
+  ticketForm.setFieldsValue(selectedTicket);
 
   const showEventModal = (record: ITicket) => {
     setSelectedTicket(record);
     setIsModalVisible(true);
+  };
+
+  const handleAcceptClicked = () => {
+    ticketForm.setFieldsValue({ status: 'in progress' });
   };
 
   while (ticketsWithEmptyRows.length < maxRows) {
@@ -185,6 +189,25 @@ export function Component() {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      filters: [
+        {
+          text: "pending acceptance",
+          value: "pending acceptance",
+        },
+        {
+          text: "in progress",
+          value: "in progress",
+        },
+        {
+          text: "in review",
+          value: "in review",
+        },
+        {
+          text: "completed",
+          value: "completed",
+        },
+      ],
+      onFilter: (value, record) => record.status.indexOf(value as string) === 0,
       render: (status) => (
         <Tag color={getStatusColor(status)} key={status}>
           {status.toUpperCase()}
@@ -195,6 +218,14 @@ export function Component() {
       title: "Priority",
       dataIndex: "priority",
       key: "priority",
+      filters: [
+        { text: 'Low', value: 1 },
+        { text: 'Medium Low', value: 2 },
+        { text: 'Medium', value: 3 },
+        { text: 'Medium High', value: 4 },
+        { text: 'High', value: 5 },
+      ],
+      onFilter: (value, record) => record.priority === value,
       render: (priority) => {
         return priority ? (
           <Tag color={getPriorityColor(priority)} key={priority}>
@@ -262,7 +293,7 @@ export function Component() {
         />
 
         <Modal
-          title="Event Information"
+          title="Ticket Information"
           open={isModalVisible}
           onCancel={() => setIsModalVisible(false)}
           footer={[
@@ -270,7 +301,114 @@ export function Component() {
               Close
             </Button>,
           ]}
-        ></Modal>
+        >
+          {selectedTicket && (
+            <Form form={ticketForm}>
+              <Form.Item name="title" label="Title">
+                <Input disabled />
+              </Form.Item>
+              <Form.Item name="description" label="Description">
+                <Input.TextArea disabled />
+              </Form.Item>
+              
+              <div className="flex gap-3">
+              <Form.Item name="status" label="Status">
+                <Tag color={getStatusColor(selectedTicket.status)}>
+                  {selectedTicket.status}
+                </Tag>
+              </Form.Item>
+
+              {selectedTicket.status === 'pending acceptance' && (
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={handleAcceptClicked}
+                    style={{ height: '10px'}}
+                  >
+                    Accept
+                  </Button>
+                </Form.Item>)}
+              </div>
+
+              <Form.Item name="priority" label="Priority">
+                <Rate tooltips={priorityTexts} value={selectedTicket.priority} disabled = {true} />
+                {selectedTicket.priority ? <span className="ant-rate-text">{getPriorityText(selectedTicket.priority)}</span> : ''}
+              </Form.Item>
+
+              <div className="flex gap-3 w-full justify-between">
+                <Form.Item name="fromTeam" label="From Team" style={{width: '250px'}}>
+                <Select placeholder="from team" disabled={true}>
+                  {teamNames.map((teamName, index) => (
+                    <Option key={index} value={`team${index}`}>
+                      {teamName}
+                    </Option>
+                  ))}
+                  </Select>
+              </Form.Item>
+
+              <Form.Item name="toTeam" label="To Team" style={{width: '250px'}}>
+                <Select placeholder="to team" disabled={true}>
+                  {teamNames.map((teamName, index) => (
+                    <Option key={index} value={`team${index}`}>
+                      {teamName}
+                    </Option>
+                  ))}
+                  </Select>
+              </Form.Item>
+              </div>
+              
+              <div className="flex gap-3 w-full justify-between">
+                <Form.Item name="creatorName" label="Created By" style={{width: '250px'}}>
+                    <Input disabled/>
+                </Form.Item>
+
+                <Form.Item name="assignToName" label="Assigned To" style={{width: '250px'}}>
+                    <Input disabled/>
+                </Form.Item>
+              </div>
+
+              <div className="flex gap-3 items-center">
+                <p>Viewers: </p>
+
+                {/*TODO: get viewer's profile photo, popover to show fullname */}
+              <Avatar.Group
+                  maxCount={5}
+                  size="large"
+                  maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}
+                >
+                  <Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=3" />
+                    <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
+                    <Tooltip title="Ant User" placement="top">
+                    <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
+                  </Tooltip>
+                  <Avatar style={{ backgroundColor: '#1677ff' }} icon={<AntDesignOutlined />} />
+                </Avatar.Group>
+              </div>
+
+              <div className="flex gap-3 mt-3">
+                <p>Attachments: </p>
+                {/*TODO: filename, filepath */}
+                <List
+                  size="small"
+                  bordered
+                  dataSource={selectedTicket.files}
+                  style={{width: '300px'}}
+                  renderItem={(file,) => (
+                    <List.Item>
+                      <a href={`path_to_your_files/${file}`} target="_blank" rel="noopener noreferrer">
+                        {file}
+                      </a>
+                    </List.Item>
+                  )}
+                />
+              </div>
+              
+            </Form>
+          )}
+          
+            
+        </Modal>
       </div>
     </>
   );
