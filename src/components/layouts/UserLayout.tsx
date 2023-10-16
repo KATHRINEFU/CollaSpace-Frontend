@@ -1,18 +1,24 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Layout, Menu, Button, Badge, Image, ConfigProvider } from "antd";
+import { Layout, Menu, Button, Badge, Image, ConfigProvider, Spin } from "antd";
 import { HomeOutlined, TeamOutlined, BellOutlined } from "@ant-design/icons";
 import ErrorBoundary from "../ErrorBoundary";
 import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
 import ProfileAvatar from "/profile-avatar.png";
 import type { MenuProps } from "antd";
+import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
 
 export default function UserLayout() {
   let { pathname } = useLocation();
   pathname = pathname.split("/")[2];
   const navigate = useNavigate();
+  const { data: teams, isLoading} = useGetEmployeeTeamsQuery({});
+
+  const teamNames: string[] = teams?.map((team: any) => team.teamName) || [];
+  console.log(teamNames);
+  const teamItems = teamNames.map((teamName, index) => getItem(teamName, `${index + 6}`));
 
   const { Header, Content, Footer, Sider } = Layout;
 
@@ -68,11 +74,9 @@ export default function UserLayout() {
       getItem("Calendar", "4"),
       getItem("Report", "5"),
     ]),
-    getItem("My Teams", "sub2", <TeamOutlined />, [
-      getItem("Team 1", "6"),
-      getItem("Team 2", "8"),
-    ]),
+    getItem('My Teams', 'sub2', <TeamOutlined />, teamItems),
   ];
+  
 
   return (
     <>
@@ -104,11 +108,13 @@ export default function UserLayout() {
                 <img src={LogoIcon} alt="Logo Icon" style={{ width: "60px" }} />
                 <span className="text-white text-xl">CollaSpace</span>
               </div>
-              <Menu
-                mode="inline"
-                defaultSelectedKeys={["1"]}
-                items={sideBarMenuItem}
-              />
+              <Menu mode="inline" defaultSelectedKeys={["1"]} items={sideBarMenuItem}>
+                {isLoading ? (
+                  <div className="spinner-container">
+                    <Spin size="large" />
+                  </div>
+                ) : null}
+              </Menu>
             </Sider>
           </div>
 

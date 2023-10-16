@@ -1,7 +1,7 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { useState } from "react";
-import { Breadcrumb, Button, Card, Layout, Modal, Select } from "antd";
+import { Button, Card, Layout, Modal, Select } from "antd";
 import AnnouncementCarousel from "../../components/user/AnnouncementCarousel";
 import {
   NotificationOutlined,
@@ -181,11 +181,11 @@ export function Component() {
 
   return (
     <>
-      <Breadcrumb style={{ margin: "24px 16px 0" }}>
+      {/* <Breadcrumb style={{ margin: "24px 16px 0" }}>
         <Breadcrumb.Item>Home</Breadcrumb.Item>
         <Breadcrumb.Item>List</Breadcrumb.Item>
         <Breadcrumb.Item>App</Breadcrumb.Item>
-      </Breadcrumb>
+      </Breadcrumb> */}
       <Content style={{ margin: "24px 16px 0" }}>
         {/* Filter Modal */}
         <Modal

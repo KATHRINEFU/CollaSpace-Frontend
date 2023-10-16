@@ -337,7 +337,7 @@ export function Component() {
               </Form.Item>
 
               <div className="flex gap-3 w-full justify-between">
-                <Form.Item name="fromTeam" label="From Team" style={{width: '250px'}}>
+                <Form.Item name="fromTeamName" label="From Team" style={{width: '250px'}}>
                 <Select placeholder="from team" disabled={true}>
                   {teamNames.map((teamName, index) => (
                     <Option key={index} value={`team${index}`}>
@@ -347,7 +347,7 @@ export function Component() {
                   </Select>
               </Form.Item>
 
-              <Form.Item name="toTeam" label="To Team" style={{width: '250px'}}>
+              <Form.Item name="toTeamName" label="To Team" style={{width: '250px'}}>
                 <Select placeholder="to team" disabled={true}>
                   {teamNames.map((teamName, index) => (
                     <Option key={index} value={`team${index}`}>
