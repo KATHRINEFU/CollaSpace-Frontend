@@ -17,7 +17,6 @@ export default function UserLayout() {
   const { data: teams, isLoading} = useGetEmployeeTeamsQuery({});
 
   const teamNames: string[] = teams?.map((team: any) => team.teamName) || [];
-  console.log(teamNames);
   const teamItems = teamNames.map((teamName, index) => getItem(teamName, `${index + 6}`));
 
   const { Header, Content, Footer, Sider } = Layout;

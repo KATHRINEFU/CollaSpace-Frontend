@@ -7,6 +7,35 @@ export enum HTTP {
   DELETE = "DELETE",
   PUT = "PUT",
 }
+
+export interface IClient {
+  account: IAccount;
+  company: ICompany;
+}
+
+export interface IAccount {
+  accountId: number;
+  accountType: string;
+  companyId: number;
+  accountCurrentStatus: string;
+  accountCurrentResponsibleDepartmentId: number;
+  biddingPersonnel: number;
+  salesPersonnel: number;
+  solutionArchitectPersonnel: number;
+  accountCreationdate: Date; 
+  accountLastUpdatedate: Date;
+  customerSuccessPersonnel: number;
+}
+
+export interface ICompany{
+
+  companyId: number;
+  companyName: string;
+  companyWebsite: string;
+  joindate: Date;
+  companyLogoUrl: string;
+
+}
 export interface ISignIn {
   email: string;
   password?: string;

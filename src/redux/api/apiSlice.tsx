@@ -13,8 +13,15 @@ export const apiSlice = createApi({
     getEmployeeTeams: builder.query({
       query: () => "/employee/teams/4",
     }),
+
+    getClient: builder.query({
+      query: (clientId) => `/account/${clientId}`,
+    }),
   }),
 });
 
 // 为 `getPosts` Query endpoint 导出自动生成的 hooks
-export const { useGetEmployeeTeamsQuery } = apiSlice;
+export const { 
+  useGetEmployeeTeamsQuery ,
+  useGetClientQuery,
+} = apiSlice;

@@ -1,7 +1,7 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
-import { useState } from "react";
-import { Button, Card, Layout, Modal, Select } from "antd";
+import { useState, useEffect} from "react";
+import { Button, Card, Layout, Modal, Select, Spin } from "antd";
 import AnnouncementCarousel from "../../components/user/AnnouncementCarousel";
 import {
   NotificationOutlined,
@@ -14,22 +14,52 @@ import {
 import TodoList from "../../components/user/TodoList";
 import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
-import AppleLogo from "../../assets/img/logos/AppleLogo.png";
-import BugattiLogo from "../../assets/img/logos/BugattiLogo.svg";
-import ChanelLogo from "../../assets/img/logos/ChanelLogo.svg";
-import TiktokLogo from "../../assets/img/logos/TiktokLogo.png";
-import ZaraLogo from "../../assets/img/logos/ZaraLogo.svg";
+// import AppleLogo from "../../assets/img/logos/AppleLogo.png";
+// import BugattiLogo from "../../assets/img/logos/BugattiLogo.svg";
+// import ChanelLogo from "../../assets/img/logos/ChanelLogo.svg";
+// import TiktokLogo from "../../assets/img/logos/TiktokLogo.png";
+// import ZaraLogo from "../../assets/img/logos/ZaraLogo.svg";
+import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
+import { useClientData } from "../../hooks/useClientData";
+import { IClient } from "../../types";
 
 export function Component() {
   const { Content } = Layout;
   const { Option } = Select;
-  const [isEventFilterModalVisible, setIsEventFilterModalVisible] =
-    useState(false);
-  // Define state for filter options here
+  // const [clientList, setClientList] = useState<IClient[]>([]);
+  const [clientLogoList, setClientLogoList] = useState<{ name: string; url: string }[]>([]);
+  const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([])
+  const [isEventFilterModalVisible, setIsEventFilterModalVisible] =useState(false);
   const [eventFilterOptions, setEventFilterOptions] = useState({
     type: [],
     team: [],
   });
+  const { data: teams, isLoading} = useGetEmployeeTeamsQuery({});
+
+  useEffect(() => {
+    if (!isLoading && teams) {
+      const ids = new Set<number>();
+      teams?.forEach((team: any) => {
+        team.accounts.forEach((account: any) => {
+          ids.add(account.accountId);
+        });
+      });
+      setUniqueAccountIds(Array.from(ids));
+    }
+  }, [isLoading, teams]);
+
+  const clientList = useClientData(uniqueAccountIds);
+
+  console.log(clientList);
+  // useEffect(() => {
+  //   // Populate clientLogoList using clientList data
+  //   const logos = clientList.map((client) => ({
+  //     name: client.company.companyName,
+  //     url: client.company.companyLogoUrl,
+  //   }));
+  //   setClientLogoList(logos);
+  // }, [clientList]);
+
 
   // Handle filter modal visibility
   const showEventFilterModal = () => {
@@ -97,28 +127,28 @@ export function Component() {
     },
   ];
 
-  const clientLogoList = [
-    {
-      name: "Apple",
-      logo: AppleLogo,
-    },
-    {
-      name: "Bugatti",
-      logo: BugattiLogo,
-    },
-    {
-      name: "Chanel",
-      logo: ChanelLogo,
-    },
-    {
-      name: "Tiktok",
-      logo: TiktokLogo,
-    },
-    {
-      name: "Zara",
-      logo: ZaraLogo,
-    },
-  ];
+  // const clientLogoList = [
+  //   {
+  //     name: "Apple",
+  //     logo: AppleLogo,
+  //   },
+  //   {
+  //     name: "Bugatti",
+  //     logo: BugattiLogo,
+  //   },
+  //   {
+  //     name: "Chanel",
+  //     logo: ChanelLogo,
+  //   },
+  //   {
+  //     name: "Tiktok",
+  //     logo: TiktokLogo,
+  //   },
+  //   {
+  //     name: "Zara",
+  //     logo: ZaraLogo,
+  //   },
+  // ];
 
   const eventList = [
     {
@@ -178,6 +208,8 @@ export function Component() {
   ];
 
   const uniqueTeams = Array.from(new Set(eventList.map((event) => event.team)));
+
+  
 
   return (
     <>
@@ -255,7 +287,11 @@ export function Component() {
                     </div>
                     <div className="px-3 text-right basis-1/3">
                       <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">7</p>
+                        {isLoading ? 
+                        (<div className="spinner-container">
+                          <Spin size="large" />
+                        </div>)
+                        : <p className="text-xl text-white">{uniqueAccountIds.length}</p>}
                       </div>
                     </div>
                   </div>
@@ -343,7 +379,7 @@ export function Component() {
                           className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-solid w-14 h-14 rounded-circle"
                         >
                           <img
-                            src={item.logo}
+                            src={item.url}
                             alt="Client Logo"
                             className="w-full p-1 rounded-circle"
                           />
