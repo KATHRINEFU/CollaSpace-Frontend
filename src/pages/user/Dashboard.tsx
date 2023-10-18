@@ -14,13 +14,9 @@ import {
 import TodoList from "../../components/user/TodoList";
 import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
-// import AppleLogo from "../../assets/img/logos/AppleLogo.png";
-// import BugattiLogo from "../../assets/img/logos/BugattiLogo.svg";
-// import ChanelLogo from "../../assets/img/logos/ChanelLogo.svg";
-// import TiktokLogo from "../../assets/img/logos/TiktokLogo.png";
-// import ZaraLogo from "../../assets/img/logos/ZaraLogo.svg";
 import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
+import { IAnnouncement } from "../../types";
 
 export function Component() {
   const { Content } = Layout;
@@ -32,10 +28,14 @@ export function Component() {
   });
   const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([])
   const { data: teams, isLoading} = useGetEmployeeTeamsQuery({});
+  const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
+  const [sortedAnnouncementList, setSortedAnnouncementList] = useState<IAnnouncement[]>([]);
 
-
+  
   useEffect(() => {
     if (!isLoading && teams) {
+
+      // extract account ids
       const ids = new Set<number>();
       teams?.forEach((team: any) => {
         team.accounts.forEach((account: any) => {
@@ -43,8 +43,32 @@ export function Component() {
         });
       });
       setUniqueAccountIds(Array.from(ids));
+
+      // extract announcements
+      teams?.forEach((team: any) => {
+        team.announcements.forEach((announcement: any) => {
+          setAnnouncementList((prevList)=>[...prevList, {
+            id: announcement.announcementId,
+            teamId: team.teamId,
+            teamName: team.teamName,
+            creatorId: announcement.announcementCreator,
+            creatorName: announcement.announcementCreatorName,
+            creationDate: announcement.announcementCreationdate,
+            content: announcement.announcementContent,
+          }])
+        });
+      });
     }
   }, [isLoading, teams]);
+
+  useEffect(() => {
+    if (announcementList.length > 0) {
+      // console.log(announcementList)
+      setSortedAnnouncementList(announcementList.sort(function(a, b) {
+        return a.creationDate.valueOf() - b.creationDate.valueOf();
+    }));
+    }
+  }, [announcementList]);
 
   // Handle filter modal visibility
   const showEventFilterModal = () => {
@@ -72,19 +96,6 @@ export function Component() {
     status: [],
   });
 
-  const announcementList = [
-    {
-      content: "Let's have dinner at 4:30pm. We need to be there in advance!",
-      creator: "Stanley Wang",
-      creationDate: "2023-09-27",
-    },
-    {
-      content: "Meet at A301 everyone, the slides need some update.",
-      creator: "Chen Zhang",
-      creationDate: "2023-09-26",
-    },
-  ];
-
   const todayTodoList = [
     {
       id: 0,
@@ -111,29 +122,6 @@ export function Component() {
       checked: false,
     },
   ];
-
-  // const clientLogoList = [
-  //   {
-  //     name: "Apple",
-  //     logo: AppleLogo,
-  //   },
-  //   {
-  //     name: "Bugatti",
-  //     logo: BugattiLogo,
-  //   },
-  //   {
-  //     name: "Chanel",
-  //     logo: ChanelLogo,
-  //   },
-  //   {
-  //     name: "Tiktok",
-  //     logo: TiktokLogo,
-  //   },
-  //   {
-  //     name: "Zara",
-  //     logo: ZaraLogo,
-  //   },
-  // ];
 
   const eventList = [
     {
@@ -371,7 +359,7 @@ export function Component() {
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0">
-                  <AnnouncementCarousel announcementList={announcementList} />
+                  <AnnouncementCarousel announcementList={sortedAnnouncementList.slice(0, 5)} />
                 </div>
               </Card>
             </div>

@@ -1,15 +1,10 @@
 import React from "react";
 import { Card, Carousel } from "antd";
 import moment from "moment";
-
-interface Announcement {
-  content: string;
-  creator: string;
-  creationDate: string;
-}
+import { IAnnouncement } from "../../types";
 
 interface AnnouncementCarouselProps {
-  announcementList: Announcement[];
+  announcementList: IAnnouncement[];
 }
 
 const AnnouncementCarousel: React.FC<AnnouncementCarouselProps> = ({
@@ -27,11 +22,12 @@ const AnnouncementCarousel: React.FC<AnnouncementCarouselProps> = ({
     <Carousel dots={true}>
       {announcementsToShow.map((announcement, index) => (
         <div key={index}>
-          <Card style={{ background: "#D2E0FB", height: "150px" }}>
+          <Card style={{ background: "#D2E0FB", height: "180px" }}>
             <div className="text-base">{announcement.content}</div>
-            <p className="text-sm text-right">{announcement.creator}</p>
+            <p className="text-sm text-right">{announcement.creatorName}</p>
+            <p className="text-sm text-right">{announcement.teamName}</p>
             <p className="text-sm text-right">
-              {moment(announcement.creationDate).format("MMMM D, YYYY")}
+              {moment(announcement.creationDate).format('LLL')}
             </p>
           </Card>
         </div>
