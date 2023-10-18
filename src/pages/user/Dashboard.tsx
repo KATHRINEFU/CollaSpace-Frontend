@@ -20,21 +20,19 @@ import TicketAssignedList from "../../components/user/TicketAssignedList";
 // import TiktokLogo from "../../assets/img/logos/TiktokLogo.png";
 // import ZaraLogo from "../../assets/img/logos/ZaraLogo.svg";
 import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
-import { useClientData } from "../../hooks/useClientData";
-import { IClient } from "../../types";
+import ClientLogoList from "../../components/user/ClientLogoList";
 
 export function Component() {
   const { Content } = Layout;
   const { Option } = Select;
-  // const [clientList, setClientList] = useState<IClient[]>([]);
-  const [clientLogoList, setClientLogoList] = useState<{ name: string; url: string }[]>([]);
-  const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([])
   const [isEventFilterModalVisible, setIsEventFilterModalVisible] =useState(false);
   const [eventFilterOptions, setEventFilterOptions] = useState({
     type: [],
     team: [],
   });
+  const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([])
   const { data: teams, isLoading} = useGetEmployeeTeamsQuery({});
+
 
   useEffect(() => {
     if (!isLoading && teams) {
@@ -47,19 +45,6 @@ export function Component() {
       setUniqueAccountIds(Array.from(ids));
     }
   }, [isLoading, teams]);
-
-  const clientList = useClientData(uniqueAccountIds);
-
-  console.log(clientList);
-  // useEffect(() => {
-  //   // Populate clientLogoList using clientList data
-  //   const logos = clientList.map((client) => ({
-  //     name: client.company.companyName,
-  //     url: client.company.companyLogoUrl,
-  //   }));
-  //   setClientLogoList(logos);
-  // }, [clientList]);
-
 
   // Handle filter modal visibility
   const showEventFilterModal = () => {
@@ -371,25 +356,7 @@ export function Component() {
                   <h5 className="mb-0 text-lg">CLIENT IN PROGRESS</h5>
                 </div>
                 <div className="flex flex-auto p-6 gap-9">
-                  {clientLogoList.map((item) => {
-                    return (
-                      <div className="w-4/12 text-center flex-0 sm:w-5/12 md:w-4/12 lg:w-2/12">
-                        <a
-                          href="javascript:;"
-                          className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-solid w-14 h-14 rounded-circle"
-                        >
-                          <img
-                            src={item.url}
-                            alt="Client Logo"
-                            className="w-full p-1 rounded-circle"
-                          />
-                        </a>
-                        <p className="mb-0 text-sm leading-normal dark:text-white dark:opacity-60">
-                          {item.name}
-                        </p>
-                      </div>
-                    );
-                  })}
+                  <ClientLogoList accountIds={uniqueAccountIds} />
                 </div>
               </Card>
 

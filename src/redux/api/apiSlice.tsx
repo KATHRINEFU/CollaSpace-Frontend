@@ -15,7 +15,7 @@ export const apiSlice = createApi({
     }),
 
     getClient: builder.query({
-      query: (clientId) => `/account/${clientId}`,
+      query: (clientId) => `/account/withcompany/${clientId}`,
     }),
   }),
 });
