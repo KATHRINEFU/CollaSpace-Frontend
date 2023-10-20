@@ -17,6 +17,11 @@ export const apiSlice = createApi({
     getClient: builder.query({
       query: (clientId) => `/account/withcompany/${clientId}`,
     }),
+
+    getEvents: builder.query({
+      query: (teamId) => `/event/byteam/${teamId}`,
+    }),
+
   }),
 });
 
@@ -24,4 +29,5 @@ export const apiSlice = createApi({
 export const { 
   useGetEmployeeTeamsQuery ,
   useGetClientQuery,
+  useGetEventsQuery,
 } = apiSlice;

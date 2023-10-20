@@ -26,7 +26,7 @@ const ClientLogoList: React.FC<ClientLogoListProps> = ({ accountIds }) => {
     <div className="flex flex-auto p-6 gap-9">
       {accountIds.map(accountId => {
         const { data } = useGetClientQuery(accountId);
-        console.log(accountId, data);
+        // console.log(accountId, data);
         if (!data) {
           return null; // or a loader, placeholder, etc.
         }

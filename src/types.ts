@@ -73,27 +73,33 @@ export interface IAnnouncement {
 }
 
 export interface ITeam {
-  id: number;
-  name: string;
-  creatorId: number;
-  creatorName: string;
-  creationDate: Date;
-  description: string;
-  type: string;
-  departmentId?: number;
-  departmentName?: string;
+  teamId: number;
+  teamName: string;
+  teamCreator: number;
+  teamCreationdate: Date;
+  teamType: string;
+  teamDepartmentId?: number;
 }
 
 export interface IEvent {
-  id: number;
-  creationTeamId: number;
-  creationTeamName: string;
-  creatorId: number;
-  creatorName: string;
-  type: string;
-  title: string;
-  description: string;
-  creationDate?: Date;
+  eventId: number;
+  eventCreationdate?: Date;
+  team: ITeam;
+  eventCreator: number;
+  eventType: string;
+  eventTitle: string;
+  eventDescription: string;
+  eventExpired: boolean;
+  eventLastUpdatedate: Date;
+  collaborations: IEventCollaboration[];
+}
+
+export interface IEventCollaboration {
+  eventCollaborationId: number;
+  team: ITeam;
+  invitedate: Date;
+  acceptStatus: boolean;
+  teamRole: string;
 }
 
 export interface IDocumentEvent extends IEvent {

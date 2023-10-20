@@ -67,6 +67,8 @@ export function Component() {
     console.log("Received values of form: ", values);
   };
 
+  // TODO: add choice: internal/collaboration
+  // if collaboration, invite other teams
   return (
     <>
       <Form

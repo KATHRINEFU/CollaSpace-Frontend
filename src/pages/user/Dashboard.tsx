@@ -1,7 +1,7 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { useState, useEffect} from "react";
-import { Button, Card, Layout, Modal, Select, Spin } from "antd";
+import { Button, Card, Layout, Modal, Select, Spin, Popover } from "antd";
 import AnnouncementCarousel from "../../components/user/AnnouncementCarousel";
 import {
   NotificationOutlined,
@@ -17,16 +17,21 @@ import TicketAssignedList from "../../components/user/TicketAssignedList";
 import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
 import { IAnnouncement } from "../../types";
+import { useNavigate } from "react-router-dom";
+import EventNumberCard from "../../components/user/EventNumberCard";
 
 export function Component() {
   const { Content } = Layout;
   const { Option } = Select;
+  const navigate = useNavigate();
   const [isEventFilterModalVisible, setIsEventFilterModalVisible] =useState(false);
   const [eventFilterOptions, setEventFilterOptions] = useState({
     type: [],
     team: [],
   });
-  const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([])
+  const [uniqueTeamIds, setUniqueTeamIds] = useState<number[]>([]);
+  const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([]);
+  const [uniqueTeamNames, setUniqueTeamNames] = useState<string[]>([]);
   const { data: teams, isLoading} = useGetEmployeeTeamsQuery({});
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
   const [sortedAnnouncementList, setSortedAnnouncementList] = useState<IAnnouncement[]>([]);
@@ -36,13 +41,19 @@ export function Component() {
     if (!isLoading && teams) {
 
       // extract account ids
-      const ids = new Set<number>();
+      const accountIds = new Set<number>();
+      const teamIds = new Set<number>();
+      const teamNames = new Set<string>();
       teams?.forEach((team: any) => {
+        teamIds.add(team.teamId);
+        teamNames.add(team.teamName);
         team.accounts.forEach((account: any) => {
-          ids.add(account.accountId);
+          accountIds.add(account.accountId);
         });
       });
-      setUniqueAccountIds(Array.from(ids));
+      setUniqueTeamNames(Array.from(teamNames));
+      setUniqueTeamIds(Array.from(teamIds));
+      setUniqueAccountIds(Array.from(accountIds));
 
       // extract announcements
       teams?.forEach((team: any) => {
@@ -91,6 +102,10 @@ export function Component() {
     });
   };
 
+  const handleViewMoreEventsClicked = () => {
+    navigate("/user/events");
+  }
+
   // Define state for filter options here
   const [ticketFilterOptions] = useState({
     status: [],
@@ -123,36 +138,6 @@ export function Component() {
     },
   ];
 
-  const eventList = [
-    {
-      title: "Review Apple's technical implementation plan",
-      team: "Solution Architect",
-      description:
-        "After reconsidering their requirement and business logic, a new plan is needed. But we do not have to draft a completely new one, just update parts.",
-      type: "document",
-    },
-    {
-      title: "Decoration for Max birthday party",
-      team: "Max Birthday",
-      description:
-        "We bought some decorations from target. We need the decoration done today.",
-      type: "activity",
-    },
-    {
-      title: "Meeting with Apple",
-      team: "Sales",
-      description: "Requirement analysis, discuss data privacy",
-      type: "meeting",
-    },
-    {
-      title: "Meeting with Tiktok",
-      team: "Solution Architect",
-      description:
-        "They met a order mismatch issue, work with their tech team to fix",
-      type: "meeting",
-    },
-  ];
-
   const ticketAssignedList = [
     {
       title: "Test Ticket 1",
@@ -179,10 +164,6 @@ export function Component() {
       status: "under review",
     },
   ];
-
-  const uniqueTeams = Array.from(new Set(eventList.map((event) => event.team)));
-
-  
 
   return (
     <>
@@ -227,7 +208,7 @@ export function Component() {
                 setEventFilterOptions({ ...eventFilterOptions, team: value })
               }
             >
-              {uniqueTeams.map((team) => (
+              {uniqueTeamNames.map((team) => (
                 <Select.Option key={team} value={team}>
                   {team}
                 </Select.Option>
@@ -273,7 +254,8 @@ export function Component() {
             </div>
 
             <div className="w-full max-w-full gap-3 px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-              <Card className="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+              <EventNumberCard teamIds={teams}/>
+              {/* <Card className="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                 <div className="flex-auto p-4">
                   <div className="flex flex-row -mx-3">
                     <div className="flex-none w-2/3 max-w-full px-3">
@@ -290,7 +272,7 @@ export function Component() {
                     </div>
                   </div>
                 </div>
-              </Card>
+              </Card> */}
             </div>
 
             <div className="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
@@ -353,7 +335,10 @@ export function Component() {
                   <div className="flex justify-between">
                     <div className="flex gap-3 items-center">
                       <NotificationOutlined />
-                      <h5 className="mb-0 text-lg">ANNOUNCEMENTS</h5>
+                      <Popover content="Top 5 Most Recently Created Annoucements">
+                        <h5 className="mb-0 text-lg">ANNOUNCEMENTS</h5>
+                      </Popover>
+                      
                     </div>
                     <Button type="link">View More</Button>
                   </div>
@@ -385,7 +370,10 @@ export function Component() {
                   <div className="flex justify-between">
                     <div className="flex gap-3 items-center">
                       <DeploymentUnitOutlined />
-                      <h5 className="mb-0 text-lg">EVENT INVOLVED</h5>
+                      <Popover content="Top 6 Most Recently Updated Events">
+                        <h5 className="mb-0 text-lg">EVENT INVOLVED</h5>
+                      </Popover>
+                      
                       <Button
                         type="link"
                         icon={<FilterOutlined />}
@@ -393,14 +381,14 @@ export function Component() {
                       />
                     </div>
 
-                    <Button type="link" className="text-right">
+                    <Button type="link" className="text-right" onClick={handleViewMoreEventsClicked}>
                       View More
                     </Button>
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0">
                   <EventList
-                    events={eventList}
+                    teamIds = {uniqueTeamIds}
                     filterOptions={eventFilterOptions}
                   />
                 </div>
