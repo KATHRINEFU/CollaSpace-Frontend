@@ -16,7 +16,7 @@ import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
 import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
-import { IAnnouncement } from "../../types";
+import { IAnnouncement, IEvent } from "../../types";
 import { useNavigate } from "react-router-dom";
 import EventNumberCard from "../../components/user/EventNumberCard";
 
@@ -32,13 +32,13 @@ export function Component() {
   const [uniqueTeamIds, setUniqueTeamIds] = useState<number[]>([]);
   const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([]);
   const [uniqueTeamNames, setUniqueTeamNames] = useState<string[]>([]);
-  const { data: teams, isLoading} = useGetEmployeeTeamsQuery({});
+  const { data: teams, isLoading: isTeamsLoading} = useGetEmployeeTeamsQuery({});
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
   const [sortedAnnouncementList, setSortedAnnouncementList] = useState<IAnnouncement[]>([]);
-
+  const [uniqueEventIds, setUniqueEventIds] = useState(new Set());
   
   useEffect(() => {
-    if (!isLoading && teams) {
+    if (!isTeamsLoading && teams) {
 
       // extract account ids
       const accountIds = new Set<number>();
@@ -70,7 +70,39 @@ export function Component() {
         });
       });
     }
-  }, [isLoading, teams]);
+  }, [isTeamsLoading, teams]);
+
+  useEffect(() => {
+    const baseUrl = 'http://localhost:8080';
+    const fetchEventIds = async () => {
+      try {
+        // Fetch event data for each team
+        const eventPromises = teams.map(async (team: any) => {
+          const eventResponse = await fetch(`${baseUrl}/event/byteam/${team.teamId}`);
+          if (!eventResponse.ok) {
+            throw new Error('Error fetching events in Dashboard');
+          }
+          const eventData = await eventResponse.json();
+
+          // Collect unique event IDs in a Set
+          eventData.forEach((event: IEvent) => {
+            uniqueEventIds.add(event.eventId);
+          });
+        });
+
+        // Wait for all event requests to complete
+        await Promise.all(eventPromises);
+
+        // Update the state with the unique event IDs
+        setUniqueEventIds(new Set(uniqueEventIds));
+      } catch (error) {
+        console.error('Error fetching events in Dashboard:', error);
+      }
+    };
+
+    fetchEventIds();
+  }, [teams, uniqueEventIds]);
+
 
   useEffect(() => {
     if (announcementList.length > 0) {
@@ -241,7 +273,7 @@ export function Component() {
                     </div>
                     <div className="px-3 text-right basis-1/3">
                       <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        {isLoading ? 
+                        {isTeamsLoading ? 
                         (<div className="spinner-container">
                           <Spin size="large" />
                         </div>)
@@ -254,8 +286,7 @@ export function Component() {
             </div>
 
             <div className="w-full max-w-full gap-3 px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-              <EventNumberCard teamIds={teams}/>
-              {/* <Card className="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+              <Card className="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                 <div className="flex-auto p-4">
                   <div className="flex flex-row -mx-3">
                     <div className="flex-none w-2/3 max-w-full px-3">
@@ -266,13 +297,19 @@ export function Component() {
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
+                    {(isTeamsLoading)? 
+                      (<div className="spinner-container">
+                        <Spin size="large" />
+                      </div>)
+                      :
                       <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">15</p>
+                        <p className="text-xl text-white">{uniqueEventIds.size}</p>
                       </div>
+                    }
                     </div>
                   </div>
                 </div>
-              </Card> */}
+              </Card>
             </div>
 
             <div className="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">

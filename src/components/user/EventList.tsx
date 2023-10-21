@@ -35,7 +35,7 @@ function getBackgroundColor(type: string) {
 
 const EventFetcher: React.FC<EventFetcherProps> = ({ teamId, filterOptions }) => {
   const { data: teamEvents } = useGetEventsQuery(teamId);
-  console.log("team ", teamId, teamEvents);
+  // console.log("team ", teamId, teamEvents);
 
   if (!teamEvents) {
     return null;
