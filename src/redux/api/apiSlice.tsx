@@ -11,7 +11,7 @@ export const apiSlice = createApi({
   endpoints: (builder) => ({
     // `getPosts` endpoint 是一个返回数据的 “Query” 操作
     getEmployeeTeams: builder.query({
-      query: () => "/employee/teams/4",
+      query: (employeeId) => `/employee/teams/${employeeId}`,
     }),
 
     getClient: builder.query({
@@ -21,7 +21,9 @@ export const apiSlice = createApi({
     getEvents: builder.query({
       query: (teamId) => `/event/byteam/${teamId}`,
     }),
-
+    getTickets: builder.query({
+      query: (employeeId) => `/ticket/employee/${employeeId}`,
+    }),
   }),
 });
 
@@ -30,4 +32,5 @@ export const {
   useGetEmployeeTeamsQuery ,
   useGetClientQuery,
   useGetEventsQuery,
+  useGetTicketsQuery,
 } = apiSlice;

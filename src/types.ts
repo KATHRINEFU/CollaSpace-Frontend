@@ -126,22 +126,36 @@ export interface IActivityEvent extends IEvent {
 }
 
 export interface ITicket {
-  id: number;
-  creatorId: number;
-  creatorName: string;
-  creationDate?: Date;
-  title: string;
-  description: string;
-  status: string;
+  ticketId: number;
+  ticketCreator: number;
+  ticketCreatorName?: string;
+  ticketCreationdate?: Date;
+  ticketLastUpdatedate?: Date;
+  ticketTitle: string;
+  ticketDescription: string;
+  ticketStatus: string;
   priority: number;
   fromTeamId: number;
-  fromTeamName: string;
-  toTeamId: number;
-  toTeamName: string;
-  assignToName: string;
-  viewers: string[];
-  files: string[];
+  fromTeamName?: string;
   dueDate?: Date;
+  assigns: ITicketAssign[];
+  ticketLogs: ITicketLog[];
+  files: string[];
+}
+
+export interface ITicketAssign {
+  ticketAssignId: number;
+  employeeId: number;
+  teamId: number;
+  role: string;
+  ticketAssigndate: Date;
+}
+
+export interface ITicketLog {
+  ticketLogId: number;
+  ticketLogCreator: number;
+  ticketLogCreationdate: Date;
+  ticketLogContent: string;
 }
 
 export type IconName = keyof typeof AntdIcons;

@@ -14,11 +14,10 @@ import {
 import TodoList from "../../components/user/TodoList";
 import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
-import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
+import { useGetEmployeeTeamsQuery, useGetTicketsQuery } from "../../redux/api/apiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
-import { IAnnouncement, IEvent } from "../../types";
+import { IAnnouncement, IEvent, ITicket, ITicketAssign, ITicketLog } from "../../types";
 import { useNavigate } from "react-router-dom";
-import EventNumberCard from "../../components/user/EventNumberCard";
 
 export function Component() {
   const { Content } = Layout;
@@ -32,10 +31,111 @@ export function Component() {
   const [uniqueTeamIds, setUniqueTeamIds] = useState<number[]>([]);
   const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([]);
   const [uniqueTeamNames, setUniqueTeamNames] = useState<string[]>([]);
-  const { data: teams, isLoading: isTeamsLoading} = useGetEmployeeTeamsQuery({});
+  const [ticketAssignedCount, setTicketAssignedCount] = useState(0)
+  const [ticketCreatedCount, setTicketCreatedCount] = useState(0)
+  const [ticketList, setTicketList] = useState<ITicket[]>([]);
+
+  const { data: teams, isLoading: isTeamsLoading} = useGetEmployeeTeamsQuery(4);
+  const {data: tickets, isLoading: isTicketsLoading}  = useGetTicketsQuery(4);
+
+  
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
   const [sortedAnnouncementList, setSortedAnnouncementList] = useState<IAnnouncement[]>([]);
+  
   const [uniqueEventIds, setUniqueEventIds] = useState(new Set());
+
+  useEffect(() => {
+    if (!isTicketsLoading && tickets) {
+      const mappedTickets = tickets.map((ticketData: any) => {
+        const {
+          ticketId,
+          ticketCreator,
+          ticketCreatorName,
+          ticketCreationdate,
+          ticketLastUpdatedate,
+          ticketTitle,
+          ticketDescription,
+          ticketStatus,
+          ticketPriority,
+          ticketFromTeam,
+          ticketDuedate,
+          assigns,
+          ticketLogs,
+          files,
+        } = ticketData;
+
+        // Map assigns data into ITicketAssign objects
+        const mappedAssigns: ITicketAssign[] = assigns.map((assignData: any) => {
+          const {
+            ticketAssignId,
+            employeeId,
+            teamId,
+            role,
+            ticketAssigndate,
+          } = assignData;
+
+          return {
+            ticketAssignId,
+            employeeId,
+            teamId,
+            role,
+            ticketAssigndate: new Date(ticketAssigndate),
+          };
+        });
+
+        const mappedTicketLogs: ITicketLog[] = ticketLogs.map((logData: any) => {
+          const {
+            ticketLogId,
+            ticketLogCreator,
+            ticketLogCreationdate,
+            ticketLogContent,
+          } = logData;
+
+          return {
+            ticketLogId,
+            ticketLogCreator,
+            ticketLogCreationdate: new Date(ticketLogCreationdate),
+            ticketLogContent,
+          };
+        });
+
+        return {
+          ticketId,
+          ticketCreator,
+          ticketCreatorName,
+          ticketCreationdate: new Date(ticketCreationdate),
+          ticketLastUpdatedate: new Date(ticketLastUpdatedate),
+          ticketTitle,
+          ticketDescription,
+          ticketStatus,
+          priority: ticketPriority,
+          fromTeamId: ticketFromTeam,
+          dueDate: new Date(ticketDuedate),
+          assigns: mappedAssigns,
+          ticketLogs: mappedTicketLogs,
+          files,
+        };
+      });
+
+      setTicketList(mappedTickets);
+
+    }
+  }, [isTicketsLoading, tickets])
+
+  useEffect(() => {
+    const createCount = ticketList.filter((ticket) => ticket.ticketCreator === 4).length; // change to cur user's id
+    setTicketCreatedCount(createCount)
+
+    const assignCount = ticketList.reduce((count, ticket) => {
+      const isAssignedToEmployee = ticket.assigns.some(
+        (assign) => assign.employeeId === 4 // replace to cur user's id
+      );
+    
+      return count + (isAssignedToEmployee ? 1 : 0);
+    }, 0);
+    setTicketAssignedCount(assignCount);
+
+  }, [ticketList])
   
   useEffect(() => {
     if (!isTeamsLoading && teams) {
@@ -319,13 +419,13 @@ export function Component() {
                     <div className="flex-none w-2/3 max-w-full px-3">
                       <div>
                         <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:opacity-60">
-                          Ticket Assigned
+                          Ticket Involved
                         </p>
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
                       <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">9</p>
+                        <p className="text-xl text-white">{ticketAssignedCount}</p>
                       </div>
                     </div>
                   </div>
@@ -340,13 +440,13 @@ export function Component() {
                     <div className="flex-none w-2/3 max-w-full px-3">
                       <div>
                         <p className="mb-0 font-sans text-lg font-semibold leading-normal uppercase dark:opacity-60">
-                          Ticket Involved
+                          Ticket Created
                         </p>
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
                       <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">22</p>
+                        <p className="text-xl text-white">{ticketCreatedCount}</p>
                       </div>
                     </div>
                   </div>
