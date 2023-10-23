@@ -14,7 +14,7 @@ export default function UserLayout() {
   let { pathname } = useLocation();
   pathname = pathname.split("/")[2];
   const navigate = useNavigate();
-  const { data: teams, isLoading} = useGetEmployeeTeamsQuery({});
+  const { data: teams, isLoading} = useGetEmployeeTeamsQuery(4);
 
   const teamNames: string[] = teams?.map((team: any) => team.teamName) || [];
   const teamItems = teamNames.map((teamName, index) => getItem(teamName, `${index + 6}`));

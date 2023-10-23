@@ -28,6 +28,15 @@ export function Component() {
     type: [],
     team: [],
   });
+
+  const [isTicketFilterModalVisible, setIsTicketFilterModalVisible] =useState(false);
+  const [ticketFilterOptions, setTicketFilterOptions] = useState({
+    status: [],
+    priority: [],
+    role: []
+  });
+
+
   const [uniqueTeamIds, setUniqueTeamIds] = useState<number[]>([]);
   const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([]);
   const [uniqueTeamNames, setUniqueTeamNames] = useState<string[]>([]);
@@ -238,10 +247,30 @@ export function Component() {
     navigate("/user/events");
   }
 
-  // Define state for filter options here
-  const [ticketFilterOptions] = useState({
-    status: [],
-  });
+  const handleViewMoreTicketsClicked = () => {
+    navigate("/user/tickets");
+  }
+
+  const showTicketFilterModal = () => {
+    setIsTicketFilterModalVisible(true);
+  };
+
+  const handleTicketFilterModalOk = () => {
+    // Apply filtering logic here based on filterOptions
+    setIsTicketFilterModalVisible(false);
+  };
+
+  const handleTicketFilterModalCancel = () => {
+    setIsTicketFilterModalVisible(false);
+  };
+
+  const handleTicketResetFilter = () => {
+    setTicketFilterOptions({
+      status: [],
+      priority: [],
+      role: [],
+    });
+  };
 
   const todayTodoList = [
     {
@@ -267,33 +296,6 @@ export function Component() {
       content: "Bug workshop with Apple",
       time: "4:00 pm",
       checked: false,
-    },
-  ];
-
-  const ticketAssignedList = [
-    {
-      title: "Test Ticket 1",
-      description: "Test Ticket 1 Description",
-      creator: "Alice A",
-      status: "new",
-    },
-    {
-      title: "Test Ticket 2",
-      description: "Test Ticket 2 Description",
-      creator: "Bob B",
-      status: "pending acceptance",
-    },
-    {
-      title: "Test Ticket 3",
-      description: "Test Ticket 3 Description",
-      creator: "Celine C",
-      status: "in progress",
-    },
-    {
-      title: "Test Ticket 4",
-      description: "Test Ticket 4 Description",
-      creator: "Dave D",
-      status: "under review",
     },
   ];
 
@@ -350,6 +352,76 @@ export function Component() {
 
           <div className="text-right">
             <Button type="link" onClick={handleEventResetFilter}>
+              Reset
+            </Button>
+          </div>
+        </Modal>
+
+
+        <Modal
+          title="Ticket Filter"
+          open={isTicketFilterModalVisible}
+          onOk={handleTicketFilterModalOk}
+          onCancel={handleTicketFilterModalCancel}
+        >
+          <div className="mb-4">
+            <label>Ticket Status:</label>
+            <Select
+              mode="multiple"
+              className="w-full"
+              placeholder="Select ticket statys"
+              value={ticketFilterOptions.status}
+              onChange={(value) =>
+                setTicketFilterOptions({ ...ticketFilterOptions, status: value })
+              }
+            >
+              <Option value="new">New</Option>
+              <Option value="pending">Pending</Option>
+              <Option value="in progress">In Progress</Option>
+              <Option value="under review">Under Review</Option>
+              <Option value="resolved">Resolved</Option>
+            </Select>
+          </div>
+
+          <div className="mb-4">
+            <label>Ticket Priority:</label>
+            <Select
+              mode="multiple"
+              className="w-full"
+              placeholder="Select ticket Priority"
+              value={ticketFilterOptions.priority}
+              onChange={(value) =>
+                setTicketFilterOptions({ ...ticketFilterOptions, priority: value })
+              }
+            >
+              <Option value="1">1</Option>
+              <Option value="2">2</Option>
+              <Option value="3">3</Option>
+              <Option value="4">4</Option>
+              <Option value="5">5</Option>
+            </Select>
+          </div>
+
+          <div className="mb-4">
+            <label>My role as:</label>
+            <Select
+              mode="multiple"
+              className="w-full"
+              placeholder="Select my role for tickets"
+              value={ticketFilterOptions.role}
+              onChange={(value) =>
+                setTicketFilterOptions({ ...ticketFilterOptions, role: value })
+              }
+            >
+              <Option value="creator">Creator</Option>
+              <Option value="assignee">Assignee</Option>
+              <Option value="supervisor">Supervisor</Option>
+              <Option value="viewer">Viewer</Option>
+            </Select>
+          </div>
+
+          <div className="text-right">
+            <Button type="link" onClick={handleTicketResetFilter}>
               Reset
             </Button>
           </div>
@@ -539,21 +611,27 @@ export function Component() {
                   <div className="flex justify-between">
                     <div className="flex gap-3 items-center">
                       <ContainerOutlined />
-                      <h5 className="mb-0 text-lg">TICKET ASSIGNED</h5>
+                      <h5 className="mb-0 text-lg">TICKET RELATED</h5>
                       <Button
                         type="link"
                         icon={<FilterOutlined />}
-                        onClick={showEventFilterModal}
+                        onClick={showTicketFilterModal}
                       />
                     </div>
-                    <Button type="link">View More</Button>
+                    <Button type="link" onClick={handleViewMoreTicketsClicked}>View More</Button>
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0">
-                  <TicketAssignedList
-                    tickets={ticketAssignedList}
-                    filterOptions={ticketFilterOptions}
-                  />
+                  {(isTicketsLoading)? 
+                      (<div className="spinner-container">
+                        <Spin size="large" />
+                      </div>)
+                      :
+                      <TicketAssignedList
+                        tickets={ticketList}
+                        filterOptions={ticketFilterOptions}
+                      />
+                    }
                 </div>
               </Card>
             </div>
