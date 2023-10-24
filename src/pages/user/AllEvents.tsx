@@ -1,66 +1,70 @@
 import { Table, Modal, Button } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ColumnsType } from "antd/es/table";
 import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";
+import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
 
-const fakeEvents: (IDocumentEvent | IMeetingEvent | IActivityEvent)[] = [
-  {
-    id: 1,
-    creationTeamId: 1,
-    creationTeamName: "Team A",
-    creatorId: 101,
-    creatorName: "John Doe",
-    type: "document",
-    title: "Document Event 1",
-    description: "This is a document event.",
-    creationDate: new Date("2023-10-01T10:00:00"),
-    link: "https://example.com/document1",
-    deadlineDate: new Date("2023-10-10"),
-  },
-  {
-    id: 2,
-    creationTeamId: 2,
-    creationTeamName: "Team B",
-    creatorId: 102,
-    creatorName: "Jane Smith",
-    type: "meeting",
-    title: "Meeting Event 1",
-    description: "This is a meeting event.",
-    creationDate: new Date("2023-10-05T10:00:00"),
-    virtual: true,
-    location: "Online",
-    link: "https://example.com/meeting1",
-    startTime: new Date("2023-09-28T14:00:00"),
-    endTime: new Date("2023-09-28T15:30:00"),
-    noteLink: "https://example.com/meeting1-notes",
-    agendaLink: "https://example.com/meeting1-agenda",
-    meetingType: "Team Meeting",
-  },
-  {
-    id: 3,
-    creationTeamId: 1,
-    creationTeamName: "Team A",
-    creatorId: 101,
-    creatorName: "John Doe",
-    type: "activity",
-    title: "Activity Event 1",
-    description: "This is an activity event.",
-    creationDate: new Date("2023-10-05T10:00:00"),
-    virtual: false,
-    location: "Park",
-    startTime: new Date("2023-10-05T10:00:00"),
-    endTime: new Date("2023-10-05T12:00:00"),
-  },
-  // Add more fake events as needed...
-];
+// const fakeEvents: (IDocumentEvent | IMeetingEvent | IActivityEvent)[] = [
+//   {
+//     id: 1,
+//     creationTeamId: 1,
+//     creationTeamName: "Team A",
+//     creatorId: 101,
+//     creatorName: "John Doe",
+//     type: "document",
+//     title: "Document Event 1",
+//     description: "This is a document event.",
+//     creationDate: new Date("2023-10-01T10:00:00"),
+//     link: "https://example.com/document1",
+//     deadlineDate: new Date("2023-10-10"),
+//   },
+//   {
+//     id: 2,
+//     creationTeamId: 2,
+//     creationTeamName: "Team B",
+//     creatorId: 102,
+//     creatorName: "Jane Smith",
+//     type: "meeting",
+//     title: "Meeting Event 1",
+//     description: "This is a meeting event.",
+//     creationDate: new Date("2023-10-05T10:00:00"),
+//     virtual: true,
+//     location: "Online",
+//     link: "https://example.com/meeting1",
+//     startTime: new Date("2023-09-28T14:00:00"),
+//     endTime: new Date("2023-09-28T15:30:00"),
+//     noteLink: "https://example.com/meeting1-notes",
+//     agendaLink: "https://example.com/meeting1-agenda",
+//     meetingType: "Team Meeting",
+//   },
+//   {
+//     id: 3,
+//     creationTeamId: 1,
+//     creationTeamName: "Team A",
+//     creatorId: 101,
+//     creatorName: "John Doe",
+//     type: "activity",
+//     title: "Activity Event 1",
+//     description: "This is an activity event.",
+//     creationDate: new Date("2023-10-05T10:00:00"),
+//     virtual: false,
+//     location: "Park",
+//     startTime: new Date("2023-10-05T10:00:00"),
+//     endTime: new Date("2023-10-05T12:00:00"),
+//   },
+//   // Add more fake events as needed...
+// ];
 
 export function Component() {
   const maxRows = 10;
-  const eventsWithEmptyRows = [...fakeEvents];
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<
     IDocumentEvent | IMeetingEvent | IActivityEvent | null
   >(null);
+  const { data: teams, isLoading: isTeamsLoading} = useGetEmployeeTeamsQuery(4);
+  const [eventList, setEventList] = useState< (IDocumentEvent | IMeetingEvent | IActivityEvent) []>([]);
+  const [eventsWithEmptyRows, setEventsWithEmptyRows]= useState<(IDocumentEvent | IMeetingEvent | IActivityEvent) []>([]);
+  const [isTableLoading, setIsTableLoading] = useState(true); // Add loading state
 
   const showEventModal = (
     record: IDocumentEvent | IMeetingEvent | IActivityEvent,
@@ -69,64 +73,183 @@ export function Component() {
     setIsModalVisible(true);
   };
 
-  while (eventsWithEmptyRows.length < maxRows) {
-    // Add empty events until the list has at least 10 rows
-    eventsWithEmptyRows.push({
-      id: 0,
-      creationTeamId: 0,
-      creationTeamName: "",
-      creatorId: 0,
-      creatorName: "",
-      type: "",
-      title: "",
-      description: "",
-      creationDate: undefined,
-    });
+  function mapToDocumentEvent(data: any) {
+    return {
+      eventId: data.eventId,
+      eventCreationdate: new Date(data.eventCreationdate),
+      team: data.team,
+      eventCreator: data.eventCreator,
+      eventType: data.eventType,
+      eventTitle: data.eventTitle,
+      eventDescription: data.eventDescription,
+      eventExpired: data.eventExpired,
+      eventLastUpdatedate: data.eventLastUpdatedate
+        ? new Date(data.eventLastUpdatedate)
+        : undefined,
+      collaborations: data.collaborations,
+      link: data.documentLink || null,
+      deadlineDate: data.deadline ? new Date(data.deadline) : undefined,
+    };
   }
+
+  function mapToMeetingEvent(data: any) {
+    return {
+      eventId: data.eventId,
+      eventCreationdate: new Date(data.eventCreationdate),
+      team: data.team,
+      eventCreator: data.eventCreator,
+      eventType: data.eventType,
+      eventTitle: data.eventTitle,
+      eventDescription: data.eventDescription,
+      eventExpired: data.eventExpired,
+      eventLastUpdatedate: data.eventLastUpdatedate
+        ? new Date(data.eventLastUpdatedate)
+        : undefined,
+      collaborations: data.collaborations,
+      virtual: data.meetingVirtual,
+      location: data.meetingLocation,
+      link: data.meetingLink,
+      startTime: data.meetingStarttime ? new Date(data.meetingStarttime): undefined,
+      endTime: data.meetingEndtime ? new Date(data.meetingEndtime): undefined,
+      noteLink: data.meetingNoteLink,
+      agendaLink: data.meetingAgendaLink,
+      meetingType: data.meetingType,
+    };
+  }
+
+  function mapToActivityEvent(data: any) {
+    return {
+      eventId: data.eventId,
+      eventCreationdate: new Date(data.eventCreationdate),
+      team: data.team,
+      eventCreator: data.eventCreator,
+      eventType: data.eventType,
+      eventTitle: data.eventTitle,
+      eventDescription: data.eventDescription,
+      eventExpired: data.eventExpired,
+      eventLastUpdatedate: data.eventLastUpdatedate
+        ? new Date(data.eventLastUpdatedate)
+        : undefined,
+      collaborations: data.collaborations,
+      virtual: data.activityVirtual,
+      location: data.activityLocation,
+      startTime: data.activityStarttime ? new Date(data.activityStarttime): undefined,
+      endTime: data.activityEndtime ? new Date(data.activityEndtime): undefined,
+    };
+  }
+  
+
+  function mapEventDataToEvent(eventData: any) {
+    switch (eventData.eventType) {
+      case 'document':
+        return mapToDocumentEvent(eventData);
+      case 'meeting':
+        return mapToMeetingEvent(eventData);
+      case 'activity':
+        return mapToActivityEvent(eventData);
+      default:
+        return null; 
+    }
+  }
+
+  useEffect(() => {
+    const baseUrl = 'http://localhost:8080';
+    const fetchEvents = async () => {
+      try {
+        // Fetch event data for each team
+        const allMappedEvents: (IDocumentEvent|IMeetingEvent|IActivityEvent)[] = [];
+        const eventPromises = teams.map(async (team: any) => {
+          const eventResponse = await fetch(`${baseUrl}/event/byteam/${team.teamId}`);
+          if (!eventResponse.ok) {
+            throw new Error('Error fetching events in AllEvents');
+          }
+          const eventData = await eventResponse.json();
+          const mappedEvents = eventData.map((eventData: any) => mapEventDataToEvent(eventData));
+          allMappedEvents.push(...mappedEvents);
+        });
+        
+        // Wait for all event requests to complete
+        await Promise.all(eventPromises);
+        setEventList(allMappedEvents);
+        setIsTableLoading(false);
+        
+      } catch (error) {
+        console.error('Error fetching events in AllEvents:', error);
+        setIsTableLoading(false);
+      }
+    };
+
+    if(teams && !isTeamsLoading){
+      fetchEvents();
+    }
+  }, [teams, isTeamsLoading])
+
+  useEffect(() => {
+    console.log(eventList);
+    setEventsWithEmptyRows(eventList);
+  }, [eventList])
+
+  // while (eventsWithEmptyRows.length < maxRows) {
+  //   // Add empty events until the list has at least 10 rows
+  //   eventsWithEmptyRows.push({
+  //     eventId: 0,
+  //     eventCreationdate: undefined,
+  //     team: null,
+  //     eventCreator: 0,
+  //     eventType: "",
+  //     eventTitle: "",
+  //     eventDescription: "",
+  //     eventExpired: false,
+  //     eventLastUpdatedate: undefined,
+  //     collaborations: [],
+  //     link: undefined,
+  //     deadlineDate: undefined,
+  //   });
+  // }  
 
   const columns: ColumnsType<IDocumentEvent | IMeetingEvent | IActivityEvent> =
     [
       {
         title: "Title",
-        dataIndex: "title",
-        key: "title",
+        dataIndex: "eventTitle",
+        key: "eventTitle",
         // fixed: 'left',
       },
-      {
-        title: "Description",
-        dataIndex: "description",
-        key: "description",
-      },
-      {
-        title: "Creation Team",
-        dataIndex: "creationTeamName",
-        key: "creationTeamName",
-        filters: [
-          {
-            text: "Team A",
-            value: "Team A",
-          },
-          {
-            text: "Team B",
-            value: "Team B",
-          },
-          {
-            text: "Team C",
-            value: "Team C",
-          },
-        ],
-        onFilter: (value, record) =>
-          record.creationTeamName.indexOf(value as string) === 0,
-      },
-      {
-        title: "Creator",
-        dataIndex: "creatorName",
-        key: "creatorName",
-      },
+      // {
+      //   title: "Description",
+      //   dataIndex: "eventDescription",
+      //   key: "eventDescription",
+      // },
+      // {
+      //   title: "Creation Team",
+      //   dataIndex: "creationTeamName",
+      //   key: "creationTeamName",
+      //   filters: [
+      //     {
+      //       text: "Team A",
+      //       value: "Team A",
+      //     },
+      //     {
+      //       text: "Team B",
+      //       value: "Team B",
+      //     },
+      //     {
+      //       text: "Team C",
+      //       value: "Team C",
+      //     },
+      //   ],
+      //   onFilter: (value, record) =>
+      //     record.creationTeamName.indexOf(value as string) === 0,
+      // },
+      // {
+      //   title: "Creator",
+      //   dataIndex: "creatorName",
+      //   key: "creatorName",
+      // },
       {
         title: "Type",
-        dataIndex: "type",
-        key: "type",
+        dataIndex: "eventType",
+        key: "eventType",
         filters: [
           {
             text: "meeting",
@@ -141,22 +264,39 @@ export function Component() {
             value: "activity",
           },
         ],
-        onFilter: (value, record) => record.type.indexOf(value as string) === 0,
+        onFilter: (value, record) => record.eventType.indexOf(value as string) === 0,
       },
       {
         title: "Creation Date",
-        dataIndex: "creationDate",
-        key: "creationDate",
+        dataIndex: "eventCreationdate",
+        key: "eventCreationdate",
 
         sorter: (a, b) => {
-          if (a.creationDate && b.creationDate) {
-            return a.creationDate.getTime() - b.creationDate.getTime();
+          if (a.eventCreationdate && b.eventCreationdate) {
+            return a.eventCreationdate.getTime() - b.eventCreationdate.getTime();
           } else {
             return 0;
           }
         },
         render: (creationDate) => {
           return creationDate?.toLocaleString();
+        },
+      },
+
+      {
+        title: "Last Update Date",
+        dataIndex: "eventLastUpdatedate",
+        key: "eventLastUpdatedate",
+
+        sorter: (a, b) => {
+          if (a.eventLastUpdatedate && b.eventLastUpdatedate) {
+            return a.eventLastUpdatedate.getTime() - b.eventLastUpdatedate.getTime();
+          } else {
+            return 0;
+          }
+        },
+        render: (eventLastUpdatedate) => {
+          return eventLastUpdatedate?.toLocaleString();
         },
       },
       {
@@ -275,8 +415,9 @@ export function Component() {
         <h2 className="text-xl font-bold m-auto">All Events</h2>
         <Table
           columns={columns}
-          dataSource={eventsWithEmptyRows}
+          dataSource={eventList}
           scroll={{ x: 1000 }}
+          loading={isTableLoading} 
         />
 
         <Modal
@@ -291,22 +432,22 @@ export function Component() {
         >
           {selectedEvent && (
             <div>
-              <p className="text-sm">ID: {selectedEvent.id}</p>
-              <p className="text-base">Title: {selectedEvent.title}</p>
+              <p className="text-sm">ID: {selectedEvent.eventId}</p>
+              <p className="text-base">Title: {selectedEvent.eventTitle}</p>
               <p className="text-base">
-                Description: {selectedEvent.description}
+                Description: {selectedEvent.eventDescription}
               </p>
               <p className="text-base">
-                Created By: {selectedEvent.creatorName}
+                Created By: {selectedEvent.eventCreator}
               </p>
-              <p className="text-base">
+              {/* <p className="text-base">
                 Creator from team: {selectedEvent.creationTeamName}
-              </p>
+              </p> */}
               {/* Add more event-specific information */}
             </div>
           )}
 
-          {selectedEvent?.type === "document" && (
+          {selectedEvent?.eventType === "document" && (
             <div>
               {/* Display Document Event specific information */}
               <p className="text-base">
@@ -321,7 +462,7 @@ export function Component() {
             </div>
           )}
 
-          {selectedEvent?.type === "meeting" && (
+          {selectedEvent?.eventType === "meeting" && (
             <div>
               {/* Display Meeting Event specific information */}
               <p className="text-base">
@@ -351,7 +492,7 @@ export function Component() {
             </div>
           )}
 
-          {selectedEvent?.type === "activity" && (
+          {selectedEvent?.eventType === "activity" && (
             <div>
               {/* Display Activity Event specific information */}
               <p className="text-base">

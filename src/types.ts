@@ -84,13 +84,13 @@ export interface ITeam {
 export interface IEvent {
   eventId: number;
   eventCreationdate?: Date;
-  team: ITeam;
+  team: ITeam | null;
   eventCreator: number;
   eventType: string;
   eventTitle: string;
   eventDescription: string;
   eventExpired: boolean;
-  eventLastUpdatedate: Date;
+  eventLastUpdatedate?: Date;
   collaborations: IEventCollaboration[];
 }
 
