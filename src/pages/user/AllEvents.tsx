@@ -1,4 +1,4 @@
-import { Table, Modal, Button } from "antd";
+import { Table, Modal, Button, Tag, Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import { ColumnsType } from "antd/es/table";
 import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";
@@ -56,15 +56,16 @@ import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
 // ];
 
 export function Component() {
-  const maxRows = 10;
+  // const maxRows = 10;
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<
     IDocumentEvent | IMeetingEvent | IActivityEvent | null
   >(null);
   const { data: teams, isLoading: isTeamsLoading} = useGetEmployeeTeamsQuery(4);
   const [eventList, setEventList] = useState< (IDocumentEvent | IMeetingEvent | IActivityEvent) []>([]);
-  const [eventsWithEmptyRows, setEventsWithEmptyRows]= useState<(IDocumentEvent | IMeetingEvent | IActivityEvent) []>([]);
+  // const [eventsWithEmptyRows, setEventsWithEmptyRows]= useState<(IDocumentEvent | IMeetingEvent | IActivityEvent) []>([]);
   const [isTableLoading, setIsTableLoading] = useState(true); // Add loading state
+  const [teamNameFilterArray, setTeamNameFilterArray] = useState<{text:string, value: string}[]>([]);
 
   const showEventModal = (
     record: IDocumentEvent | IMeetingEvent | IActivityEvent,
@@ -72,6 +73,19 @@ export function Component() {
     setSelectedEvent(record);
     setIsModalVisible(true);
   };
+
+  const getTypeColor = (eventType: string) => {
+    switch (eventType) {
+      case "document":
+        return "#5cdbd3";
+      case "meeting":
+        return "#ffd666";
+      case "activity":
+        return "#b37feb";
+      default:
+        return "";
+    }
+  }
 
   function mapToDocumentEvent(data: any) {
     return {
@@ -185,9 +199,19 @@ export function Component() {
   }, [teams, isTeamsLoading])
 
   useEffect(() => {
-    console.log(eventList);
-    setEventsWithEmptyRows(eventList);
-  }, [eventList])
+    const uniqueTeamNames = new Set<string>();
+    eventList.forEach((event) => {
+      const teamName = event.team?.teamName;
+      if (teamName) {
+        uniqueTeamNames.add(teamName);
+      }
+    });
+
+    setTeamNameFilterArray(Array.from(uniqueTeamNames).map((teamName) => ({
+      text: teamName,
+      value: teamName,
+    })));
+  }, eventList)
 
   // while (eventsWithEmptyRows.length < maxRows) {
   //   // Add empty events until the list has at least 10 rows
@@ -213,39 +237,15 @@ export function Component() {
         title: "Title",
         dataIndex: "eventTitle",
         key: "eventTitle",
-        // fixed: 'left',
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (eventTitle) => (
+          <Tooltip placement="topLeft" title={eventTitle}>
+            {eventTitle}
+          </Tooltip>
+        ),
       },
-      // {
-      //   title: "Description",
-      //   dataIndex: "eventDescription",
-      //   key: "eventDescription",
-      // },
-      // {
-      //   title: "Creation Team",
-      //   dataIndex: "creationTeamName",
-      //   key: "creationTeamName",
-      //   filters: [
-      //     {
-      //       text: "Team A",
-      //       value: "Team A",
-      //     },
-      //     {
-      //       text: "Team B",
-      //       value: "Team B",
-      //     },
-      //     {
-      //       text: "Team C",
-      //       value: "Team C",
-      //     },
-      //   ],
-      //   onFilter: (value, record) =>
-      //     record.creationTeamName.indexOf(value as string) === 0,
-      // },
-      // {
-      //   title: "Creator",
-      //   dataIndex: "creatorName",
-      //   key: "creatorName",
-      // },
       {
         title: "Type",
         dataIndex: "eventType",
@@ -265,24 +265,80 @@ export function Component() {
           },
         ],
         onFilter: (value, record) => record.eventType.indexOf(value as string) === 0,
+        render: (eventType) => (
+          <Tag color={getTypeColor(eventType)} key={eventType}>
+            {eventType.toUpperCase()}
+          </Tag>
+        ),
       },
       {
-        title: "Creation Date",
-        dataIndex: "eventCreationdate",
-        key: "eventCreationdate",
-
-        sorter: (a, b) => {
-          if (a.eventCreationdate && b.eventCreationdate) {
-            return a.eventCreationdate.getTime() - b.eventCreationdate.getTime();
-          } else {
-            return 0;
+        title: "Created By Team",
+        dataIndex: "team",
+        key: "team",
+        ellipsis: {
+          showTitle: false,
+        },
+        filters: teamNameFilterArray,
+        onFilter: (value, record) => record.team?.teamName.indexOf(value as string) === 0,
+        render: (team) => (
+          <Tooltip placement="topLeft" title={team.teamName}>
+            {team.teamName}
+          </Tooltip>
+        ),
+      },
+      {
+        title: "Cross-Team",
+        dataIndex: "collaborations",
+        key: "collaborations",
+        filters: [
+          {
+            "text": "Yes",
+            "value": "Yes",
+          },
+          {
+            "text": "No",
+            "value": "No",
           }
+        ],
+        onFilter: (value, record) => {
+          if ("Yes".indexOf(value as string)) {
+            return record.collaborations.length > 0;
+          } else if ("No".indexOf(value as string)) {
+            return record.collaborations.length === 0;
+          }
+          return false;
         },
-        render: (creationDate) => {
-          return creationDate?.toLocaleString();
-        },
+        render: (collaborations) => {
+          return collaborations.length? "Yes": "No"
+        }
       },
 
+      {
+        title: "Status",
+        dataIndex: "eventExpired",
+        key: "eventExpired",
+        filters: [
+          {
+            "text": "Ongoing",
+            "value": "Ongoing",
+          },
+          {
+            "text": "Expired",
+            "value": "Expired",
+          }
+        ],
+        onFilter: (value, record) => {
+          if ("Ongoing".indexOf(value as string)) {
+            return record.eventExpired===true;
+          } else if ("Expired".indexOf(value as string)) {
+            return record.eventExpired===false;
+          }
+          return false;
+        },
+        render: (eventExpired) => {
+          return eventExpired? "Expired": "Ongoing"
+        }
+      },
       {
         title: "Last Update Date",
         dataIndex: "eventLastUpdatedate",
@@ -305,7 +361,7 @@ export function Component() {
         fixed: "right",
         width: 100,
         render: (record) =>
-          record.id ? <a onClick={() => showEventModal(record)}>View</a> : null,
+          record.eventId ? <a onClick={() => showEventModal(record)}>View</a> : null,
       },
       // Additional columns specific to each event type
       // {
