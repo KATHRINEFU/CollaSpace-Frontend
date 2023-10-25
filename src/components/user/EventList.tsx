@@ -46,7 +46,7 @@ const EventFetcher: React.FC<EventFetcherProps> = ({ teamId, filterOptions }) =>
     (event: IEvent) =>
       (filterOptions.type.length === 0 ||
         filterOptions.type.includes(event.eventType)) &&
-      (filterOptions.team.length === 0 || filterOptions.team.includes(event.team.teamName))
+      (filterOptions.team.length === 0 || filterOptions.team.includes(event.team!.teamName))
   );
 
   // Render the filtered events
@@ -65,7 +65,7 @@ const EventFetcher: React.FC<EventFetcherProps> = ({ teamId, filterOptions }) =>
                   <p className="text-lg font-bold">{item.eventTitle}</p>
                   <div className="">
                     <span className="py-1.5 px-2.5 text-xs w-40 rounded-1.8 inline-block bg-blue-100 text-center align-baseline font-bold uppercase leading-none text-blue-600">
-                      {item.team.teamName}
+                      {item.team?.teamName}
                     </span>
                   </div>
                 </div>

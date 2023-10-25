@@ -1,59 +1,11 @@
-import { Table, Modal, Button, Tag, Tooltip } from "antd";
+import { Table, Modal, Button, Tag, Tooltip, Form, Input, Divider, DatePicker, TimePicker, Switch, Select, List} from "antd";
 import { useEffect, useState } from "react";
 import { ColumnsType } from "antd/es/table";
 import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";
 import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
-
-// const fakeEvents: (IDocumentEvent | IMeetingEvent | IActivityEvent)[] = [
-//   {
-//     id: 1,
-//     creationTeamId: 1,
-//     creationTeamName: "Team A",
-//     creatorId: 101,
-//     creatorName: "John Doe",
-//     type: "document",
-//     title: "Document Event 1",
-//     description: "This is a document event.",
-//     creationDate: new Date("2023-10-01T10:00:00"),
-//     link: "https://example.com/document1",
-//     deadlineDate: new Date("2023-10-10"),
-//   },
-//   {
-//     id: 2,
-//     creationTeamId: 2,
-//     creationTeamName: "Team B",
-//     creatorId: 102,
-//     creatorName: "Jane Smith",
-//     type: "meeting",
-//     title: "Meeting Event 1",
-//     description: "This is a meeting event.",
-//     creationDate: new Date("2023-10-05T10:00:00"),
-//     virtual: true,
-//     location: "Online",
-//     link: "https://example.com/meeting1",
-//     startTime: new Date("2023-09-28T14:00:00"),
-//     endTime: new Date("2023-09-28T15:30:00"),
-//     noteLink: "https://example.com/meeting1-notes",
-//     agendaLink: "https://example.com/meeting1-agenda",
-//     meetingType: "Team Meeting",
-//   },
-//   {
-//     id: 3,
-//     creationTeamId: 1,
-//     creationTeamName: "Team A",
-//     creatorId: 101,
-//     creatorName: "John Doe",
-//     type: "activity",
-//     title: "Activity Event 1",
-//     description: "This is an activity event.",
-//     creationDate: new Date("2023-10-05T10:00:00"),
-//     virtual: false,
-//     location: "Park",
-//     startTime: new Date("2023-10-05T10:00:00"),
-//     endTime: new Date("2023-10-05T12:00:00"),
-//   },
-//   // Add more fake events as needed...
-// ];
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import TeamSearchAutocomplete from "../../components/user/TeamSearchAutocomplete";
 
 export function Component() {
   // const maxRows = 10;
@@ -66,6 +18,15 @@ export function Component() {
   // const [eventsWithEmptyRows, setEventsWithEmptyRows]= useState<(IDocumentEvent | IMeetingEvent | IActivityEvent) []>([]);
   const [isTableLoading, setIsTableLoading] = useState(true); // Add loading state
   const [teamNameFilterArray, setTeamNameFilterArray] = useState<{text:string, value: string}[]>([]);
+  const [eventForm] = Form.useForm();
+  eventForm.setFieldsValue(selectedEvent);
+
+  dayjs.extend(customParseFormat);
+  const dateFormat = 'M/D/YYYY hh:mm:ss A';
+  const timeFormat = 'h:mm A';
+
+  const { Option } = Select;
+
 
   const showEventModal = (
     record: IDocumentEvent | IMeetingEvent | IActivityEvent,
@@ -486,88 +447,219 @@ export function Component() {
             </Button>,
           ]}
         >
-          {selectedEvent && (
-            <div>
-              <p className="text-sm">ID: {selectedEvent.eventId}</p>
-              <p className="text-base">Title: {selectedEvent.eventTitle}</p>
-              <p className="text-base">
-                Description: {selectedEvent.eventDescription}
-              </p>
-              <p className="text-base">
-                Created By: {selectedEvent.eventCreator}
-              </p>
-              {/* <p className="text-base">
-                Creator from team: {selectedEvent.creationTeamName}
-              </p> */}
-              {/* Add more event-specific information */}
-            </div>
-          )}
+          <div className="w-full h-2 mb-3 rounded text-center text-sm"
+          style={{
+            backgroundColor: selectedEvent? getTypeColor(selectedEvent.eventType): "white",
+          }}
+          />
+          <Form form={eventForm}>
+            {selectedEvent && (
+              <div>
+                <Form.Item name="eventTitle" label="Title">
+                  <Input disabled />
+                </Form.Item>
+                <Form.Item name="eventDescription" label="Description">
+                  <Input.TextArea rows={4} disabled />
+                </Form.Item>
+                <p className="">
+                  Created By Team: {selectedEvent.team?.teamName}
+                </p>
 
-          {selectedEvent?.eventType === "document" && (
-            <div>
-              {/* Display Document Event specific information */}
-              <p className="text-base">
-                Link: {(selectedEvent as IDocumentEvent).link}
-              </p>
-              <p className="text-base">
-                Deadline Date:{" "}
-                {(
-                  selectedEvent as IDocumentEvent
-                ).deadlineDate?.toLocaleString()}
-              </p>
-            </div>
-          )}
+                <p className="">
+                  Creation Time: {selectedEvent.eventCreationdate?.toLocaleString()}
+                </p>
 
-          {selectedEvent?.eventType === "meeting" && (
-            <div>
-              {/* Display Meeting Event specific information */}
-              <p className="text-base">
-                Virtual:{" "}
-                {(selectedEvent as IMeetingEvent).virtual ? "Yes" : "No"}
-              </p>
-              <p className="text-base">
-                Location: {(selectedEvent as IMeetingEvent).location}
-              </p>
-              <p className="text-base">
-                Start Time:{" "}
-                {(selectedEvent as IMeetingEvent).startTime.toLocaleString()}
-              </p>
-              <p className="text-base">
-                End Time:{" "}
-                {(selectedEvent as IMeetingEvent).endTime.toLocaleString()}
-              </p>
-              <p className="text-base">
-                Note Link: {(selectedEvent as IMeetingEvent).noteLink}
-              </p>
-              <p className="text-base">
-                Agenda Link: {(selectedEvent as IMeetingEvent).agendaLink}
-              </p>
-              <p className="text-base">
-                Meeting Type: {(selectedEvent as IMeetingEvent).meetingType}
-              </p>
-            </div>
-          )}
+                <p className="">
+                  Last Update Time: {selectedEvent.eventLastUpdatedate?.toLocaleString()}
+                </p>
+              </div>
+            )}
 
-          {selectedEvent?.eventType === "activity" && (
-            <div>
-              {/* Display Activity Event specific information */}
-              <p className="text-base">
-                Virtual:{" "}
-                {(selectedEvent as IActivityEvent).virtual ? "Yes" : "No"}
-              </p>
-              <p className="text-base">
-                Location: {(selectedEvent as IActivityEvent).location}
-              </p>
-              <p className="text-base">
-                Start Time:{" "}
-                {(selectedEvent as IActivityEvent).startTime.toLocaleString()}
-              </p>
-              <p className="text-base">
-                End Time:{" "}
-                {(selectedEvent as IActivityEvent).endTime.toLocaleString()}
-              </p>
-            </div>
-          )}
+            <Divider>{selectedEvent?.eventType.toUpperCase()} Specific Info</Divider>
+
+            {selectedEvent?.eventType === "document" && (
+              <div>
+                {/* Display Document Event specific information */}
+                <Form.Item name="link" label="Link">
+                  <Input disabled />
+                </Form.Item>
+
+                <span>Deadline: </span>
+                <DatePicker 
+                  defaultValue={dayjs((selectedEvent as IDocumentEvent).deadlineDate?.toLocaleString(), dateFormat)} 
+                  disabled />
+                <span>    </span>
+                <TimePicker
+                  defaultValue={dayjs((selectedEvent as IDocumentEvent).deadlineDate?.toLocaleString(), timeFormat)}
+                  disabled
+                />
+              </div>
+            )}
+
+            {selectedEvent?.eventType === "meeting" && (
+              <div>
+                {/* Display Meeting Event specific information */}
+                <div className="flex gap-3 items-center">
+                  <p className="">
+                    Virtual:{" "}
+                    {(selectedEvent as IActivityEvent).virtual ? "Yes" : "No"}
+                  </p>
+                  <Form.Item name="virtual" valuePropName="checked">
+                    <Switch defaultChecked={(selectedEvent as IActivityEvent).virtual} disabled/>
+                  </Form.Item>
+                </div>
+                
+                <Form.Item name="location" label="location">
+                  <Input disabled />
+                </Form.Item>
+
+                {/*TODO: timeformat */}
+                <Form.Item name={"startTime"} label="Start Time">
+                  <DatePicker 
+                    defaultValue={dayjs((selectedEvent as IMeetingEvent).startTime?.toLocaleString(), dateFormat)} 
+                    disabled />
+                  <span>    </span>
+                  <TimePicker
+                    defaultValue={dayjs((selectedEvent as IMeetingEvent).startTime?.toLocaleString(), timeFormat)}
+                    disabled
+                  />
+                </Form.Item>
+
+                <Form.Item name={"endTime"} label = "End Time">
+                  <DatePicker 
+                    defaultValue={dayjs((selectedEvent as IMeetingEvent).endTime?.toLocaleString(), dateFormat)} 
+                    disabled />
+                  <span>    </span>
+                  <TimePicker
+                    defaultValue={dayjs((selectedEvent as IMeetingEvent).endTime?.toLocaleString(), timeFormat)}
+                    disabled
+                  />
+                </Form.Item>
+
+                {/* <p className="">
+                  Start Time:{" "}
+                  {(selectedEvent as IMeetingEvent).startTime.toLocaleString()}
+                </p>
+                <p className="">
+                  End Time:{" "}
+                  {(selectedEvent as IMeetingEvent).endTime.toLocaleString()}
+                </p> */}
+
+                <Form.Item name="noteLink" label="Note Link">
+                  <Input disabled />
+                </Form.Item>
+
+                <Form.Item name="agendaLink" label="Agenda Link">
+                  <Input disabled />
+                </Form.Item>
+
+                <Form.Item name="meetingType" label="Meeting Type">
+                  <Select disabled>
+                    <Option value="document">Business</Option>
+                    <Option value="meeting">Internal</Option>
+                    <Option value="activity">Casual</Option>
+                  </Select>
+                </Form.Item>
+              </div>
+            )}
+
+            {selectedEvent?.eventType === "activity" && (
+              <div>
+                {/* Display Activity Event specific information */}
+                <div className="flex gap-3 items-center">
+                  <p className="">
+                    Virtual:{" "}
+                    {(selectedEvent as IActivityEvent).virtual ? "Yes" : "No"}
+                  </p>
+                  <Form.Item name="virtual" valuePropName="checked">
+                    <Switch defaultChecked={(selectedEvent as IActivityEvent).virtual} disabled/>
+                  </Form.Item>
+                </div>
+                
+                <Form.Item name="location" label="location">
+                  <Input disabled />
+                </Form.Item>
+
+                {/*TODO: timeformat */}
+                <Form.Item name={"startTime"} label="Start Time">
+                  <DatePicker 
+                    defaultValue={dayjs((selectedEvent as IActivityEvent).startTime?.toLocaleString(), dateFormat)} 
+                    disabled />
+                  <span>    </span>
+                  <TimePicker
+                    defaultValue={dayjs((selectedEvent as IActivityEvent).startTime?.toLocaleString(), timeFormat)}
+                    disabled
+                  />
+                </Form.Item>
+
+                <Form.Item name={"endTime"} label = "End Time">
+                  <DatePicker 
+                    defaultValue={dayjs((selectedEvent as IActivityEvent).endTime?.toLocaleString(), dateFormat)} 
+                    disabled />
+                  <span>    </span>
+                  <TimePicker
+                    defaultValue={dayjs((selectedEvent as IActivityEvent).endTime?.toLocaleString(), timeFormat)}
+                    disabled
+                  />
+                </Form.Item>
+               
+
+                {/* <p className="text-base">
+                  Start Time:{" "}
+                  {(selectedEvent as IActivityEvent).startTime.toLocaleString()}
+                </p>
+                <p className="text-base">
+                  End Time:{" "}
+                  {(selectedEvent as IActivityEvent).endTime.toLocaleString()}
+                </p> */}
+              </div>
+            )}
+
+            <Divider>Collaboration Specific Info</Divider>
+            {selectedEvent?.collaborations.length===0
+            ? (
+              <div className="flex flex-col justify-center">
+                <p>This event has no collaborations</p>
+              </div>
+              
+            )
+            : (
+              <List
+                itemLayout="horizontal"
+                dataSource={selectedEvent?.collaborations}
+                renderItem={(collaboration) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={collaboration.team.teamName}
+                      description={
+                        `
+                         Role: ${collaboration.teamRole}, 
+                         Accept Status: ${collaboration.acceptStatus ? 'Joined' : 'Pending Acceptance'
+                      }`}
+                    />
+                    {collaboration.acceptStatus ? (
+                      <div className="w-24 h-6 mb-3 rounded text-center text-sm bg-orange-100">
+                        Joined
+                      </div>
+                    ): (
+
+                      <div className="w-24 h-6 mb-3 rounded text-center text-sm bg-lime-100">
+                        Pending Acceptance
+                      </div>
+                    )}
+                    
+                  </List.Item>
+                )}
+              />
+              
+            )
+
+            
+          }
+            <p>Add More Teams to Collaborate:</p>
+            <TeamSearchAutocomplete allTeamNames={["Team A", "Team B", "Team C"]}/>
+          </Form>
+          
         </Modal>
       </div>
     </>
