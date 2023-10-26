@@ -2,7 +2,7 @@ import { Table, Modal, Button, Tag, Tooltip, Form, Input, Divider, DatePicker, T
 import { useEffect, useState } from "react";
 import { ColumnsType } from "antd/es/table";
 import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";
-import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
+import { useGetAllTeamsQuery, useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import TeamSearchAutocomplete from "../../components/user/TeamSearchAutocomplete";
@@ -14,10 +14,12 @@ export function Component() {
     IDocumentEvent | IMeetingEvent | IActivityEvent | null
   >(null);
   const { data: teams, isLoading: isTeamsLoading} = useGetEmployeeTeamsQuery(4);
+  const {data: allTeams, isLoading: isAllTeamsLoading} = useGetAllTeamsQuery({});
   const [eventList, setEventList] = useState< (IDocumentEvent | IMeetingEvent | IActivityEvent) []>([]);
   // const [eventsWithEmptyRows, setEventsWithEmptyRows]= useState<(IDocumentEvent | IMeetingEvent | IActivityEvent) []>([]);
   const [isTableLoading, setIsTableLoading] = useState(true); // Add loading state
   const [teamNameFilterArray, setTeamNameFilterArray] = useState<{text:string, value: string}[]>([]);
+  const [allTeamIdAndNames, setAllTeamIdAndNames] = useState<{'id': number, 'name': string}[]>([]);
   const [eventForm] = Form.useForm();
   eventForm.setFieldsValue(selectedEvent);
 
@@ -127,6 +129,15 @@ export function Component() {
     }
   }
 
+  useEffect(()=> {
+    if(!isAllTeamsLoading && allTeams){
+      allTeams.map((team: any)=> {
+        setAllTeamIdAndNames((prevList)=> [...prevList, {'id': team.teamId, 'name': team.teamName}]);
+      })
+    }
+
+  }, [allTeams, isAllTeamsLoading])
+
   useEffect(() => {
     const baseUrl = 'http://localhost:8080';
     const fetchEvents = async () => {
@@ -172,7 +183,7 @@ export function Component() {
       text: teamName,
       value: teamName,
     })));
-  }, eventList)
+  }, [eventList])
 
   // while (eventsWithEmptyRows.length < maxRows) {
   //   // Add empty events until the list has at least 10 rows
@@ -657,7 +668,7 @@ export function Component() {
             
           }
             <p>Add More Teams to Collaborate:</p>
-            <TeamSearchAutocomplete allTeamNames={["Team A", "Team B", "Team C"]}/>
+            <TeamSearchAutocomplete allTeamIdAndNames={allTeamIdAndNames}/>
           </Form>
           
         </Modal>

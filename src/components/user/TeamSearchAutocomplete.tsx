@@ -1,12 +1,19 @@
 import { AutoComplete, Button, Tag } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const TeamSearchAutocomplete: React.FC<{
-    allTeamNames: string[]; // An array of all teams
-  }> = ({ allTeamNames }) => {
+    allTeamIdAndNames: {'id': number, 'name':string}[]; // An array of all teams
+  }> = ({ allTeamIdAndNames }) => {
     const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [options, setOptions] = useState<string[]>([]);
+    const [allTeamNames, setAllTeamNames] = useState<string[]>([]);
+
+    useEffect(() => {
+      allTeamIdAndNames.map((team)=>{
+        setAllTeamNames((prevList)=> [...prevList, team.name]);
+      })
+    }, [allTeamIdAndNames])
   
     const handleSearch = (value: string) => {
       const filteredTeams = allTeamNames
@@ -51,8 +58,8 @@ const TeamSearchAutocomplete: React.FC<{
         </div>
         
         <div className="selected-teams mt-1">
-          {selectedTeams.map((teamName) => (
-            <Tag key={teamName} closable onClose={() => handleRemove(teamName)}>
+          {selectedTeams.map((teamName, index) => (
+            <Tag key={index} closable onClose={() => handleRemove(teamName)}>
               {teamName}
             </Tag>
           ))}
