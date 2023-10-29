@@ -1,98 +1,10 @@
 import { Table, Modal, Button, Tag, Form, Input, Rate, Select, Avatar, Tooltip, List} from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ColumnsType } from "antd/es/table";
-import { ITicket } from "../../types";
+import { ITicket, ITicketAssign } from "../../types";
 import {UserOutlined, AntDesignOutlined} from "@ant-design/icons";
-
-const fakeTickets: ITicket[] = [
-  {
-    id: 1,
-    creatorId: 1,
-    creatorName: "John Doe",
-    creationDate: new Date(),
-    title: "Ticket 1",
-    description: "This is the description for ticket 1.",
-    status: "pending acceptance",
-    priority: 1,
-    fromTeamId: 1,
-    fromTeamName: "Support Team",
-    toTeamId: 2,
-    toTeamName: "Development Team",
-    assignToName: "Alice",
-    viewers: ["Alice", "Bob"],
-    files: ["file1.pdf", "file2.doc"],
-    dueDate: new Date("2023-10-15"),
-  },
-  {
-    id: 2,
-    creatorId: 2,
-    creatorName: "Jane Smith",
-    creationDate: new Date(),
-    title: "Ticket 2",
-    description: "This is the description for ticket 2.",
-    status: "in progress",
-    priority: 2,
-    fromTeamId: 2,
-    fromTeamName: "Development Team",
-    toTeamId: 3,
-    toTeamName: "Testing Team",
-    assignToName: "Eve",
-    viewers: ["Eve"],
-    files: ["file3.jpg"],
-  },
-  {
-    id: 3,
-    creatorId: 3,
-    creatorName: "Alice Johnson",
-    creationDate: new Date(),
-    title: "Ticket 3",
-    description: "This is the description for ticket 3.",
-    status: "completed",
-    priority: 3,
-    fromTeamId: 2,
-    fromTeamName: "Development Team",
-    toTeamId: 4,
-    toTeamName: "Maintenance Team",
-    assignToName: "David",
-    viewers: ["David", "Frank"],
-    files: ["file4.docx", "file5.png"],
-  },
-  {
-    id: 4,
-    creatorId: 4,
-    creatorName: "Bob Johnson",
-    creationDate: new Date(),
-    title: "Ticket 4",
-    description: "This is the description for ticket 4.",
-    status: "in review",
-    priority: 4,
-    fromTeamId: 3,
-    fromTeamName: "Testing Team",
-    toTeamId: 2,
-    toTeamName: "Development Team",
-    assignToName: "Alice",
-    viewers: ["Alice", "Eve"],
-    files: ["file6.pdf"],
-    dueDate: new Date("2023-10-20"),
-  },
-  {
-    id: 5,
-    creatorId: 5,
-    creatorName: "Eve Smith",
-    creationDate: new Date(),
-    title: "Ticket 5",
-    description: "This is the description for ticket 5.",
-    status: "in progress",
-    priority: 5,
-    fromTeamId: 4,
-    fromTeamName: "Maintenance Team",
-    toTeamId: 3,
-    toTeamName: "Testing Team",
-    assignToName: "Frank",
-    viewers: ["Frank", "David"],
-    files: ["file7.jpg"],
-  },
-];
+import { useGetTicketsQuery } from "../../redux/api/apiSlice";
+import axios from "../../api/axios";
 
 const teamNames = [
   "Support Team",
@@ -103,13 +15,13 @@ const teamNames = [
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "pending acceptance":
+    case "pending":
       return "#d3f261";
     case "in progress":
       return "#ffd666";
     case "in review":
       return "#b37feb";
-    case "completed":
+    case "resolved":
       return "#5cdbd3";
     default:
       return "";
@@ -133,6 +45,16 @@ const getPriorityColor = (priority: number) => {
   }
 };
 
+function getFormattedDate(date: Date) {
+  var month = ("0" + (date.getMonth() + 1)).slice(-2);
+  var day  = ("0" + (date.getDate())).slice(-2);
+  var year = date.getFullYear();
+  var hour =  ("0" + (date.getHours())).slice(-2);
+  var min =  ("0" + (date.getMinutes())).slice(-2);
+  var seg = ("0" + (date.getSeconds())).slice(-2);
+  return year + "-" + month + "-" + day + " " + hour + ":" +  min + ":" + seg;
+}
+
 const getPriorityText = (priority: number) => {
   return priorityTexts[priority-1]
 };
@@ -142,13 +64,100 @@ const priorityTexts = ['casual', 'not in hurry', 'don\'t delay', 'do it', 'super
 export function Component() {
   const maxRows = 10;
   const { Option } = Select;
-  const ticketsWithEmptyRows = [...fakeTickets];
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [ticketForm] = Form.useForm();
   ticketForm.setFieldsValue(selectedTicket);
 
-  const showEventModal = (record: ITicket) => {
+  const {data: tickets, isLoading: isTicketsLoading}  = useGetTicketsQuery(4);
+  const [allTickets, setAllTickets] = useState<ITicket[]>([]);
+
+  function mapDataToTickets(data: any){
+    return {
+      ticketId: data.ticketId,
+      ticketCreator: data.ticketCreator,
+      ticketCreatorName: data.ticketCreatorName,
+      ticketCreationdate: data.ticketCreationdate,
+      ticketLastUpdatedate: data.ticketLastUpdatedate,
+      ticketTitle: data.ticketTitle,
+      ticketDescription: data.ticketDescription,
+      ticketStatus: data.ticketStatus,
+      priority: data.ticketPriority,
+      fromTeamId: data.ticketFromTeam,
+      fromTeamName: data.fromTeamName,
+      dueDate: data.ticketDuedate,
+      assigns: data.assigns,
+      ticketLogs: data.ticketLogs,
+      files: data.files,
+    }
+  }
+
+  useEffect(()=> {
+    const baseUrl = 'http://localhost:8080';
+    if(!isTicketsLoading && tickets){
+      const fetchAdditionalData = async (ticket: any) => {
+        let ticketWithAdditionalData = { ...ticket };
+  
+        // Fetch ticket creator's name
+        if (ticket.ticketCreator) {
+          const employeeResponse = await axios.get(`${baseUrl}/employee/${ticket.ticketCreator}`);
+          if (employeeResponse.data) {
+            ticketWithAdditionalData.ticketCreatorName = employeeResponse.data.employeeFirstname + " " + employeeResponse.data.employeeLastname;
+          }
+        }
+  
+        // Fetch from team name
+        if (ticket.ticketFromTeam) {
+          const teamResponse = await axios.get(`${baseUrl}/team/${ticket.ticketFromTeam}`);
+          if (teamResponse.data) {
+            ticketWithAdditionalData.fromTeamName = teamResponse.data.teamName;
+          }
+        }
+  
+        return ticketWithAdditionalData;
+      };
+
+      const fetchAndSetTickets = async () => {
+        const mappedTickets = await Promise.all(tickets.map((data:any) => fetchAdditionalData(data)));
+        const convertedTicket = mappedTickets.map((ticket) => mapDataToTickets(ticket));
+        setAllTickets(convertedTicket);
+      };
+
+      fetchAndSetTickets();
+    }
+  }, [tickets, isTicketsLoading])
+
+  useEffect(() => {
+    if (allTickets) {
+      // Add empty events until the list has at least 10 rows
+      const emptyRowCount = maxRows - allTickets.length;
+      if(emptyRowCount>0){
+        const emptyRows = Array(emptyRowCount).fill(
+          {
+            ticketId: 0,
+            ticketCreator: 0,
+            ticketCreatorName: "",
+            ticketCreationdate: undefined,
+            ticketLastUpdatedate: undefined,
+            ticketTitle: "",
+            ticketDescription: "",
+            ticketStatus: "",
+            priority: 0,
+            fromTeamId: 0,
+            fromTeamName: "",
+            dueDate: undefined,
+            assigns: [],
+            ticketLogs: [],
+            files: [],
+            }
+        );
+
+        setAllTickets((prevList) => [...prevList, ...emptyRows]);
+      }
+    }
+  }, [allTickets])
+
+  const showTicketModal = (record: ITicket) => {
     setSelectedTicket(record);
     setIsModalVisible(true);
   };
@@ -157,42 +166,21 @@ export function Component() {
     ticketForm.setFieldsValue({ status: 'in progress' });
   };
 
-  while (ticketsWithEmptyRows.length < maxRows) {
-    // Add empty events until the list has at least 10 rows
-    ticketsWithEmptyRows.push({
-      id: 0,
-      creatorId: 0,
-      creatorName: "",
-      creationDate: undefined,
-      title: "",
-      description: "",
-      status: "",
-      priority: 0,
-      fromTeamId: 0,
-      fromTeamName: "",
-      toTeamId: 0,
-      toTeamName: "",
-      assignToName: "",
-      viewers: [],
-      files: [],
-    });
-  }
-
   const columns: ColumnsType<ITicket> = [
     {
       title: "Title",
-      dataIndex: "title",
-      key: "title",
+      dataIndex: "ticketTitle",
+      key: "ticketTitle",
       // fixed: 'left',
     },
     {
       title: "Status",
-      dataIndex: "status",
-      key: "status",
+      dataIndex: "ticketStatus",
+      key: "ticketStatus",
       filters: [
         {
-          text: "pending acceptance",
-          value: "pending acceptance",
+          text: "pending",
+          value: "pending",
         },
         {
           text: "in progress",
@@ -203,14 +191,14 @@ export function Component() {
           value: "in review",
         },
         {
-          text: "completed",
-          value: "completed",
+          text: "resolved",
+          value: "resolved",
         },
       ],
-      onFilter: (value, record) => record.status.indexOf(value as string) === 0,
-      render: (status) => (
-        <Tag color={getStatusColor(status)} key={status}>
-          {status.toUpperCase()}
+      onFilter: (value, record) => record.ticketStatus.indexOf(value as string) === 0,
+      render: (ticketStatus) => (
+        <Tag color={getStatusColor(ticketStatus)} key={ticketStatus}>
+          {ticketStatus}
         </Tag>
       ),
     },
@@ -239,35 +227,47 @@ export function Component() {
       dataIndex: "fromTeamName",
       key: "fromTeamName",
     },
-    {
-      title: "To Team",
-      dataIndex: "toTeamName",
-      key: "toTeamName",
-    },
+    // {
+    //   title: "To Team",
+    //   dataIndex: "toTeamName",
+    //   key: "toTeamName",
+    // },
     {
       title: "Assignee",
-      dataIndex: "assignToName",
-      key: "assignToName",
+      dataIndex: "assigns",
+      key: "assignee",
+      render: (assigns) => {
+        if (assigns && assigns.length > 0) {
+          // Assuming "assigns" is an array of assignee objects
+          const assigneeNames = assigns.map((assignee: ITicketAssign) => assignee.employeeId).join(', ');
+          return assigneeNames;
+        } else {
+          return null; // Return null if there are no assignees
+        }
+      },
     },
     {
-      title: "Creator",
-      dataIndex: "creatorName",
-      key: "creatorName",
+      title: "Created By",
+      dataIndex: "ticketCreatorName",
+      key: "ticketCreatorName",
     },
     {
       title: "Creation Date",
-      dataIndex: "creationDate",
-      key: "creationDate",
+      dataIndex: "ticketCreationdate",
+      key: "ticketCreationdate",
 
       sorter: (a, b) => {
-        if (a.creationDate && b.creationDate) {
-          return a.creationDate.getTime() - b.creationDate.getTime();
+        if (a.ticketCreationdate && b.ticketCreationdate) {
+          return a.ticketCreationdate.getTime() - b.ticketCreationdate.getTime();
         } else {
           return 0;
         }
       },
-      render: (creationDate) => {
-        return creationDate?.toLocaleString();
+      render: (ticketCreationdate) => {
+        if(ticketCreationdate){
+          return  getFormattedDate(new Date(ticketCreationdate));
+        } 
+        else return null;
       },
     },
 
@@ -277,7 +277,7 @@ export function Component() {
       fixed: "right",
       width: 100,
       render: (record) =>
-        record.id ? <a onClick={() => showEventModal(record)}>View</a> : null,
+        record.ticketId ? <a onClick={() => showTicketModal(record)}>View</a> : null,
     },
   ];
 
@@ -288,8 +288,7 @@ export function Component() {
         {/* TODO: add buttons for choosing: ticket assigned to me*/}
         <Table
           columns={columns}
-          dataSource={ticketsWithEmptyRows}
-          scroll={{ x: 1000 }}
+          dataSource={allTickets}
         />
 
         <Modal
@@ -313,12 +312,12 @@ export function Component() {
               
               <div className="flex gap-3">
               <Form.Item name="status" label="Status">
-                <Tag color={getStatusColor(selectedTicket.status)}>
-                  {selectedTicket.status}
+                <Tag color={getStatusColor(selectedTicket.ticketStatus)}>
+                  {selectedTicket.ticketStatus}
                 </Tag>
               </Form.Item>
 
-              {selectedTicket.status === 'pending acceptance' && (
+              {selectedTicket.ticketStatus === 'pending acceptance' && (
                 <Form.Item>
                   <Button
                     type="primary"

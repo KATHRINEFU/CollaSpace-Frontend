@@ -146,7 +146,9 @@ export interface ITicket {
 export interface ITicketAssign {
   ticketAssignId: number;
   employeeId: number;
+  employeeName?: string;
   teamId: number;
+  teamName?: string;
   role: string;
   ticketAssigndate: Date;
 }
