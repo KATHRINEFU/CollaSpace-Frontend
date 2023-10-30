@@ -1,10 +1,13 @@
-import { Table, Modal, Button, Tag, Form, Input, Rate, Select, Avatar, Tooltip, List} from "antd";
-import { useEffect, useState } from "react";
-import { ColumnsType } from "antd/es/table";
-import { ITicket, ITicketAssign } from "../../types";
-import {UserOutlined, AntDesignOutlined} from "@ant-design/icons";
+import { Table, Modal, Button, Tag, Form, Input, Rate, Select, Avatar, Tooltip, List, Space} from "antd";
+import { useEffect, useState, useRef } from "react";
+import { ITicket } from "../../types";
+import {UserOutlined, AntDesignOutlined, SearchOutlined} from "@ant-design/icons";
 import { useGetTicketsQuery } from "../../redux/api/apiSlice";
 import axios from "../../api/axios";
+import type { ColumnType, ColumnsType } from 'antd/es/table';
+import type { FilterConfirmProps } from 'antd/es/table/interface';
+import type { InputRef } from 'antd';
+import Highlighter from 'react-highlight-words';
 
 const teamNames = [
   "Support Team",
@@ -68,6 +71,8 @@ export function Component() {
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [ticketForm] = Form.useForm();
   ticketForm.setFieldsValue(selectedTicket);
+  const [fromTeamNameFilterArray, setFromTeamNameFilterArray] = useState<{text:string, value: string}[]>([]);
+  const [toTeamNameFilterArray, setToTeamNameFilterArray] = useState<{text:string, value: string}[]>([]);
 
   const {data: tickets, isLoading: isTicketsLoading}  = useGetTicketsQuery(4);
   const [allTickets, setAllTickets] = useState<ITicket[]>([]);
@@ -99,20 +104,49 @@ export function Component() {
         let ticketWithAdditionalData = { ...ticket };
   
         // Fetch ticket creator's name
-        if (ticket.ticketCreator) {
-          const employeeResponse = await axios.get(`${baseUrl}/employee/${ticket.ticketCreator}`);
+        if (ticketWithAdditionalData.ticketCreator) {
+          const employeeResponse = await axios.get(`${baseUrl}/employee/${ticketWithAdditionalData.ticketCreator}`);
           if (employeeResponse.data) {
             ticketWithAdditionalData.ticketCreatorName = employeeResponse.data.employeeFirstname + " " + employeeResponse.data.employeeLastname;
           }
         }
   
         // Fetch from team name
-        if (ticket.ticketFromTeam) {
-          const teamResponse = await axios.get(`${baseUrl}/team/${ticket.ticketFromTeam}`);
+        if (ticketWithAdditionalData.ticketFromTeam) {
+          const teamResponse = await axios.get(`${baseUrl}/team/${ticketWithAdditionalData.ticketFromTeam}`);
           if (teamResponse.data) {
             ticketWithAdditionalData.fromTeamName = teamResponse.data.teamName;
           }
         }
+
+        if (ticketWithAdditionalData.assigns) {
+          const assignsWithAdditionalData = [];
+          for (const assign of ticketWithAdditionalData.assigns) {
+            if (assign.role === 'assignee') {
+              const assignWithAdditionalData = { ...assign };
+      
+              if (assignWithAdditionalData.employeeId) {
+                const employeeResponse = await axios.get(`${baseUrl}/employee/${assignWithAdditionalData.employeeId}`);
+                if (employeeResponse.data) {
+                  assignWithAdditionalData.employeeName = `${employeeResponse.data.employeeFirstname} ${employeeResponse.data.employeeLastname}`;
+                }
+              }
+      
+              if (assignWithAdditionalData.teamId) {
+                const teamResponse = await axios.get(`${baseUrl}/team/${assignWithAdditionalData.teamId}`);
+                if (teamResponse.data) {
+                  assignWithAdditionalData.teamName = teamResponse.data.teamName;
+                }
+              }
+      
+              assignsWithAdditionalData.push(assignWithAdditionalData);
+            }else{
+              assignsWithAdditionalData.push(assign);
+            }
+          }
+      
+          ticketWithAdditionalData.assigns = assignsWithAdditionalData;
+        }      
   
         return ticketWithAdditionalData;
       };
@@ -129,6 +163,34 @@ export function Component() {
 
   useEffect(() => {
     if (allTickets) {
+      // get FromTeamNameFilterArray and ToTeamNameFilterArray
+      const uniqueFromTeamNames = new Set<string>();
+      const uniqueToTeamNames = new Set<string>();
+      allTickets.forEach((ticket) => {
+        const teamName = ticket.fromTeamName;
+        if (teamName) {
+          uniqueFromTeamNames.add(teamName);
+        }
+
+        const assigns = ticket?.assigns;
+        assigns.forEach((assign)=> {
+          const teamName = assign.teamName;
+          if(teamName){
+            uniqueToTeamNames.add(teamName);
+          }
+        })
+      });
+
+      setFromTeamNameFilterArray(Array.from(uniqueFromTeamNames).map((teamName) => ({
+        text: teamName,
+        value: teamName,
+      })));
+      setToTeamNameFilterArray(Array.from(uniqueToTeamNames).map((teamName) => ({
+        text: teamName,
+        value: teamName,
+      })));
+
+
       // Add empty events until the list has at least 10 rows
       const emptyRowCount = maxRows - allTickets.length;
       if(emptyRowCount>0){
@@ -166,17 +228,100 @@ export function Component() {
     ticketForm.setFieldsValue({ status: 'in progress' });
   };
 
+  const [searchText, setSearchText] = useState('');
+  const searchInput = useRef<InputRef>(null);
+
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: (param?: FilterConfirmProps) => void,
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+  };
+
+  const handleReset = (clearFilters: () => void) => {
+    clearFilters();
+    setSearchText('');
+  };
+
+  const getColumnSearchProps = (): ColumnType<ITicket> => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={"Search Ticket By Title"}
+          value={(selectedKeys as string[])[0]}
+          // value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys as string[], confirm)}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys as string[], confirm)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record.ticketTitle
+        .toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+       (
+        <Highlighter
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      )
+  });
+
   const columns: ColumnsType<ITicket> = [
     {
       title: "Title",
       dataIndex: "ticketTitle",
       key: "ticketTitle",
-      // fixed: 'left',
+      fixed: 'left',
+      ...getColumnSearchProps(),
     },
     {
       title: "Status",
       dataIndex: "ticketStatus",
       key: "ticketStatus",
+      width: 120,
       filters: [
         {
           text: "pending",
@@ -196,16 +341,19 @@ export function Component() {
         },
       ],
       onFilter: (value, record) => record.ticketStatus.indexOf(value as string) === 0,
-      render: (ticketStatus) => (
+      render: (ticketStatus) => {
+        return ticketStatus? (
         <Tag color={getStatusColor(ticketStatus)} key={ticketStatus}>
           {ticketStatus}
-        </Tag>
-      ),
+        </Tag>)
+        : null;
+        },
     },
     {
       title: "Priority",
       dataIndex: "priority",
       key: "priority",
+      width: 120,
       filters: [
         { text: 'Low', value: 1 },
         { text: 'Medium Low', value: 2 },
@@ -223,26 +371,112 @@ export function Component() {
       },
     },
     {
+      title: "My Role",
+      dataIndex: "assigns",
+      key: "myRole",
+      width: 150,
+      filters: [
+        {
+          text: "creator",
+          value: "creator",
+        },
+        {
+          text: "viewer",
+          value: "viewer",
+        },
+        {
+          text: "supervisor",
+          value: "supervisor",
+        },
+      ],
+      onFilter: (value, record) => {
+        // Replace 4 with the current user's ID
+        const currentUserID = 4;
+        
+        // Check if the user's role matches the selected filter value
+        if (value === "creator") {
+          // Check if the user is the creator
+          if(record.ticketCreator ===  currentUserID){
+            return true;
+          }
+        } else {
+          // Check if the user has the role in assigns
+          if (record.assigns && record.assigns.length > 0) {
+            for (const assign of record.assigns) {
+              if (assign.employeeId === currentUserID && assign.role === value) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      },
+      render: (assigns) => {
+        let isCreator = true;
+        if(assigns && assigns.length>0){
+          for(const assign of assigns){
+            if(assign.employeeId === 4){ // replace 4 with current user id
+              isCreator = false
+              return assign.role;
+            }
+          }
+
+          if (isCreator){
+            return "creator"
+          }
+        }else{
+          return null;
+        }
+      }
+    },
+    {
       title: "From Team",
       dataIndex: "fromTeamName",
+      filters: fromTeamNameFilterArray,
+      onFilter: (value, record) => record.fromTeamName?.indexOf(value as string) === 0,
       key: "fromTeamName",
     },
-    // {
-    //   title: "To Team",
-    //   dataIndex: "toTeamName",
-    //   key: "toTeamName",
-    // },
+    {
+      title: "To Team",
+      dataIndex: "assigns",
+      key: "toTeamName",
+      filters: toTeamNameFilterArray,
+      onFilter: (value, record) => {
+        if (record.assigns && record.assigns.length > 0) {
+          for (const assign of record.assigns) {
+            if (assign.role === "assignee" && assign.teamName === value) {
+              return true;
+            }
+          }
+        }
+        return false;
+      },
+      render:(assigns) => {
+        if(assigns && assigns.length>0){
+          for(const assign of assigns){
+            if(assign.role === "assignee"){
+              return assign.teamName;
+            }
+          }
+        }else{
+          return null;
+        }
+      }
+    },
     {
       title: "Assignee",
       dataIndex: "assigns",
       key: "assignee",
+      width: 180,
       render: (assigns) => {
-        if (assigns && assigns.length > 0) {
-          // Assuming "assigns" is an array of assignee objects
-          const assigneeNames = assigns.map((assignee: ITicketAssign) => assignee.employeeId).join(', ');
-          return assigneeNames;
-        } else {
-          return null; // Return null if there are no assignees
+        if(assigns && assigns.length>0){
+          for(const assign of assigns){
+            if(assign.role === "assignee"){
+              return assign.employeeName;
+            }
+          }
+        }else{
+          return null;
         }
       },
     },
@@ -250,11 +484,13 @@ export function Component() {
       title: "Created By",
       dataIndex: "ticketCreatorName",
       key: "ticketCreatorName",
+      width: 180,
     },
     {
       title: "Creation Date",
       dataIndex: "ticketCreationdate",
       key: "ticketCreationdate",
+      width: 200,
 
       sorter: (a, b) => {
         if (a.ticketCreationdate && b.ticketCreationdate) {
@@ -289,6 +525,7 @@ export function Component() {
         <Table
           columns={columns}
           dataSource={allTickets}
+          scroll = {{ x: 2000}}
         />
 
         <Modal
