@@ -156,6 +156,7 @@ export interface ITicketAssign {
 export interface ITicketLog {
   ticketLogId: number;
   ticketLogCreator: number;
+  ticketLogCreatorName?: string;
   ticketLogCreationdate: Date;
   ticketLogContent: string;
 }
