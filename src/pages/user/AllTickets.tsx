@@ -76,7 +76,18 @@ export function Component() {
 
   const {data: tickets, isLoading: isTicketsLoading}  = useGetTicketsQuery(4);
   const [allTickets, setAllTickets] = useState<ITicket[]>([]);
+  const [initialValue, setInitialValue] = useState<{
+    ticketTitle: string,
+    ticketDescription: string,
+    ticketStatus: string,
+    priority: number,
+    fromTeamName: string | undefined,
+    ticketCreatorName: string | undefined,
+    toTeamName: string  | undefined, 
+    assignToName: string | undefined,
 
+  }>();
+  
   function mapDataToTickets(data: any){
     return {
       ticketId: data.ticketId,
@@ -96,6 +107,32 @@ export function Component() {
       files: data.files,
     }
   }
+
+  useEffect(()=> {
+    if(selectedTicket){
+      setInitialValue(
+        {
+          ticketTitle: selectedTicket.ticketTitle,
+          ticketDescription: selectedTicket.ticketDescription,
+          ticketStatus: selectedTicket.ticketStatus,
+          priority: selectedTicket.priority,
+          fromTeamName: selectedTicket.fromTeamName,
+          ticketCreatorName: selectedTicket.ticketCreatorName,
+          toTeamName: selectedTicket.assigns
+            .find((assign) => assign.role === 'assignee')
+            ?.teamName,
+          assignToName: selectedTicket.assigns
+            .find((assign) => assign.role === 'assignee')
+            ?.employeeName,
+        }
+      )
+    }
+    
+  }, [selectedTicket])
+
+  useEffect(()=> {
+    ticketForm.resetFields();
+  },[initialValue]);
 
   useEffect(()=> {
     const baseUrl = 'http://localhost:8080';
@@ -538,23 +575,27 @@ export function Component() {
             </Button>,
           ]}
         >
-          {selectedTicket && (
-            <Form form={ticketForm}>
-              <Form.Item name="title" label="Title">
+          { initialValue && selectedTicket && (
+            <Form 
+              form={ticketForm} 
+              initialValues={initialValue}
+              key={selectedTicket.ticketId}
+              >
+              <Form.Item name="ticketTitle" label="Title">
                 <Input disabled />
               </Form.Item>
-              <Form.Item name="description" label="Description">
-                <Input.TextArea disabled />
+              <Form.Item name="ticketDescription" label="Description">
+                <Input.TextArea  rows={4} disabled />
               </Form.Item>
               
               <div className="flex gap-3">
-              <Form.Item name="status" label="Status">
+              <Form.Item name="ticketStatus" label="Status">
                 <Tag color={getStatusColor(selectedTicket.ticketStatus)}>
                   {selectedTicket.ticketStatus}
                 </Tag>
               </Form.Item>
 
-              {selectedTicket.ticketStatus === 'pending acceptance' && (
+              {selectedTicket.ticketStatus === 'pending' && (
                 <Form.Item>
                   <Button
                     type="primary"
@@ -584,18 +625,12 @@ export function Component() {
               </Form.Item>
 
               <Form.Item name="toTeamName" label="To Team" style={{width: '250px'}}>
-                <Select placeholder="to team" disabled={true}>
-                  {teamNames.map((teamName, index) => (
-                    <Option key={index} value={`team${index}`}>
-                      {teamName}
-                    </Option>
-                  ))}
-                  </Select>
+                  <Input disabled></Input>
               </Form.Item>
               </div>
               
               <div className="flex gap-3 w-full justify-between">
-                <Form.Item name="creatorName" label="Created By" style={{width: '250px'}}>
+                <Form.Item name="ticketCreatorName" label="Created By" style={{width: '250px'}}>
                     <Input disabled/>
                 </Form.Item>
 
