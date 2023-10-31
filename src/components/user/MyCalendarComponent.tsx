@@ -1,8 +1,8 @@
-import React from 'react';
-import type { Dayjs } from 'dayjs';
-import type { BadgeProps, CalendarProps } from 'antd';
-import { Badge, Calendar } from 'antd';
-import { ICalendarItem } from '../../types';
+import React from "react";
+import type { Dayjs } from "dayjs";
+import type { BadgeProps, CalendarProps } from "antd";
+import { Badge, Calendar } from "antd";
+import { ICalendarItem } from "../../types";
 
 // const getListData = (value: Dayjs) => {
 //   let listData;
@@ -35,16 +35,17 @@ import { ICalendarItem } from '../../types';
 //   return listData || [];
 // };
 
-const MyCalendarComponent: React.FC<{realData: ICalendarItem[]}> = ({realData}) => {
-
+const MyCalendarComponent: React.FC<{ realData: ICalendarItem[] }> = ({
+  realData,
+}) => {
   const getListData = (value: Dayjs) => {
     const date = value.date();
-  
+
     const filteredData = realData.filter((item) => {
       // Check if the day of the month matches the date value
       return item.date.getDate() === date;
     });
-  
+
     // Map filtered data to the format needed for rendering
     const listData = filteredData.map((item) => {
       return {
@@ -52,11 +53,10 @@ const MyCalendarComponent: React.FC<{realData: ICalendarItem[]}> = ({realData}) 
         content: item.content,
       };
     });
-  
+
     return listData || [];
   };
-  
-  
+
   const getMonthData = (value: Dayjs) => {
     if (value.month() === 8) {
       return 1394;
@@ -79,20 +79,23 @@ const MyCalendarComponent: React.FC<{realData: ICalendarItem[]}> = ({realData}) 
       <ul className="events">
         {listData.map((item: any) => (
           <li key={item.content}>
-            <Badge status={item.type as BadgeProps['status']} text={item.content} />
+            <Badge
+              status={item.type as BadgeProps["status"]}
+              text={item.content}
+            />
           </li>
         ))}
       </ul>
     );
   };
 
-  const cellRender: CalendarProps<Dayjs>['cellRender'] = (current, info) => {
-    if (info.type === 'date') return dateCellRender(current);
-    if (info.type === 'month') return monthCellRender(current);
+  const cellRender: CalendarProps<Dayjs>["cellRender"] = (current, info) => {
+    if (info.type === "date") return dateCellRender(current);
+    if (info.type === "month") return monthCellRender(current);
     return info.originNode;
   };
 
-  return <Calendar className='rounded-xl' cellRender={cellRender} />;
+  return <Calendar className="rounded-xl" cellRender={cellRender} />;
 };
 
 export default MyCalendarComponent;

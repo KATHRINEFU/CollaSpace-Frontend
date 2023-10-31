@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { useGetEmployeeTeamsQuery, useGetEventsQuery } from "../redux/api/apiSlice";
+import {
+  useGetEmployeeTeamsQuery,
+  useGetEventsQuery,
+} from "../redux/api/apiSlice";
 import { IEvent } from "../types";
 
 export const useEventCount = () => {

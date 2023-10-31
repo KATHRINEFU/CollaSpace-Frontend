@@ -1,4 +1,4 @@
-import { List , Rate} from "antd";
+import { List, Rate } from "antd";
 import { ITicket } from "../../types";
 
 interface FilterOptions {
@@ -48,7 +48,7 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
     if (4 === ticket.ticketCreator && filterOptions.role.includes("creator")) {
       return statusFilterMatch && priorityFilterMatch;
     }
-     // replace 4 with cur user id
+    // replace 4 with cur user id
     const hasSelectedRole =
       filterOptions.role.length === 0 || // No role selected (matches all roles)
       ticket.assigns.some((assign) => {
@@ -62,7 +62,13 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
     return statusFilterMatch && priorityFilterMatch && hasSelectedRole;
   });
 
-  const priorityTexts = ['casual', 'not in hurry', 'don\'t delay', 'do it', 'super important'];
+  const priorityTexts = [
+    "casual",
+    "not in hurry",
+    "don't delay",
+    "do it",
+    "super important",
+  ];
 
   return (
     <>
@@ -86,40 +92,42 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
         <div className="w-20 h-10 rounded text-center text-sm bg-lime-100">
           RESOLVED
         </div>
-
       </div>
 
-    <List
-      itemLayout="horizontal"
-      dataSource={filteredTickets}
-      renderItem={(item) => (
-        <List.Item
-          className={`relative flex flex-col h-full min-w-0 my-3 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border ${getBackgroundColor(
-            item.ticketStatus,
-          )}`}
-        >
-          <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-            <div className="w-full flex justify-between">
-              <p className="text-lg font-bold">{item.ticketTitle}</p>
-              <div className="">
-                <span className="py-1.5 px-2.5 text-xs rounded-1.8 inline-block whitespace-nowrap bg-blue-100 text-center align-baseline font-bold uppercase leading-none text-blue-600">
-                  {item.ticketStatus}
-                </span>
+      <List
+        itemLayout="horizontal"
+        dataSource={filteredTickets}
+        renderItem={(item) => (
+          <List.Item
+            className={`relative flex flex-col h-full min-w-0 my-3 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border ${getBackgroundColor(
+              item.ticketStatus,
+            )}`}
+          >
+            <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+              <div className="w-full flex justify-between">
+                <p className="text-lg font-bold">{item.ticketTitle}</p>
+                <div className="">
+                  <span className="py-1.5 px-2.5 text-xs rounded-1.8 inline-block whitespace-nowrap bg-blue-100 text-center align-baseline font-bold uppercase leading-none text-blue-600">
+                    {item.ticketStatus}
+                  </span>
 
-                <span>
-                  <Rate tooltips={priorityTexts} value={item.priority} disabled/>
-                </span>
+                  <span>
+                    <Rate
+                      tooltips={priorityTexts}
+                      value={item.priority}
+                      disabled
+                    />
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className=" p-6 pt-0 text-left">
-            <p className="mb-0 text-sm">{item.ticketDescription}</p>
-          </div>
-        </List.Item>
-      )}
-    ></List>
+            <div className=" p-6 pt-0 text-left">
+              <p className="mb-0 text-sm">{item.ticketDescription}</p>
+            </div>
+          </List.Item>
+        )}
+      ></List>
     </>
-    
   );
 };
 

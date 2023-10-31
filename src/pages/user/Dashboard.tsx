@@ -1,6 +1,6 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { Button, Card, Layout, Modal, Select, Spin, Popover } from "antd";
 import AnnouncementCarousel from "../../components/user/AnnouncementCarousel";
 import {
@@ -14,43 +14,55 @@ import {
 import TodoList from "../../components/user/TodoList";
 import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
-import { useGetEmployeeTeamsQuery, useGetTicketsQuery } from "../../redux/api/apiSlice";
+import {
+  useGetEmployeeTeamsQuery,
+  useGetTicketsQuery,
+} from "../../redux/api/apiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
-import { IAnnouncement, IEvent, ITicket, ITicketAssign, ITicketLog } from "../../types";
+import {
+  IAnnouncement,
+  IEvent,
+  ITicket,
+  ITicketAssign,
+  ITicketLog,
+} from "../../types";
 import { useNavigate } from "react-router-dom";
 
 export function Component() {
   const { Content } = Layout;
   const { Option } = Select;
   const navigate = useNavigate();
-  const [isEventFilterModalVisible, setIsEventFilterModalVisible] =useState(false);
+  const [isEventFilterModalVisible, setIsEventFilterModalVisible] =
+    useState(false);
   const [eventFilterOptions, setEventFilterOptions] = useState({
     type: [],
     team: [],
   });
 
-  const [isTicketFilterModalVisible, setIsTicketFilterModalVisible] =useState(false);
+  const [isTicketFilterModalVisible, setIsTicketFilterModalVisible] =
+    useState(false);
   const [ticketFilterOptions, setTicketFilterOptions] = useState({
     status: [],
     priority: [],
-    role: []
+    role: [],
   });
-
 
   const [uniqueTeamIds, setUniqueTeamIds] = useState<number[]>([]);
   const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([]);
   const [uniqueTeamNames, setUniqueTeamNames] = useState<string[]>([]);
-  const [ticketAssignedCount, setTicketAssignedCount] = useState(0)
-  const [ticketCreatedCount, setTicketCreatedCount] = useState(0)
+  const [ticketAssignedCount, setTicketAssignedCount] = useState(0);
+  const [ticketCreatedCount, setTicketCreatedCount] = useState(0);
   const [ticketList, setTicketList] = useState<ITicket[]>([]);
 
-  const { data: teams, isLoading: isTeamsLoading} = useGetEmployeeTeamsQuery(4);
-  const {data: tickets, isLoading: isTicketsLoading}  = useGetTicketsQuery(4);
+  const { data: teams, isLoading: isTeamsLoading } =
+    useGetEmployeeTeamsQuery(4);
+  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsQuery(4);
 
-  
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
-  const [sortedAnnouncementList, setSortedAnnouncementList] = useState<IAnnouncement[]>([]);
-  
+  const [sortedAnnouncementList, setSortedAnnouncementList] = useState<
+    IAnnouncement[]
+  >([]);
+
   const [uniqueEventIds, setUniqueEventIds] = useState(new Set());
 
   useEffect(() => {
@@ -74,39 +86,43 @@ export function Component() {
         } = ticketData;
 
         // Map assigns data into ITicketAssign objects
-        const mappedAssigns: ITicketAssign[] = assigns.map((assignData: any) => {
-          const {
-            ticketAssignId,
-            employeeId,
-            teamId,
-            role,
-            ticketAssigndate,
-          } = assignData;
+        const mappedAssigns: ITicketAssign[] = assigns.map(
+          (assignData: any) => {
+            const {
+              ticketAssignId,
+              employeeId,
+              teamId,
+              role,
+              ticketAssigndate,
+            } = assignData;
 
-          return {
-            ticketAssignId,
-            employeeId,
-            teamId,
-            role,
-            ticketAssigndate: new Date(ticketAssigndate),
-          };
-        });
+            return {
+              ticketAssignId,
+              employeeId,
+              teamId,
+              role,
+              ticketAssigndate: new Date(ticketAssigndate),
+            };
+          },
+        );
 
-        const mappedTicketLogs: ITicketLog[] = ticketLogs.map((logData: any) => {
-          const {
-            ticketLogId,
-            ticketLogCreator,
-            ticketLogCreationdate,
-            ticketLogContent,
-          } = logData;
+        const mappedTicketLogs: ITicketLog[] = ticketLogs.map(
+          (logData: any) => {
+            const {
+              ticketLogId,
+              ticketLogCreator,
+              ticketLogCreationdate,
+              ticketLogContent,
+            } = logData;
 
-          return {
-            ticketLogId,
-            ticketLogCreator,
-            ticketLogCreationdate: new Date(ticketLogCreationdate),
-            ticketLogContent,
-          };
-        });
+            return {
+              ticketLogId,
+              ticketLogCreator,
+              ticketLogCreationdate: new Date(ticketLogCreationdate),
+              ticketLogContent,
+            };
+          },
+        );
 
         return {
           ticketId,
@@ -127,28 +143,27 @@ export function Component() {
       });
 
       setTicketList(mappedTickets);
-
     }
-  }, [isTicketsLoading, tickets])
+  }, [isTicketsLoading, tickets]);
 
   useEffect(() => {
-    const createCount = ticketList.filter((ticket) => ticket.ticketCreator === 4).length; // change to cur user's id
-    setTicketCreatedCount(createCount)
+    const createCount = ticketList.filter(
+      (ticket) => ticket.ticketCreator === 4,
+    ).length; // change to cur user's id
+    setTicketCreatedCount(createCount);
 
     const assignCount = ticketList.reduce((count, ticket) => {
       const isAssignedToEmployee = ticket.assigns.some(
-        (assign) => assign.employeeId === 4 // replace to cur user's id
+        (assign) => assign.employeeId === 4, // replace to cur user's id
       );
-    
+
       return count + (isAssignedToEmployee ? 1 : 0);
     }, 0);
     setTicketAssignedCount(assignCount);
+  }, [ticketList]);
 
-  }, [ticketList])
-  
   useEffect(() => {
     if (!isTeamsLoading && teams) {
-
       // extract account ids
       const accountIds = new Set<number>();
       const teamIds = new Set<number>();
@@ -167,29 +182,34 @@ export function Component() {
       // extract announcements
       teams?.forEach((team: any) => {
         team.announcements.forEach((announcement: any) => {
-          setAnnouncementList((prevList)=>[...prevList, {
-            id: announcement.announcementId,
-            teamId: team.teamId,
-            teamName: team.teamName,
-            creatorId: announcement.announcementCreator,
-            creatorName: announcement.announcementCreatorName,
-            creationDate: announcement.announcementCreationdate,
-            content: announcement.announcementContent,
-          }])
+          setAnnouncementList((prevList) => [
+            ...prevList,
+            {
+              id: announcement.announcementId,
+              teamId: team.teamId,
+              teamName: team.teamName,
+              creatorId: announcement.announcementCreator,
+              creatorName: announcement.announcementCreatorName,
+              creationDate: announcement.announcementCreationdate,
+              content: announcement.announcementContent,
+            },
+          ]);
         });
       });
     }
   }, [isTeamsLoading, teams]);
 
   useEffect(() => {
-    const baseUrl = 'http://localhost:8080';
+    const baseUrl = "http://localhost:8080";
     const fetchEventIds = async () => {
       try {
         // Fetch event data for each team
         const eventPromises = teams.map(async (team: any) => {
-          const eventResponse = await fetch(`${baseUrl}/event/byteam/${team.teamId}`);
+          const eventResponse = await fetch(
+            `${baseUrl}/event/byteam/${team.teamId}`,
+          );
           if (!eventResponse.ok) {
-            throw new Error('Error fetching events in Dashboard');
+            throw new Error("Error fetching events in Dashboard");
           }
           const eventData = await eventResponse.json();
 
@@ -205,20 +225,21 @@ export function Component() {
         // Update the state with the unique event IDs
         setUniqueEventIds(new Set(uniqueEventIds));
       } catch (error) {
-        console.error('Error fetching events in Dashboard:', error);
+        console.error("Error fetching events in Dashboard:", error);
       }
     };
 
     fetchEventIds();
   }, [teams, uniqueEventIds]);
 
-
   useEffect(() => {
     if (announcementList.length > 0) {
       // console.log(announcementList)
-      setSortedAnnouncementList(announcementList.sort(function(a, b) {
-        return a.creationDate.valueOf() - b.creationDate.valueOf();
-    }));
+      setSortedAnnouncementList(
+        announcementList.sort(function (a, b) {
+          return a.creationDate.valueOf() - b.creationDate.valueOf();
+        }),
+      );
     }
   }, [announcementList]);
 
@@ -245,11 +266,11 @@ export function Component() {
 
   const handleViewMoreEventsClicked = () => {
     navigate("/user/events");
-  }
+  };
 
   const handleViewMoreTicketsClicked = () => {
     navigate("/user/tickets");
-  }
+  };
 
   const showTicketFilterModal = () => {
     setIsTicketFilterModalVisible(true);
@@ -357,7 +378,6 @@ export function Component() {
           </div>
         </Modal>
 
-
         <Modal
           title="Ticket Filter"
           open={isTicketFilterModalVisible}
@@ -372,7 +392,10 @@ export function Component() {
               placeholder="Select ticket statys"
               value={ticketFilterOptions.status}
               onChange={(value) =>
-                setTicketFilterOptions({ ...ticketFilterOptions, status: value })
+                setTicketFilterOptions({
+                  ...ticketFilterOptions,
+                  status: value,
+                })
               }
             >
               <Option value="new">New</Option>
@@ -391,7 +414,10 @@ export function Component() {
               placeholder="Select ticket Priority"
               value={ticketFilterOptions.priority}
               onChange={(value) =>
-                setTicketFilterOptions({ ...ticketFilterOptions, priority: value })
+                setTicketFilterOptions({
+                  ...ticketFilterOptions,
+                  priority: value,
+                })
               }
             >
               <Option value="1">1</Option>
@@ -445,11 +471,15 @@ export function Component() {
                     </div>
                     <div className="px-3 text-right basis-1/3">
                       <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        {isTeamsLoading ? 
-                        (<div className="spinner-container">
-                          <Spin size="large" />
-                        </div>)
-                        : <p className="text-xl text-white">{uniqueAccountIds.length}</p>}
+                        {isTeamsLoading ? (
+                          <div className="spinner-container">
+                            <Spin size="large" />
+                          </div>
+                        ) : (
+                          <p className="text-xl text-white">
+                            {uniqueAccountIds.length}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -469,15 +499,17 @@ export function Component() {
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
-                    {(isTeamsLoading)? 
-                      (<div className="spinner-container">
-                        <Spin size="large" />
-                      </div>)
-                      :
-                      <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">{uniqueEventIds.size}</p>
-                      </div>
-                    }
+                      {isTeamsLoading ? (
+                        <div className="spinner-container">
+                          <Spin size="large" />
+                        </div>
+                      ) : (
+                        <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
+                          <p className="text-xl text-white">
+                            {uniqueEventIds.size}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -497,7 +529,9 @@ export function Component() {
                     </div>
                     <div className="px-3 text-right basis-1/3">
                       <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">{ticketAssignedCount}</p>
+                        <p className="text-xl text-white">
+                          {ticketAssignedCount}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -518,7 +552,9 @@ export function Component() {
                     </div>
                     <div className="px-3 text-right basis-1/3">
                       <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">{ticketCreatedCount}</p>
+                        <p className="text-xl text-white">
+                          {ticketCreatedCount}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -547,13 +583,14 @@ export function Component() {
                       <Popover content="Top 5 Most Recently Created Annoucements">
                         <h5 className="mb-0 text-lg">ANNOUNCEMENTS</h5>
                       </Popover>
-                      
                     </div>
                     <Button type="link">View More</Button>
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0">
-                  <AnnouncementCarousel announcementList={sortedAnnouncementList.slice(0, 5)} />
+                  <AnnouncementCarousel
+                    announcementList={sortedAnnouncementList.slice(0, 5)}
+                  />
                 </div>
               </Card>
             </div>
@@ -582,7 +619,7 @@ export function Component() {
                       <Popover content="Top 6 Most Recently Updated Events">
                         <h5 className="mb-0 text-lg">EVENT INVOLVED</h5>
                       </Popover>
-                      
+
                       <Button
                         type="link"
                         icon={<FilterOutlined />}
@@ -590,14 +627,18 @@ export function Component() {
                       />
                     </div>
 
-                    <Button type="link" className="text-right" onClick={handleViewMoreEventsClicked}>
+                    <Button
+                      type="link"
+                      className="text-right"
+                      onClick={handleViewMoreEventsClicked}
+                    >
                       View More
                     </Button>
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0">
                   <EventList
-                    teamIds = {uniqueTeamIds}
+                    teamIds={uniqueTeamIds}
                     filterOptions={eventFilterOptions}
                   />
                 </div>
@@ -618,20 +659,22 @@ export function Component() {
                         onClick={showTicketFilterModal}
                       />
                     </div>
-                    <Button type="link" onClick={handleViewMoreTicketsClicked}>View More</Button>
+                    <Button type="link" onClick={handleViewMoreTicketsClicked}>
+                      View More
+                    </Button>
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0">
-                  {(isTicketsLoading)? 
-                      (<div className="spinner-container">
-                        <Spin size="large" />
-                      </div>)
-                      :
-                      <TicketAssignedList
-                        tickets={ticketList}
-                        filterOptions={ticketFilterOptions}
-                      />
-                    }
+                  {isTicketsLoading ? (
+                    <div className="spinner-container">
+                      <Spin size="large" />
+                    </div>
+                  ) : (
+                    <TicketAssignedList
+                      tickets={ticketList}
+                      filterOptions={ticketFilterOptions}
+                    />
+                  )}
                 </div>
               </Card>
             </div>

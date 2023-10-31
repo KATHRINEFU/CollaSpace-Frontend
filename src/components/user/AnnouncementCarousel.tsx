@@ -27,7 +27,7 @@ const AnnouncementCarousel: React.FC<AnnouncementCarouselProps> = ({
             <p className="text-sm text-right">{announcement.creatorName}</p>
             <p className="text-sm text-right">{announcement.teamName}</p>
             <p className="text-sm text-right">
-              {moment(announcement.creationDate).format('LLL')}
+              {moment(announcement.creationDate).format("LLL")}
             </p>
           </Card>
         </div>

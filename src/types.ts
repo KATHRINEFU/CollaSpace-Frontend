@@ -22,19 +22,17 @@ export interface IAccount {
   biddingPersonnel: number;
   salesPersonnel: number;
   solutionArchitectPersonnel: number;
-  accountCreationdate: Date; 
+  accountCreationdate: Date;
   accountLastUpdatedate: Date;
   customerSuccessPersonnel: number;
 }
 
-export interface ICompany{
-
+export interface ICompany {
   companyId: number;
   companyName: string;
   companyWebsite: string;
   joindate: Date;
   companyLogoUrl: string;
-
 }
 export interface ISignIn {
   email: string;
@@ -162,10 +160,10 @@ export interface ITicketLog {
 }
 
 export interface ICalendarItem {
-  id: string
-  date: Date,
-  type: string,
-  content: string
+  id: string;
+  date: Date;
+  type: string;
+  content: string;
 }
 
 export type IconName = keyof typeof AntdIcons;

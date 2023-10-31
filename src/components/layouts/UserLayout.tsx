@@ -14,10 +14,12 @@ export default function UserLayout() {
   let { pathname } = useLocation();
   pathname = pathname.split("/")[2];
   const navigate = useNavigate();
-  const { data: teams, isLoading} = useGetEmployeeTeamsQuery(4);
+  const { data: teams, isLoading } = useGetEmployeeTeamsQuery(4);
 
   const teamNames: string[] = teams?.map((team: any) => team.teamName) || [];
-  const teamItems = teamNames.map((teamName, index) => getItem(teamName, `${index + 6}`));
+  const teamItems = teamNames.map((teamName, index) =>
+    getItem(teamName, `${index + 6}`),
+  );
 
   const { Header, Content, Footer, Sider } = Layout;
 
@@ -80,9 +82,8 @@ export default function UserLayout() {
       getItem("Calendar", "4"),
       getItem("Report", "5"),
     ]),
-    getItem('My Teams', 'sub2', <TeamOutlined />, teamItems),
+    getItem("My Teams", "sub2", <TeamOutlined />, teamItems),
   ];
-  
 
   return (
     <>
@@ -114,7 +115,11 @@ export default function UserLayout() {
                 <img src={LogoIcon} alt="Logo Icon" style={{ width: "60px" }} />
                 <span className="text-white text-xl">CollaSpace</span>
               </div>
-              <Menu mode="inline" defaultSelectedKeys={["1"]} items={sideBarMenuItem}>
+              <Menu
+                mode="inline"
+                defaultSelectedKeys={["1"]}
+                items={sideBarMenuItem}
+              >
                 {isLoading ? (
                   <div className="spinner-container">
                     <Spin size="large" />
@@ -184,10 +189,11 @@ export default function UserLayout() {
                 >
                   Create Team
                 </Button>
-                <Button 
-                  type="primary" 
+                <Button
+                  type="primary"
                   onClick={handleMyCalendarBtnClicked}
-                  style={{ width: "140px" }}>
+                  style={{ width: "140px" }}
+                >
                   My Calendar
                 </Button>
                 <Button type="primary" style={{ width: "140px" }}>
