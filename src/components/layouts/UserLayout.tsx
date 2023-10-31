@@ -33,6 +33,10 @@ export default function UserLayout() {
     navigate("/user/create-team");
   };
 
+  const handleMyCalendarBtnClicked = () => {
+    navigate("/user/calendar");
+  };
+
   type MenuItem = Required<MenuProps>["items"][number];
   function getItem(
     label: React.ReactNode,
@@ -50,6 +54,9 @@ export default function UserLayout() {
           break;
         case "3":
           navigate("/user/tickets");
+          break;
+        case "3":
+          navigate("/user/calendar");
           break;
         default:
           break;
@@ -177,7 +184,10 @@ export default function UserLayout() {
                 >
                   Create Team
                 </Button>
-                <Button type="primary" style={{ width: "140px" }}>
+                <Button 
+                  type="primary" 
+                  onClick={handleMyCalendarBtnClicked}
+                  style={{ width: "140px" }}>
                   My Calendar
                 </Button>
                 <Button type="primary" style={{ width: "140px" }}>

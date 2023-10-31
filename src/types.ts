@@ -161,6 +161,13 @@ export interface ITicketLog {
   ticketLogContent: string;
 }
 
+export interface ICalendarItem {
+  id: string
+  date: Date,
+  type: string,
+  content: string
+}
+
 export type IconName = keyof typeof AntdIcons;
 export interface INav {
   name: string;

@@ -6,6 +6,7 @@ import { useGetAllTeamsQuery, useGetEmployeeTeamsQuery } from "../../redux/api/a
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import TeamSearchAutocomplete from "../../components/user/TeamSearchAutocomplete";
+import { mapEventDataToEvent, getEventTypeColor } from "../../utils/functions";
 
 export function Component() {
   // const maxRows = 10;
@@ -36,98 +37,6 @@ export function Component() {
     setSelectedEvent(record);
     setIsModalVisible(true);
   };
-
-  const getTypeColor = (eventType: string) => {
-    switch (eventType) {
-      case "document":
-        return "#5cdbd3";
-      case "meeting":
-        return "#ffd666";
-      case "activity":
-        return "#b37feb";
-      default:
-        return "";
-    }
-  }
-
-  function mapToDocumentEvent(data: any) {
-    return {
-      eventId: data.eventId,
-      eventCreationdate: new Date(data.eventCreationdate),
-      team: data.team,
-      eventCreator: data.eventCreator,
-      eventType: data.eventType,
-      eventTitle: data.eventTitle,
-      eventDescription: data.eventDescription,
-      eventExpired: data.eventExpired,
-      eventLastUpdatedate: data.eventLastUpdatedate
-        ? new Date(data.eventLastUpdatedate)
-        : undefined,
-      collaborations: data.collaborations,
-      link: data.documentLink || null,
-      deadlineDate: data.deadline ? new Date(data.deadline) : undefined,
-    };
-  }
-
-  function mapToMeetingEvent(data: any) {
-    return {
-      eventId: data.eventId,
-      eventCreationdate: new Date(data.eventCreationdate),
-      team: data.team,
-      eventCreator: data.eventCreator,
-      eventType: data.eventType,
-      eventTitle: data.eventTitle,
-      eventDescription: data.eventDescription,
-      eventExpired: data.eventExpired,
-      eventLastUpdatedate: data.eventLastUpdatedate
-        ? new Date(data.eventLastUpdatedate)
-        : undefined,
-      collaborations: data.collaborations,
-      virtual: data.meetingVirtual,
-      location: data.meetingLocation,
-      link: data.meetingLink,
-      startTime: data.meetingStarttime ? new Date(data.meetingStarttime): undefined,
-      endTime: data.meetingEndtime ? new Date(data.meetingEndtime): undefined,
-      noteLink: data.meetingNoteLink,
-      agendaLink: data.meetingAgendaLink,
-      meetingType: data.meetingType,
-    };
-  }
-
-  function mapToActivityEvent(data: any) {
-    return {
-      eventId: data.eventId,
-      eventCreationdate: new Date(data.eventCreationdate),
-      team: data.team,
-      eventCreator: data.eventCreator,
-      eventType: data.eventType,
-      eventTitle: data.eventTitle,
-      eventDescription: data.eventDescription,
-      eventExpired: data.eventExpired,
-      eventLastUpdatedate: data.eventLastUpdatedate
-        ? new Date(data.eventLastUpdatedate)
-        : undefined,
-      collaborations: data.collaborations,
-      virtual: data.activityVirtual,
-      location: data.activityLocation,
-      startTime: data.activityStarttime ? new Date(data.activityStarttime): undefined,
-      endTime: data.activityEndtime ? new Date(data.activityEndtime): undefined,
-    };
-  }
-  
-
-  function mapEventDataToEvent(eventData: any) {
-    switch (eventData.eventType) {
-      case 'document':
-        return mapToDocumentEvent(eventData);
-      case 'meeting':
-        return mapToMeetingEvent(eventData);
-      case 'activity':
-        return mapToActivityEvent(eventData);
-      default:
-        return null; 
-    }
-  }
 
   useEffect(()=> {
     if(!isAllTeamsLoading && allTeams){
@@ -185,24 +94,6 @@ export function Component() {
     })));
   }, [eventList])
 
-  // while (eventsWithEmptyRows.length < maxRows) {
-  //   // Add empty events until the list has at least 10 rows
-  //   eventsWithEmptyRows.push({
-  //     eventId: 0,
-  //     eventCreationdate: undefined,
-  //     team: null,
-  //     eventCreator: 0,
-  //     eventType: "",
-  //     eventTitle: "",
-  //     eventDescription: "",
-  //     eventExpired: false,
-  //     eventLastUpdatedate: undefined,
-  //     collaborations: [],
-  //     link: undefined,
-  //     deadlineDate: undefined,
-  //   });
-  // }  
-
   const columns: ColumnsType<IDocumentEvent | IMeetingEvent | IActivityEvent> =
     [
       {
@@ -238,7 +129,7 @@ export function Component() {
         ],
         onFilter: (value, record) => record.eventType.indexOf(value as string) === 0,
         render: (eventType) => (
-          <Tag color={getTypeColor(eventType)} key={eventType}>
+          <Tag color={getEventTypeColor(eventType)} key={eventType}>
             {eventType.toUpperCase()}
           </Tag>
         ),
@@ -335,106 +226,6 @@ export function Component() {
         render: (record) =>
           record.eventId ? <a onClick={() => showEventModal(record)}>View</a> : null,
       },
-      // Additional columns specific to each event type
-      // {
-      //   title: 'Link',
-      //   dataIndex: 'link',
-      //   key: 'link',
-      //   render: (link, record) => {
-      //     if (record.type === 'document') {
-      //       return link;
-      //     }
-      //     return null;
-      //   },
-      // },
-      // {
-      //     title: 'Deadline',
-      //     dataIndex: 'deadline',
-      //     key: 'deadline',
-      //     render: (deadlineDate, record) => {
-      //         if (record.type === 'document') {
-      //           return deadlineDate?.toLocaleString();
-      //         }
-      //         return null;
-      //       },
-      //   },
-      // {
-      //   title: 'Virtual',
-      //   dataIndex: 'virtual',
-      //   key: 'virtual',
-      //   render: (virtual, record) => {
-      //     if (record.type === 'meeting' || record.type === 'activity') {
-      //       return virtual.toString();
-      //     }
-      //     return null;
-      //   },
-      // },
-      // {
-      //   title: 'Location',
-      //   dataIndex: 'location',
-      //   key: 'location',
-      //   render: (location, record) => {
-      //     if (record.type === 'meeting' || record.type === 'activity') {
-      //       return location;
-      //     }
-      //     return null;
-      //   },
-      // },
-      // {
-      //   title: 'Start Time',
-      //   dataIndex: 'startTime',
-      //   key: 'startTime',
-      //   render: (startTime, record) => {
-      //     if (record.type === 'meeting' || record.type === 'activity') {
-      //       return startTime?.toLocaleString();
-      //     }
-      //     return null;
-      //   },
-      // },
-      // {
-      //   title: 'End Time',
-      //   dataIndex: 'endTime',
-      //   key: 'endTime',
-      //   render: (endTime, record) => {
-      //     if (record.type === 'meeting' || record.type === 'activity') {
-      //       return endTime?.toLocaleString();
-      //     }
-      //     return null;
-      //   },
-      // },
-      // {
-      //     title: 'Note Link',
-      //     dataIndex: 'noteLink',
-      //     key: 'noteLink',
-      //     render: (noteLink, record) => {
-      //       if (record.type === 'meeting') {
-      //         return noteLink;
-      //       }
-      //       return null;
-      //     },
-      // },
-      // {
-      //     title: 'Agenda Link',
-      //     dataIndex: 'agendaLink',
-      //     key: 'agendaLink',
-      //     render: (agendaLink, record) => {
-      //       if (record.type === 'meeting') {
-      //         return agendaLink;
-      //       }
-      //       return null;
-      //     },
-      // },
-      // {
-      //     title: 'Meeting Type',
-      //     dataIndex: 'meetingType',
-      //     key: 'meetingType',
-      //     render: (meetingType, record) => {
-      //       if (record.type === 'meeting') {
-      //         return meetingType;
-      //       }
-      //       return null;
-      //     },
-      // },
     ];
 
   return (
@@ -460,7 +251,7 @@ export function Component() {
         >
           <div className="w-full h-2 mb-3 rounded text-center text-sm"
           style={{
-            backgroundColor: selectedEvent? getTypeColor(selectedEvent.eventType): "white",
+            backgroundColor: selectedEvent? getEventTypeColor(selectedEvent.eventType): "white",
           }}
           />
           <Form form={eventForm}>

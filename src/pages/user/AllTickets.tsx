@@ -9,6 +9,7 @@ import type { FilterConfirmProps } from 'antd/es/table/interface';
 import type { InputRef } from 'antd';
 import Highlighter from 'react-highlight-words';
 import MessageList from "../../components/user/MessageList";
+import { mapDataToTickets } from "../../utils/functions";
 
 const teamNames = [
   "Support Team",
@@ -88,26 +89,6 @@ export function Component() {
     assignToName: string | undefined,
 
   }>();
-  
-  function mapDataToTickets(data: any){
-    return {
-      ticketId: data.ticketId,
-      ticketCreator: data.ticketCreator,
-      ticketCreatorName: data.ticketCreatorName,
-      ticketCreationdate: data.ticketCreationdate,
-      ticketLastUpdatedate: data.ticketLastUpdatedate,
-      ticketTitle: data.ticketTitle,
-      ticketDescription: data.ticketDescription,
-      ticketStatus: data.ticketStatus,
-      priority: data.ticketPriority,
-      fromTeamId: data.ticketFromTeam,
-      fromTeamName: data.fromTeamName,
-      dueDate: data.ticketDuedate,
-      assigns: data.assigns,
-      ticketLogs: data.ticketLogs,
-      files: data.files,
-    }
-  }
 
   useEffect(()=> {
     if(selectedTicket){
