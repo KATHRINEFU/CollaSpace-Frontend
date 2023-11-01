@@ -46,20 +46,6 @@ export interface IUser {
   email: string;
   token?: string;
 }
-
-export interface IEmployee {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  location: string;
-  departmentId: number;
-  departmentName: string;
-  birthday: Date;
-  startDate: Date;
-  role: string;
-}
 export interface IAnnouncement {
   id: number;
   teamId: number;
@@ -164,6 +150,20 @@ export interface ICalendarItem {
   date: Date;
   type: string;
   content: string;
+}
+
+export interface IEmployee{
+  id: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  phone: string,
+  locationCountry: string,
+  locationCity: string,
+  departmentId: number,
+  departmentName: string,
+  startdate: Date,
+  role: string,
 }
 
 export type IconName = keyof typeof AntdIcons;

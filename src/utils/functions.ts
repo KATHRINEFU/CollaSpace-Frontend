@@ -102,6 +102,22 @@ export function mapDataToTickets(data: any) {
   };
 }
 
+export function mapDataToEmployee(data: any){
+  return {
+    id: data.employeeId,
+    firstName: data.employeeFirstname,
+    lastName: data.employeeLastname,
+    email: data.employeeEmail,
+    phone: data.employeePhone,
+    locationCountry: data.employeeLocationCountry,
+    locationCity: data.employeeLocationCity,
+    departmentId: data.departmentId,
+    departmentName: data.departmentName,
+    startdate: data.employeeStartdate,
+    role: data.employeeRole,
+  }
+}
+
 export function mapEventToCalendarItem(data: any) {
   let date;
   if (data.eventType === "document") {
