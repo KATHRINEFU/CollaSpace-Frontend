@@ -27,6 +27,9 @@ export const apiSlice = createApi({
     getAllTeams: builder.query({
       query: () => `/team/`,
     }),
+    getEmployeeDetail: builder.query({
+      query: (employeeId) => `/employee/${employeeId}`,
+    }),
   }),
 });
 
@@ -37,4 +40,5 @@ export const {
   useGetEventsQuery,
   useGetTicketsQuery,
   useGetAllTeamsQuery,
+  useGetEmployeeDetailQuery,
 } = apiSlice;

@@ -1,12 +1,11 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Layout, Menu, Button, Badge, Image, ConfigProvider, Spin } from "antd";
-import { HomeOutlined, TeamOutlined, BellOutlined } from "@ant-design/icons";
+import { Layout, Menu, Button, Badge, ConfigProvider, Spin, Avatar } from "antd";
+import { HomeOutlined, TeamOutlined, BellOutlined, LogoutOutlined } from "@ant-design/icons";
 import ErrorBoundary from "../ErrorBoundary";
 import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
-import ProfileAvatar from "/profile-avatar.png";
 import type { MenuProps } from "antd";
 import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
 
@@ -39,6 +38,10 @@ export default function UserLayout() {
     navigate("/user/calendar");
   };
 
+  const handleProfileBtnClicked = () => {
+    navigate("/user/profile");
+  }
+
   type MenuItem = Required<MenuProps>["items"][number];
   function getItem(
     label: React.ReactNode,
@@ -57,7 +60,7 @@ export default function UserLayout() {
         case "3":
           navigate("/user/tickets");
           break;
-        case "3":
+        case "4":
           navigate("/user/calendar");
           break;
         default:
@@ -144,7 +147,16 @@ export default function UserLayout() {
                   {" "}
                   Good Morning! Yuehao
                 </h2>
-                <div className="w-50 flex items-center gap-3">
+                <div className="w-50 flex items-center gap-1">
+                  <div 
+                    className="flex items-center justify-center gap-2 mr-6 cursor-pointer"
+                    onClick={handleProfileBtnClicked}
+                    >
+                    <Avatar src={<img src={"https://cdn-icons-png.flaticon.com/512/188/188987.png"} alt="Profile" />} />
+                    <span className="text-black">Yuehao Fu</span>
+                  </div>
+                  
+
                   <Badge count={5}>
                     <Button
                       type="primary"
@@ -156,14 +168,15 @@ export default function UserLayout() {
                     />
                   </Badge>
 
-                  <div className="flex items-center justify-center gap-2 mr-6">
-                    <Image
-                      src={ProfileAvatar}
-                      alt="Profile Avatar"
-                      width={50}
+                  <Button
+                      type="primary"
+                      shape="circle"
+                      size="small"
+                      icon={<LogoutOutlined />}
+                      style={{ width: "42px" }}
+                      className="mr-3"
                     />
-                    <span className="text-black">Yuehao Fu</span>
-                  </div>
+
                 </div>
               </div>
 
