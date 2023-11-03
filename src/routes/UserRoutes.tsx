@@ -1,4 +1,5 @@
 import { RouteObject } from "react-router-dom";
+import TeamDashboard from "../pages/user/TeamDashboard";
 
 export const UserRoutes: RouteObject[] = [
   {
@@ -32,5 +33,9 @@ export const UserRoutes: RouteObject[] = [
   {
     path: "/user/profile",
     lazy: () => import("../pages/user/Profile"),
+  },
+  {
+    path: "/user/team/:teamId",
+    element: <TeamDashboard/>,
   },
 ];

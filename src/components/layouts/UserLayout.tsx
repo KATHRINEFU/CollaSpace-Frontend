@@ -15,9 +15,8 @@ export default function UserLayout() {
   const navigate = useNavigate();
   const { data: teams, isLoading } = useGetEmployeeTeamsQuery(4);
 
-  const teamNames: string[] = teams?.map((team: any) => team.teamName) || [];
-  const teamItems = teamNames.map((teamName, index) =>
-    getItem(teamName, `${index + 6}`),
+  const teamItems = teams?.map((team: any, index: number) =>
+    getItem(team.teamName, `${index + 6}`, undefined, undefined, team.teamId),
   );
 
   const { Header, Content, Footer, Sider } = Layout;
@@ -48,6 +47,7 @@ export default function UserLayout() {
     key: React.Key,
     icon?: React.ReactNode,
     children?: MenuItem[],
+    teamId?: number
   ): MenuItem {
     const onClick = () => {
       switch (key) {
@@ -65,6 +65,10 @@ export default function UserLayout() {
           break;
         default:
           break;
+      }
+      if (teamId) {
+        // If teamName is provided, navigate to the team-specific route
+        navigate(`/user/team/${teamId}`);
       }
     };
 
@@ -105,12 +109,6 @@ export default function UserLayout() {
               width={250}
               breakpoint="lg"
               collapsedWidth="0"
-              onBreakpoint={(broken) => {
-                console.log(broken);
-              }}
-              onCollapse={(collapsed, type) => {
-                console.log(collapsed, type);
-              }}
               style={{ background: "#243A73" }}
             >
               <div className="demo-logo-vertical" />
