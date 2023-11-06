@@ -1,8 +1,22 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Layout, Menu, Button, Badge, ConfigProvider, Spin, Avatar } from "antd";
-import { HomeOutlined, TeamOutlined, BellOutlined, LogoutOutlined, EllipsisOutlined } from "@ant-design/icons";
+import {
+  Layout,
+  Menu,
+  Button,
+  Badge,
+  ConfigProvider,
+  Spin,
+  Avatar,
+} from "antd";
+import {
+  HomeOutlined,
+  TeamOutlined,
+  BellOutlined,
+  LogoutOutlined,
+  EllipsisOutlined,
+} from "@ant-design/icons";
 import ErrorBoundary from "../ErrorBoundary";
 import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
@@ -22,14 +36,13 @@ export default function UserLayout() {
     getItem(team.teamName, `${index + 7}`, undefined, undefined, team.teamId),
   );
 
-  useEffect(()=> {
-    if(!isLoading && teams){
+  useEffect(() => {
+    if (!isLoading && teams) {
       setMyDepartment(
-        teams.filter((team:any)=> team.teamDepartmentId != null)[0]
-      )
+        teams.filter((team: any) => team.teamDepartmentId != null)[0],
+      );
     }
-  }, [teams, isLoading])
-  
+  }, [teams, isLoading]);
 
   const { Header, Content, Footer, Sider } = Layout;
 
@@ -51,7 +64,7 @@ export default function UserLayout() {
 
   const handleProfileBtnClicked = () => {
     navigate("/user/profile");
-  }
+  };
 
   type MenuItem = Required<MenuProps>["items"][number];
   function getItem(
@@ -59,7 +72,7 @@ export default function UserLayout() {
     key: React.Key,
     icon?: React.ReactNode,
     children?: MenuItem[],
-    teamId?: number
+    teamId?: number,
   ): MenuItem {
     const onClick = () => {
       switch (key) {
@@ -135,10 +148,10 @@ export default function UserLayout() {
               <Menu
                 mode="inline"
                 defaultSelectedKeys={["1"]}
-                defaultOpenKeys={['sub1']}
+                defaultOpenKeys={["sub1"]}
                 items={sideBarMenuItem}
-                overflowedIndicator = {<EllipsisOutlined />}
-                inlineCollapsed = {true}
+                overflowedIndicator={<EllipsisOutlined />}
+                inlineCollapsed={true}
               >
                 {isLoading ? (
                   <div className="spinner-container">
@@ -165,14 +178,22 @@ export default function UserLayout() {
                   Good Morning! Yuehao
                 </h2>
                 <div className="w-50 flex items-center gap-1">
-                  <div 
+                  <div
                     className="flex items-center justify-center gap-2 mr-6 cursor-pointer"
                     onClick={handleProfileBtnClicked}
-                    >
-                    <Avatar src={<img src={"https://cdn-icons-png.flaticon.com/512/188/188987.png"} alt="Profile" />} />
+                  >
+                    <Avatar
+                      src={
+                        <img
+                          src={
+                            "https://cdn-icons-png.flaticon.com/512/188/188987.png"
+                          }
+                          alt="Profile"
+                        />
+                      }
+                    />
                     <span className="text-black">Yuehao Fu</span>
                   </div>
-                  
 
                   <Badge count={5}>
                     <Button
@@ -186,14 +207,13 @@ export default function UserLayout() {
                   </Badge>
 
                   <Button
-                      type="primary"
-                      shape="circle"
-                      size="small"
-                      icon={<LogoutOutlined />}
-                      style={{ width: "42px" }}
-                      className="mr-3"
-                    />
-
+                    type="primary"
+                    shape="circle"
+                    size="small"
+                    icon={<LogoutOutlined />}
+                    style={{ width: "42px" }}
+                    className="mr-3"
+                  />
                 </div>
               </div>
 

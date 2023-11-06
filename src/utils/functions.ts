@@ -102,7 +102,7 @@ export function mapDataToTickets(data: any) {
   };
 }
 
-export function mapDataToEmployee(data: any){
+export function mapDataToEmployee(data: any) {
   return {
     id: data.employeeId,
     firstName: data.employeeFirstname,
@@ -115,7 +115,7 @@ export function mapDataToEmployee(data: any){
     departmentName: data.departmentName,
     startdate: data.employeeStartdate,
     role: data.employeeRole,
-  }
+  };
 }
 
 export function mapEventToCalendarItem(data: any) {

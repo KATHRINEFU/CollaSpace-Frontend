@@ -153,18 +153,18 @@ export interface ICalendarItem {
   content: string;
 }
 
-export interface IEmployee{
-  id: number,
-  firstName: string,
-  lastName: string,
-  email: string,
-  phone: string,
-  locationCountry: string,
-  locationCity: string,
-  departmentId: number,
-  departmentName: string,
-  startdate: Date,
-  role: string,
+export interface IEmployee {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  locationCountry: string;
+  locationCity: string;
+  departmentId: number;
+  departmentName: string;
+  startdate: Date;
+  role: string;
 }
 
 export type IconName = keyof typeof AntdIcons;

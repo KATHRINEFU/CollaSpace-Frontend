@@ -37,10 +37,10 @@ export const UserRoutes: RouteObject[] = [
   },
   {
     path: "/user/team/:teamId",
-    element: <TeamDashboard/>,
+    element: <TeamDashboard />,
   },
   {
     path: "/user/department/:departmentId",
-    element: <DepartmentDashboard/>,
+    element: <DepartmentDashboard />,
   },
 ];
