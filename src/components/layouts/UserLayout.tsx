@@ -2,22 +2,34 @@ import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Layout, Menu, Button, Badge, ConfigProvider, Spin, Avatar } from "antd";
-import { HomeOutlined, TeamOutlined, BellOutlined, LogoutOutlined } from "@ant-design/icons";
+import { HomeOutlined, TeamOutlined, BellOutlined, LogoutOutlined, EllipsisOutlined } from "@ant-design/icons";
 import ErrorBoundary from "../ErrorBoundary";
 import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
 import type { MenuProps } from "antd";
 import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
+import { useEffect, useState } from "react";
+import { ITeam } from "../../types";
 
 export default function UserLayout() {
   let { pathname } = useLocation();
   pathname = pathname.split("/")[2];
   const navigate = useNavigate();
   const { data: teams, isLoading } = useGetEmployeeTeamsQuery(4);
+  const [myDepartment, setMyDepartment] = useState<ITeam>();
 
   const teamItems = teams?.map((team: any, index: number) =>
     getItem(team.teamName, `${index + 6}`, undefined, undefined, team.teamId),
   );
+
+  useEffect(()=> {
+    if(!isLoading && teams){
+      setMyDepartment(
+        teams.filter((team:any)=> team.teamDepartmentId != null)[0]
+      )
+    }
+  }, [teams, isLoading])
+  
 
   const { Header, Content, Footer, Sider } = Layout;
 
@@ -63,6 +75,9 @@ export default function UserLayout() {
         case "4":
           navigate("/user/calendar");
           break;
+        case "6":
+          navigate(`/user/department/${myDepartment?.teamId}`);
+          break;
         default:
           break;
       }
@@ -83,7 +98,8 @@ export default function UserLayout() {
 
   const sideBarMenuItem: MenuItem[] = [
     getItem("My Space", "sub1", <HomeOutlined />, [
-      getItem("Dashboard", "1"),
+      getItem("My Dashboard", "1"),
+      getItem(myDepartment?.teamName.replace(" Department", ""), "6"),
       getItem("Events", "2"),
       getItem("Tickets", "3"),
       getItem("Calendar", "4"),
@@ -119,7 +135,10 @@ export default function UserLayout() {
               <Menu
                 mode="inline"
                 defaultSelectedKeys={["1"]}
+                defaultOpenKeys={['sub1']}
                 items={sideBarMenuItem}
+                overflowedIndicator = {<EllipsisOutlined />}
+                inlineCollapsed = {true}
               >
                 {isLoading ? (
                   <div className="spinner-container">

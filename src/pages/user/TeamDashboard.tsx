@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 function TeamDashboard() {
     const { teamId } = useParams();
     
-    // Now, you can use the teamName variable in your component.
+    
+    // Team Dashboard:
     
     return (
       <>

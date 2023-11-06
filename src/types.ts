@@ -25,6 +25,7 @@ export interface IAccount {
   accountCreationdate: Date;
   accountLastUpdatedate: Date;
   customerSuccessPersonnel: number;
+  accountCompany?: ICompany;
 }
 
 export interface ICompany {
