@@ -1,7 +1,7 @@
 import "../../muse.main.css";
 import "../../muse.responsive.css";
 import { useParams } from "react-router-dom";
-import { Layout, Card, Button, Spin, List, Image, 
+import { Layout, Card, Button, Spin, Modal, Select, TreeSelect
     // Skeleton, 
     // Divider 
 } from "antd";
@@ -13,23 +13,80 @@ import {
   } from "@ant-design/icons";
 // import InfiniteScroll from 'react-infinite-scroll-component';
 import axios from "../../api/axios";
+import ClientList from "../../components/user/ClientList";
+import { clientStatusByDepartment } from "../../utils/constants";
 
 function DepartmentDashboard() {
     const { departmentId } = useParams();
     // const [loading, setLoading] = useState(false);
     const {data: accounts, isLoading: isAccountsLoading} = useGetDepartmentAccountsQuery(departmentId);
     const [accountList, setAccountList] = useState<IAccount[]>([]);
+    // const [value, setValue] = useState([]);
     const { Content } = Layout;
-    const getBackgroundColor = (type: string) => {
-        switch(type){
-            case "standard":
-                return "bg-teal-100";
-            case "premium":
-                return "bg-pink-100";
-            default:
-                return "bg-white";
-        }
+    const {Option} = Select;
+    const { SHOW_PARENT } = TreeSelect;
+    const [isClientFilterModalVisible, setIsClientFilterModalVisible] =useState(false);
+    const [clientFilterOptions, setClientFilterOptions] = useState<{
+        type: string[];
+        status: string[];
+      }>({
+        type: [],
+        status: [],
+      });
+
+    const treeData = clientStatusByDepartment.map((departmentItem) => {
+        return {
+            title: departmentItem.department,
+            value: departmentItem.department,
+            key: departmentItem.department,
+            children: departmentItem.processes.map((process) => ({
+                title: process,
+                value: process,
+                key: process,
+            })),
+        };
+    });
+
+
+    const onChange = (newValue: string[]) => {
+        
+        setClientFilterOptions({ ...clientFilterOptions, status: newValue })
+        // setValue(newValue);
+    };
+
+    const tProps = {
+        treeData,
+        value: clientFilterOptions.status,
+        onChange,
+        treeCheckable: true,
+        showCheckedStrategy: SHOW_PARENT,
+        placeholder: 'Select current status',
+        style: {
+          width: '100%',
+        },
+    };
+    
+
+    const showClientFilterModal = () => {
+        setIsClientFilterModalVisible(true);
     }
+    const handleEventFilterModalOk = () => {
+        // Apply filtering logic here based on filterOptions
+        setIsClientFilterModalVisible(false);
+    };
+
+    const handleEventFilterModalCancel = () => {
+        setIsClientFilterModalVisible(false);
+    };
+
+    const handleClientResetFilter = () => {
+        setClientFilterOptions({
+          type: [],
+          status: [],
+        });
+    };
+
+
 
     // const loadMoreData = () => {
     //     if (loading) {
@@ -48,12 +105,7 @@ function DepartmentDashboard() {
     
     useEffect(() => {
         if(accounts && !isAccountsLoading){
-            setAccountList(accounts)
-        }
-    },[accounts, isAccountsLoading])
-
-    useEffect(() => {
-        if(accountList){
+            // setAccountList(accounts)
             const baseUrl = "http://localhost:8080";
             const fetchCompanyInfo = async (companyId: number) => {
                 try {
@@ -70,15 +122,15 @@ function DepartmentDashboard() {
                 // fetch its company info by calling baseurl/client/{compantId}
                 // set its company field with fetched company
                 const accountsWithAdditionalDAta = await Promise.all(
-                    accountList.map(async (account) => {
+                    accounts.map(async (account: any) => {
                         if (account.companyId) {
-                        const companyInfo = await fetchCompanyInfo(account.companyId);
-                        if (companyInfo) {
-                            return {
-                            ...account,
-                            accountCompany: companyInfo,
-                            };
-                        }
+                            const companyInfo = await fetchCompanyInfo(account.companyId);
+                            if (companyInfo) {
+                                return {
+                                ...account,
+                                accountCompany: companyInfo,
+                                };
+                            }
                         }
                         return account;
                     })
@@ -86,13 +138,59 @@ function DepartmentDashboard() {
                 setAccountList(accountsWithAdditionalDAta)
             }
             fetchAndSetAccount()
-
-            console.log(accountList);
         }
-    }, [accountList])
+    },[accounts, isAccountsLoading])
+
     return (
       <>
         <Content style={{ margin: "24px 16px 0" }}>
+            <Modal
+            title="Client Filter"
+            open={isClientFilterModalVisible}
+            onOk={handleEventFilterModalOk}
+            onCancel={handleEventFilterModalCancel}
+            >
+                <div className="mb-4">
+                    <label>Client Account Type:</label>
+                    <Select
+                        mode="multiple"
+                        className="w-full"
+                        placeholder="Select account type"
+                        value={clientFilterOptions.type}
+                        onChange={(value) =>
+                            setClientFilterOptions({ ...clientFilterOptions, type: value })
+                        }
+                    >
+                        <Option value="standard">Standard</Option>
+                        <Option value="premium">Premium</Option>
+                    </Select>
+                </div>
+                <div className="mb-4">
+                    <label>Client Account Status:</label>
+                    <TreeSelect {...tProps}/>
+                    {/* <Select
+                        mode="multiple"
+                        className="w-full"
+                        placeholder="Select account current status"
+                        value={clientFilterOptions.status}
+                        onChange={(value) =>
+                            setClientFilterOptions({ ...clientFilterOptions, status: value })
+                        }
+                    >
+                        <Option value="initial reachout">initial reachout</Option>
+                        <Option value="contract review">contract review</Option>
+                        <Option value="technical implementation">technical implementation</Option>
+                        <Option value="requirement review">requirement review</Option>
+                        
+                    </Select> */}
+                </div>
+
+                <div className="text-right">
+                    <Button type="link" onClick={handleClientResetFilter}>
+                        Reset
+                    </Button>
+                </div>
+            </Modal>
             <div
             className="rounded-lg"
             style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}
@@ -107,7 +205,7 @@ function DepartmentDashboard() {
                                         <Button
                                             type="link"
                                             icon={<FilterOutlined />}
-                                            // onClick={showTicketFilterModal}
+                                            onClick={showClientFilterModal}
                                         />
                                         </div>
                                 </div>
@@ -136,30 +234,10 @@ function DepartmentDashboard() {
                                 //     endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
                                 //     scrollableTarget="scrollableDiv"
                                 // >
-                                    <List
-                                    dataSource={accountList}
-                                    itemLayout="horizontal"
-                                    renderItem={(item: IAccount) => (
-                                        <List.Item
-                                        className={`relative flex flex-col my-3 h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border ${getBackgroundColor(
-                                            item.accountType,
-                                        )}`}
-                                        // actions={[<a key="list-loadmore-edit">edit</a>, <a key="list-loadmore-more">more</a>]}
-                                        >
-                                            <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-3 flex items-center justify-center gap-3">
-                                                <Image src={item.accountCompany?.companyLogoUrl}/>
-                                                <p className="text-xl font-bold">{item.accountCompany?.companyName}</p>
-                                                <div className="">
-                                                    <span className="py-1.5 px-2.5 text-xs w-40 rounded-1.8 inline-block bg-blue-100 text-center align-baseline font-bold uppercase leading-none text-blue-600">
-                                                    {item.accountCurrentStatus}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </List.Item>
-                                    )}
-                                />
+
+                                    
                                 // </InfiniteScroll>
-                                
+                                <ClientList accountList={accountList} filterOptions={clientFilterOptions}/>
                             )}
                             </div>
                         </Card>

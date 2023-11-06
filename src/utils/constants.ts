@@ -48,3 +48,22 @@ export const roleOptions: SelectProps["options"] = [
     value: "Intern",
   },
 ];
+
+export const clientStatusByDepartment = [
+  {
+    department: 'Bidding',
+    processes: ['Initial Reachout', 'Presale Demo', 'Intention Confirmed']
+  },
+  {
+    department: 'Sales',
+    processes: ['Requirement Analysis', 'Requirement Review', 'Solution Overview', 'Pricing', 'Contracting', 'Contract Review', 'Contract Confirmed']
+  },
+  {
+    department: 'Solution Architect',
+    processes: ['Technical Implementation Planning', 'Technical Implementation', 'Testing', 'Trouble Shooting', 'Technical Implementation Completed']
+  },
+  {
+    department: 'Customer Success',
+    processes: ['Training', 'Networking', 'Routine Maintenance', 'Contract Renew', 'Leaving']
+  },
+];

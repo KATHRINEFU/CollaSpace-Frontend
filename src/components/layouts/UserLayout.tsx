@@ -19,7 +19,7 @@ export default function UserLayout() {
   const [myDepartment, setMyDepartment] = useState<ITeam>();
 
   const teamItems = teams?.map((team: any, index: number) =>
-    getItem(team.teamName, `${index + 6}`, undefined, undefined, team.teamId),
+    getItem(team.teamName, `${index + 7}`, undefined, undefined, team.teamId),
   );
 
   useEffect(()=> {
