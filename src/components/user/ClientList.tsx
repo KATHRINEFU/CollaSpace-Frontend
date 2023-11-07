@@ -9,13 +9,14 @@ interface FilterOptions {
 interface ClientListProps {
   accountList: IAccount[];
   filterOptions: FilterOptions;
+  onOpenClientDetailModal: (item: IAccount) => void;
 }
 
 const ClientList: React.FC<ClientListProps> = ({
   accountList,
   filterOptions,
+  onOpenClientDetailModal
 }) => {
-  console.log(filterOptions);
 
   const getBackgroundColor = (type: string) => {
     switch (type) {
@@ -51,13 +52,14 @@ const ClientList: React.FC<ClientListProps> = ({
         itemLayout="horizontal"
         renderItem={(item: IAccount) => (
           <List.Item
-            className={`relative flex flex-col my-3 h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border ${getBackgroundColor(
+            className={`relative flex flex-col my-3 h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border cursor-pointer ${getBackgroundColor(
               item.accountType,
             )}`}
+            onClick={() => onOpenClientDetailModal(item)}
             // actions={[<a key="list-loadmore-edit">edit</a>, <a key="list-loadmore-more">more</a>]}
           >
             <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-3 flex items-center justify-center gap-3">
-              <Image src={item.accountCompany?.companyLogoUrl} />
+              <Image src={item.accountCompany?.companyLogoUrl} preview ={false} width={100}/>
               <p className="text-xl font-bold">
                 {item.accountCompany?.companyName}
               </p>

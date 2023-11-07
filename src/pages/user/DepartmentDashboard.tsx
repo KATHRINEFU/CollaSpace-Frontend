@@ -9,6 +9,7 @@ import {
   Modal,
   Select,
   TreeSelect,
+  Image,
   // Skeleton,
   // Divider
 } from "antd";
@@ -20,6 +21,7 @@ import { FilterOutlined } from "@ant-design/icons";
 import axios from "../../api/axios";
 import ClientList from "../../components/user/ClientList";
 import { clientStatusByDepartment } from "../../utils/constants";
+import ClientTimeline from "../../components/user/ClientTimeline";
 
 function DepartmentDashboard() {
   const { departmentId } = useParams();
@@ -31,6 +33,9 @@ function DepartmentDashboard() {
   const { Content } = Layout;
   const { Option } = Select;
   const { SHOW_PARENT } = TreeSelect;
+  const [selectedAccount, setSelectedAccount] = useState<IAccount | null>(null);
+  const [isClientDetailModalVisible, setIsClientDetailModalVisible] =
+    useState(false);
   const [isClientFilterModalVisible, setIsClientFilterModalVisible] =
     useState(false);
   const [clientFilterOptions, setClientFilterOptions] = useState<{
@@ -71,15 +76,23 @@ function DepartmentDashboard() {
     },
   };
 
-  const showClientFilterModal = () => {
-    setIsClientFilterModalVisible(true);
-  };
-  const handleEventFilterModalOk = () => {
-    // Apply filtering logic here based on filterOptions
+  const handleClientDetailModalOk = () => {
     setIsClientFilterModalVisible(false);
   };
 
-  const handleEventFilterModalCancel = () => {
+  const handleOpenClientDetailModal = (account: IAccount) => {
+    setSelectedAccount(account);
+    setIsClientDetailModalVisible(true);
+  };
+
+  const showClientFilterModal = () => {
+    setIsClientFilterModalVisible(true);
+  };
+  const handleClientFilterModalOk = () => {
+    setIsClientFilterModalVisible(false);
+  };
+
+  const handleClientFilterModalCancel = () => {
     setIsClientFilterModalVisible(false);
   };
 
@@ -149,8 +162,8 @@ function DepartmentDashboard() {
         <Modal
           title="Client Filter"
           open={isClientFilterModalVisible}
-          onOk={handleEventFilterModalOk}
-          onCancel={handleEventFilterModalCancel}
+          onOk={handleClientFilterModalOk}
+          onCancel={handleClientFilterModalCancel}
         >
           <div className="mb-4">
             <label>Client Account Type:</label>
@@ -192,6 +205,31 @@ function DepartmentDashboard() {
               Reset
             </Button>
           </div>
+        </Modal>
+
+        <Modal
+          title="Client Detail"
+          open={isClientDetailModalVisible}
+          onOk={handleClientDetailModalOk}
+          onCancel={() => setIsClientDetailModalVisible(false)}
+          footer={[
+            <Button key="back" onClick={() => setIsClientDetailModalVisible(false)}>
+              Close
+            </Button>,
+          ]}
+        >
+            {selectedAccount && (
+                <>
+                    <div className="flex gap-3 items-center justify-center">
+                        <Image src={selectedAccount.accountCompany?.companyLogoUrl} preview={false} width={100}/>
+                        <p className="text-base font-bold">{selectedAccount.accountCompany?.companyName}</p>
+                    </div>
+                    
+                    <ClientTimeline currentDepartmentId={Number(departmentId)} currentStatus= {selectedAccount.accountCurrentStatus}/>
+                {/* Add more details as needed */}
+                </>
+            )}
+
         </Modal>
         <div
           className="rounded-lg"
@@ -241,6 +279,7 @@ function DepartmentDashboard() {
                     <ClientList
                       accountList={accountList}
                       filterOptions={clientFilterOptions}
+                      onOpenClientDetailModal={handleOpenClientDetailModal}
                     />
                   )}
                 </div>
