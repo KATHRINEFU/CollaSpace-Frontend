@@ -10,6 +10,10 @@ import {
   Select,
   TreeSelect,
   Image,
+  Row,
+  Col,
+  List,
+  Divider
   // Skeleton,
   // Divider
 } from "antd";
@@ -22,6 +26,9 @@ import axios from "../../api/axios";
 import ClientList from "../../components/user/ClientList";
 import { clientStatusByDepartment } from "../../utils/constants";
 import ClientTimeline from "../../components/user/ClientTimeline";
+import { getFormattedDate } from "../../utils/functions";
+import { mapDataToEmployee } from "../../utils/functions";
+import UploadFile from "../../components/user/UploadFile";
 
 function DepartmentDashboard() {
   const { departmentId } = useParams();
@@ -45,6 +52,17 @@ function DepartmentDashboard() {
     type: [],
     status: [],
   });
+
+  const [documents, setDocuments] = useState([
+    'www.googledoc.com/clientfile/1',
+    'ClientFile-Version1.doc',
+    'ClientFile-Version2.doc',
+    'ClientFile-Version3.doc',
+    'ClientFile-Version4.doc',
+    'ClientFile-Final.pdf'
+  ]);
+
+
 
   const treeData = clientStatusByDepartment.map((departmentItem) => {
     return {
@@ -74,6 +92,11 @@ function DepartmentDashboard() {
     style: {
       width: "100%",
     },
+  };
+
+  const handleUploadSuccess = (fileName: string) => {
+    // Add the uploaded file name to the documents list
+    setDocuments([fileName, ...documents]);
   };
 
   const handleClientDetailModalOk = () => {
@@ -132,25 +155,62 @@ function DepartmentDashboard() {
         }
       };
 
+
+      const fetchPersonnelInfo = async (personnelId: number) => {
+        try {
+            const response = await axios.get(`${baseUrl}/employee/${personnelId}`);
+            return response.data;
+          } catch (error) {
+            console.error("Error fetching personnel info: ", error);
+            return null;
+          }
+      }
       const fetchAndSetAccount = async () => {
         // for each account, we have all fields except ICompany
         // fetch its company info by calling baseurl/client/{compantId}
         // set its company field with fetched company
-        const accountsWithAdditionalDAta = await Promise.all(
+        const accountsWithAdditionalData = await Promise.all(
           accounts.map(async (account: any) => {
+            let updatedAccount = { ...account };
+
             if (account.companyId) {
               const companyInfo = await fetchCompanyInfo(account.companyId);
               if (companyInfo) {
-                return {
-                  ...account,
-                  accountCompany: companyInfo,
-                };
+                updatedAccount.accountCompany = companyInfo;
               }
             }
-            return account;
+
+            if(account.biddingPersonnel){
+                const personnelInfo = await fetchPersonnelInfo(account.biddingPersonnel)
+                if(personnelInfo){
+                    updatedAccount.biddingPersonnelEmployee = mapDataToEmployee(personnelInfo)
+                    
+                }
+            }
+            if(account.salesPersonnel){
+                const personnelInfo = await fetchPersonnelInfo(account.salesPersonnel)
+                if(personnelInfo){
+                    updatedAccount.salesPersonnelEmployee = mapDataToEmployee(personnelInfo)
+                }
+            }
+
+            if(account.solutionArchitectPersonnel){
+                const personnelInfo = await fetchPersonnelInfo(account.solutionArchitectPersonnel)
+                if(personnelInfo){
+                    updatedAccount.solutionArchitectPersonnelEmployee = mapDataToEmployee(personnelInfo)
+                }
+            }
+
+            if(account.customerSuccessPersonnel){
+                const personnelInfo = await fetchPersonnelInfo(account.customerSuccessPersonnel)
+                if(personnelInfo){
+                    updatedAccount.customerSuccessPersonnelEmployee = mapDataToEmployee(personnelInfo)
+                }
+            }
+            return updatedAccount;
           }),
         );
-        setAccountList(accountsWithAdditionalDAta);
+        setAccountList(accountsWithAdditionalData);
       };
       fetchAndSetAccount();
     }
@@ -209,6 +269,7 @@ function DepartmentDashboard() {
 
         <Modal
           title="Client Detail"
+          width={1200}
           open={isClientDetailModalVisible}
           onOk={handleClientDetailModalOk}
           onCancel={() => setIsClientDetailModalVisible(false)}
@@ -220,13 +281,85 @@ function DepartmentDashboard() {
         >
             {selectedAccount && (
                 <>
-                    <div className="flex gap-3 items-center justify-center">
+                    <div className="flex gap-3 items-center justify-center mb-3">
                         <Image src={selectedAccount.accountCompany?.companyLogoUrl} preview={false} width={100}/>
                         <p className="text-base font-bold">{selectedAccount.accountCompany?.companyName}</p>
                     </div>
-                    
-                    <ClientTimeline currentDepartmentId={Number(departmentId)} currentStatus= {selectedAccount.accountCurrentStatus}/>
-                {/* Add more details as needed */}
+                    <Row gutter={{ xs: 8, sm: 12, md: 16, lg: 32 }}>
+                        <Col span={8}>
+                            <div className="ml-12">
+                                <ClientTimeline currentDepartmentId={Number(departmentId)} currentStatus= {selectedAccount.accountCurrentStatus}/>
+                            </div>
+                            
+                        </Col>
+
+
+                        <Col span={8}>
+                            <Divider orientation="right">Client Information</Divider>
+                            <p>Client Name: {selectedAccount.accountCompany?.companyName}</p>
+                            <p>Client Website: {selectedAccount.accountCompany?.companyWebsite}</p>
+                            <p>Joined Date: {getFormattedDate(new Date(selectedAccount.accountCreationdate))}</p>
+                            <p>Last Update Date: {getFormattedDate(new Date(selectedAccount.accountLastUpdatedate))}</p>
+
+                            <Divider orientation="right">Personnel Information</Divider>
+
+                            <Row className="mb-3" gutter={{ xs: 4, sm: 8, md: 16, lg: 16 }}>
+                                <Col span={12}>
+                                    <Card>
+                                        <p className="text-sm">Bidding</p>
+                                        <h5>{selectedAccount.biddingPersonnelEmployee?.firstName + " " + selectedAccount.biddingPersonnelEmployee?.lastName}</h5>
+                                        <p>{selectedAccount.biddingPersonnelEmployee?.email}</p>
+
+                                    </Card>
+                                </Col>
+
+                                <Col span={12}>
+                                    <Card>
+                                        <p className="text-sm">Sales</p>
+                                        <h5>{selectedAccount.salesPersonnelEmployee?.firstName + " " + selectedAccount.salesPersonnelEmployee?.lastName}</h5>
+                                        <p>{selectedAccount.salesPersonnelEmployee?.email}</p>
+                                    </Card>
+                                </Col>
+                            </Row>
+
+                            <Row gutter={{ xs: 4, sm: 8, md: 16, lg: 16 }}>
+                                <Col span={12}>
+                                    <Card>
+                                        <p className="text-sm">Solution Architect</p>
+                                        <h5>{selectedAccount.solutionArchitectPersonnelEmployee?.firstName + " " + selectedAccount.solutionArchitectPersonnelEmployee?.lastName}</h5>
+                                        <p>{selectedAccount.solutionArchitectPersonnelEmployee?.email}</p>
+                                    </Card>
+                                </Col>
+
+                                <Col span={12}>
+                                    <Card>
+                                        <p className="text-sm">Customer Success</p>
+                                        <h5>{selectedAccount.customerSuccessPersonnelEmployee?.firstName + " " + selectedAccount.customerSuccessPersonnelEmployee?.lastName}</h5>
+                                        <p>{selectedAccount.customerSuccessPersonnelEmployee?.email}</p>
+                                    </Card>
+                                </Col>
+                            </Row>
+
+                            
+                        </Col>
+
+                        <Col span={8}>
+                            <Divider orientation="right">Documents</Divider>
+                            <List
+                                dataSource={documents}
+                                renderItem={(item) => (
+                                  <List.Item>
+                                    <p className="text-sky-600">{item}</p>
+                                  </List.Item>
+                                )}
+                            />
+                            
+                            <div className="h-30">
+                                <UploadFile onUploadSuccess={handleUploadSuccess}/>
+                            </div>
+                        </Col>
+
+                    </Row>
                 </>
             )}
 

@@ -20,11 +20,15 @@ export interface IAccount {
   accountCurrentStatus: string;
   accountCurrentResponsibleDepartmentId: number;
   biddingPersonnel: number;
+  biddingPersonnelEmployee?: IEmployee;
   salesPersonnel: number;
+  salesPersonnelEmployee?: IEmployee;
   solutionArchitectPersonnel: number;
+  solutionArchitectPersonnelEmployee?: IEmployee;
   accountCreationdate: Date;
   accountLastUpdatedate: Date;
   customerSuccessPersonnel: number;
+  customerSuccessPersonnelEmployee?: IEmployee;
   accountCompany?: ICompany;
 }
 
