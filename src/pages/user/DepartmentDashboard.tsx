@@ -13,14 +13,15 @@ import {
   Row,
   Col,
   List,
-  Divider
+  Divider,
+  Typography,
   // Skeleton,
   // Divider
 } from "antd";
-import { useGetDepartmentAccountsQuery } from "../../redux/api/apiSlice";
+import { useGetDepartmentAccountsQuery, useGetTeamAnnouncementInSevenDaysQuery } from "../../redux/api/apiSlice";
 import { useEffect, useState } from "react";
-import { IAccount } from "../../types";
-import { FilterOutlined } from "@ant-design/icons";
+import { IAccount, IAnnouncement } from "../../types";
+import { FilterOutlined, NotificationOutlined, AppstoreOutlined} from "@ant-design/icons";
 // import InfiniteScroll from 'react-infinite-scroll-component';
 import axios from "../../api/axios";
 import ClientList from "../../components/user/ClientList";
@@ -35,16 +36,25 @@ function DepartmentDashboard() {
   // const [loading, setLoading] = useState(false);
   const { data: accounts, isLoading: isAccountsLoading } =
     useGetDepartmentAccountsQuery(departmentId);
+  const {data: announcements, isLoading: isAnnouncementsLoading} = useGetTeamAnnouncementInSevenDaysQuery(departmentId);
+
   const [accountList, setAccountList] = useState<IAccount[]>([]);
+  const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
+
   // const [value, setValue] = useState([]);
   const { Content } = Layout;
   const { Option } = Select;
   const { SHOW_PARENT } = TreeSelect;
+  const { Text } = Typography;
+
   const [selectedAccount, setSelectedAccount] = useState<IAccount | null>(null);
   const [isClientDetailModalVisible, setIsClientDetailModalVisible] =
     useState(false);
   const [isClientFilterModalVisible, setIsClientFilterModalVisible] =
     useState(false);
+  const [isAnnouncementHistoryModalVisible, setIsAnnouncementHistoryModalVisible] =
+    useState(false);
+
   const [clientFilterOptions, setClientFilterOptions] = useState<{
     type: string[];
     status: string[];
@@ -125,6 +135,19 @@ function DepartmentDashboard() {
       status: [],
     });
   };
+
+  const handleAnnouncementHistoryClicked = () => {
+    setIsAnnouncementHistoryModalVisible(true);
+  }
+
+  const handleAnnouncementHistoryModalOk = () => {
+    setIsAnnouncementHistoryModalVisible(false);
+  };
+
+  const handleAnnouncementHistoryModalCancel = () => {
+    setIsAnnouncementHistoryModalVisible(false);
+  };
+
 
   // const loadMoreData = () => {
   //     if (loading) {
@@ -216,9 +239,48 @@ function DepartmentDashboard() {
     }
   }, [accounts, isAccountsLoading]);
 
+
+  useEffect(() => {
+    if (!isAnnouncementsLoading && announcements) {
+      // Convert and sort announcements by creation date (newest first)
+      const sortedAnnouncements = announcements
+        .map((announcement: any) => ({
+          id: announcement.announcementId,
+          teamId: departmentId,
+          teamName: "",
+          creatorId: announcement.announcementCreator,
+          creatorName:"",
+          creationDate: new Date(announcement.announcementCreationdate),
+          content: announcement.announcementContent,
+        }))
+        .sort((a: IAnnouncement, b:IAnnouncement) => b.creationDate.getTime() - a.creationDate.getTime());
+
+      setAnnouncementList(sortedAnnouncements);
+    }
+  }, [announcements, isAnnouncementsLoading]);
+
   return (
     <>
       <Content style={{ margin: "24px 16px 0" }}>
+        <Modal
+            title="Announcements in past seven days"
+            open = {isAnnouncementHistoryModalVisible}
+            onOk={handleAnnouncementHistoryModalOk}
+            onCancel={handleAnnouncementHistoryModalCancel}
+        >
+            <List
+                bordered
+                dataSource={announcementList}
+                renderItem={(item) => (
+                    <List.Item>
+                        <div>{item.content}</div>
+                        <Divider type="vertical"/>
+                        <div>{getFormattedDate(item.creationDate)}</div>
+                    </List.Item>
+                )}
+            />
+
+        </Modal>
         <Modal
           title="Client Filter"
           open={isClientFilterModalVisible}
@@ -369,11 +431,37 @@ function DepartmentDashboard() {
           style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}
         >
           <div className="flex flex-wrap mt-6 -mx-3">
-            <div className="w-full max-w-full mt-3 px-3 mb-6 shrink-0 lg:w-6/12 md:flex-0 md:w-6/12 lg:mb-0">
+            <div className="w-full max-w-full mt-3 px-3 mb-6 flex flex-col gap-3 shrink-0 lg:w-6/12 md:flex-0 md:w-6/12 lg:mb-0">
+              
+                <Card className="relative flex flex-col h-40 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                    <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                    <div className="flex justify-between">
+                        <div className="flex gap-3 items-center">
+                        <NotificationOutlined />
+                        <h5 className="mb-0 text-lg">ANNOUNCEMENT</h5>
+                        </div>
+                        <Button type="link" onClick={handleAnnouncementHistoryClicked}>History in 7 days</Button>
+                    </div>
+                    <div className="ml-3 mr-3">
+                        {announcementList ? (
+                            <Text mark>{announcementList.at(0)?.content}</Text>
+                        ): (
+                            <Spin size="large"/>
+                        )}
+                        
+                    </div>
+                    </div>
+                    <div className="flex-auto p-6 pt-0">
+                    
+                    </div>
+              </Card>
+              
+              
               <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                 <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                   <div className="flex justify-between">
                     <div className="flex gap-3 items-center">
+                      <AppstoreOutlined />
                       <h5 className="mb-0 text-lg">CLIENT RESPONSIBLE</h5>
                       <Button
                         type="link"
