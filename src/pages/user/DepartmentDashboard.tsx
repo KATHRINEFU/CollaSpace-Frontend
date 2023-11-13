@@ -18,17 +18,17 @@ import {
   // Skeleton,
   // Divider
 } from "antd";
-import { useGetDepartmentAccountsQuery, useGetTeamAnnouncementInSevenDaysQuery } from "../../redux/api/apiSlice";
+import { useGetDepartmentAccountsQuery, useGetTeamAnnouncementInSevenDaysQuery, useGetTeamMembersQuery } from "../../redux/api/apiSlice";
 import { useEffect, useState } from "react";
-import { IAccount, IAnnouncement } from "../../types";
-import { FilterOutlined, NotificationOutlined, AppstoreOutlined} from "@ant-design/icons";
+import { IAccount, IAnnouncement, ITeamMember } from "../../types";
+import { FilterOutlined, NotificationOutlined, AppstoreOutlined, TeamOutlined} from "@ant-design/icons";
 // import InfiniteScroll from 'react-infinite-scroll-component';
 import axios from "../../api/axios";
 import ClientList from "../../components/user/ClientList";
 import { clientStatusByDepartment } from "../../utils/constants";
 import ClientTimeline from "../../components/user/ClientTimeline";
 import { getFormattedDate } from "../../utils/functions";
-import { mapDataToEmployee } from "../../utils/functions";
+import { mapDataToEmployee, mapDataToTeamMember } from "../../utils/functions";
 import UploadFile from "../../components/user/UploadFile";
 
 function DepartmentDashboard() {
@@ -37,9 +37,11 @@ function DepartmentDashboard() {
   const { data: accounts, isLoading: isAccountsLoading } =
     useGetDepartmentAccountsQuery(departmentId);
   const {data: announcements, isLoading: isAnnouncementsLoading} = useGetTeamAnnouncementInSevenDaysQuery(departmentId);
+  const {data: teamMembers, isLoading: isTeamMembersLoading} = useGetTeamMembersQuery(departmentId);
 
   const [accountList, setAccountList] = useState<IAccount[]>([]);
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
+  const [teamMemberList, setTeamMemberList] = useState<ITeamMember[]>([]);
 
   // const [value, setValue] = useState([]);
   const { Content } = Layout;
@@ -259,6 +261,13 @@ function DepartmentDashboard() {
     }
   }, [announcements, isAnnouncementsLoading]);
 
+  useEffect(() => {
+    if(!isTeamMembersLoading && teamMembers){
+        const mappedTeamMembers = teamMembers.map((teamMember: any) => mapDataToTeamMember(teamMember));
+        setTeamMemberList(mappedTeamMembers);
+    }
+  }, [teamMembers, isTeamMembersLoading])
+
   return (
     <>
       <Content style={{ margin: "24px 16px 0" }}>
@@ -431,7 +440,7 @@ function DepartmentDashboard() {
           style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}
         >
           <div className="flex flex-wrap mt-6 -mx-3">
-            <div className="w-full max-w-full mt-3 px-3 mb-6 flex flex-col gap-3 shrink-0 lg:w-6/12 md:flex-0 md:w-6/12 lg:mb-0">
+            <div className="w-full max-w-full px-3 shrink-0 lg:flex-0 lg:w-6/12">
               
                 <Card className="relative flex flex-col h-40 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                     <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
@@ -455,6 +464,46 @@ function DepartmentDashboard() {
                     
                     </div>
               </Card>
+            </div>
+
+            <div className="w-full max-w-full px-3 mt-6 shrink-0 lg:mt-0 lg:flex-0 lg:w-6/12">
+                <Card className="relative flex flex-col h-60 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                    <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                    <div className="flex justify-between">
+                        <div className="flex gap-3 items-center">
+                        <TeamOutlined />
+                        <h5 className="mb-0 text-lg">TEAM MEMBERS</h5>
+                        </div>
+                        <Button type="link" onClick={handleAnnouncementHistoryClicked}>Manage Team Members</Button>
+                    </div>
+                    {/* <div className="flex flex-wrap -mx-3"> */}
+                        {/* <div className="w-full max-w-full px-3 flex-0"> */}
+                            {/* <div className="relative flex flex-col min-w-0 overflow-scroll break-words bg-white border-0 shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"> */}
+                                <div className="flex flex-auto p-3">
+                                {teamMemberList ? (
+                                    teamMemberList.map((member) => (
+                                        <div className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12">
+                                            <a className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-blue-500 border-solid w-14 h-14 rounded-circle">
+                                                <Image src={ member.employee.profileUrl} alt="Profile"/>
+                                            </a>
+                                            <p className="text-sm">{member.employee.firstName + " " + member.employee.lastName}</p>
+                                            <p className="text-sm">{member.role}</p>
+                                        </div>
+                                    ))
+                                ): (
+                                    <Spin size="large"/>
+                                )}
+                                </div>
+                            {/* </div> */}
+                        {/* </div> */}
+                        
+                    {/* </div> */}
+                    </div>
+                    <div className="flex-auto p-6 pt-0">
+                    
+                    </div>
+              </Card>
+            </div>
               
               
               <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
@@ -505,7 +554,6 @@ function DepartmentDashboard() {
                   )}
                 </div>
               </Card>
-            </div>
           </div>
         </div>
       </Content>

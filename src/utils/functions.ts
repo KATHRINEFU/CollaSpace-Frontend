@@ -115,7 +115,30 @@ export function mapDataToEmployee(data: any) {
     departmentName: data.departmentName,
     startdate: data.employeeStartdate,
     role: data.employeeRole,
+    profileUrl: data.employeeProfileUrl
   };
+}
+
+export function mapDataToTeamMember(data: any){
+  return {
+    employee: {
+      id: data.employeeId,
+      firstName: data.employeeFirstname,
+      lastName: data.employeeLastname,
+      email: data.employeeEmail,
+      phone: data.employeePhone,
+      locationCountry: data.employeeLocationCountry,
+      locationCity: data.employeeLocationCity,
+      departmentId: data.departmentId,
+      departmentName: '',
+      startdate: new Date(data.employeeStartdate),
+      role: data.employeeRole,
+      profileUrl: data.employeeProfileUrl,
+    },
+    joindate: new Date(data.joindate),
+    role: data.role,
+  };
+  
 }
 
 export function mapEventToCalendarItem(data: any) {

@@ -169,6 +169,13 @@ export interface IEmployee {
   departmentName: string;
   startdate: Date;
   role: string;
+  profileUrl: string
+}
+
+export interface ITeamMember {
+  employee: IEmployee;
+  joindate: Date;
+  role: string;
 }
 
 export type IconName = keyof typeof AntdIcons;
