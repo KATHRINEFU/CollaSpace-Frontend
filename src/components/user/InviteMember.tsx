@@ -30,12 +30,16 @@ function InviteTeamMember() {
     setMembersList(updatedList);
   };
 
+  const handleSendInivitation = () => {
+    console.log("sending team member inivitation")
+  }
+
   return (
-    <div>
+    <div className="flex flex-col justify-center p-3 border-2 rounded-lg bg-lime-100">
       <h2 className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
         Invite Team Member
       </h2>
-      <div>
+      <div className="flex gap-3">
         <Input
           placeholder="Enter employee name"
           value={searchQuery}
@@ -70,10 +74,8 @@ function InviteTeamMember() {
               </Button>,
             ]}
           >
-            <List.Item.Meta
-              title={member.employee}
-              description={
-                <Select
+            <h4>{member.employee}</h4>
+            <Select
                   value={member.authority}
                   style={{ width: 120 }}
                   onChange={(value) => {
@@ -87,11 +89,11 @@ function InviteTeamMember() {
                   <Option value="editor">Editor</Option>
                   <Option value="leader">Leader</Option>
                 </Select>
-              }
-            />
           </List.Item>
         )}
       />
+
+      <Button type="primary" onClick={handleSendInivitation}>Send Invitation</Button>
     </div>
   );
 }

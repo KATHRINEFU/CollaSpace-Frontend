@@ -10,11 +10,10 @@ import {
   Select,
   TreeSelect,
   Image,
-  Row,
-  Col,
   List,
   Divider,
   Typography,
+  Avatar,
   // Skeleton,
   // Divider
 } from "antd";
@@ -26,10 +25,10 @@ import { FilterOutlined, NotificationOutlined, AppstoreOutlined, TeamOutlined} f
 import axios from "../../api/axios";
 import ClientList from "../../components/user/ClientList";
 import { clientStatusByDepartment } from "../../utils/constants";
-import ClientTimeline from "../../components/user/ClientTimeline";
 import { getFormattedDate } from "../../utils/functions";
 import { mapDataToEmployee, mapDataToTeamMember } from "../../utils/functions";
-import UploadFile from "../../components/user/UploadFile";
+import InviteTeamMember from "../../components/user/InviteMember";
+import ClientDetail from "../../components/user/ClientDetail";
 
 function DepartmentDashboard() {
   const { departmentId } = useParams();
@@ -56,6 +55,7 @@ function DepartmentDashboard() {
     useState(false);
   const [isAnnouncementHistoryModalVisible, setIsAnnouncementHistoryModalVisible] =
     useState(false);
+  const [isTeamMemberModalVisible, setIsTeamMemberModalVisible] = useState(false);
 
   const [clientFilterOptions, setClientFilterOptions] = useState<{
     type: string[];
@@ -64,15 +64,6 @@ function DepartmentDashboard() {
     type: [],
     status: [],
   });
-
-  const [documents, setDocuments] = useState([
-    'www.googledoc.com/clientfile/1',
-    'ClientFile-Version1.doc',
-    'ClientFile-Version2.doc',
-    'ClientFile-Version3.doc',
-    'ClientFile-Version4.doc',
-    'ClientFile-Final.pdf'
-  ]);
 
 
 
@@ -104,11 +95,6 @@ function DepartmentDashboard() {
     style: {
       width: "100%",
     },
-  };
-
-  const handleUploadSuccess = (fileName: string) => {
-    // Add the uploaded file name to the documents list
-    setDocuments([fileName, ...documents]);
   };
 
   const handleClientDetailModalOk = () => {
@@ -148,6 +134,23 @@ function DepartmentDashboard() {
 
   const handleAnnouncementHistoryModalCancel = () => {
     setIsAnnouncementHistoryModalVisible(false);
+  };
+
+  const handleManageTeamMemberClicked = () => {
+    setIsTeamMemberModalVisible(true);
+  }
+
+  const handleTeamMemberModalOk = () => {
+    setIsTeamMemberModalVisible(false);
+  };
+
+  const handleTeamMemberModalCancel = () => {
+    setIsTeamMemberModalVisible(false);
+  };
+
+  const handleDeleteTeamMember = (id: number) => {
+    const updatedList = teamMemberList.filter((member) => member.employee.id !== id);
+    setTeamMemberList(updatedList);
   };
 
 
@@ -290,6 +293,41 @@ function DepartmentDashboard() {
             />
 
         </Modal>
+
+        <Modal
+            title="Manage Team Members"
+            open = {isTeamMemberModalVisible}
+            onOk={handleTeamMemberModalOk}
+            onCancel={handleTeamMemberModalCancel}
+            width={600}
+        >
+            <List
+                bordered
+                dataSource={teamMemberList}
+                renderItem={(item) => (
+                    <List.Item>
+                        <List.Item.Meta
+                            avatar={<Avatar src={item.employee.profileUrl}/>}
+                            title={<p>{item.employee.firstName+ " " + item.employee.lastName}</p>}
+                        />
+                        
+                        <div>Joined at {getFormattedDate(item.joindate)}</div>
+                        <Divider type="vertical"/>
+                        <div>{item.role}</div>
+
+                        <Button type="link" danger onClick={() => handleDeleteTeamMember(item.employee.id)}>
+                            Delete
+                        </Button>
+                    </List.Item>
+                )}
+            />
+            <div className="mt-3 flex items-center justify-center w-full">
+                <InviteTeamMember/>
+            </div>
+            
+
+        </Modal>
+
         <Modal
           title="Client Filter"
           open={isClientFilterModalVisible}
@@ -352,85 +390,7 @@ function DepartmentDashboard() {
         >
             {selectedAccount && (
                 <>
-                    <div className="flex gap-3 items-center justify-center mb-3">
-                        <Image src={selectedAccount.accountCompany?.companyLogoUrl} preview={false} width={100}/>
-                        <p className="text-base font-bold">{selectedAccount.accountCompany?.companyName}</p>
-                    </div>
-                    <Row gutter={{ xs: 8, sm: 12, md: 16, lg: 32 }}>
-                        <Col span={8}>
-                            <div className="ml-12">
-                                <ClientTimeline currentDepartmentId={Number(departmentId)} currentStatus= {selectedAccount.accountCurrentStatus}/>
-                            </div>
-                            
-                        </Col>
-
-
-                        <Col span={8}>
-                            <Divider orientation="right">Client Information</Divider>
-                            <p>Client Name: {selectedAccount.accountCompany?.companyName}</p>
-                            <p>Client Website: {selectedAccount.accountCompany?.companyWebsite}</p>
-                            <p>Joined Date: {getFormattedDate(new Date(selectedAccount.accountCreationdate))}</p>
-                            <p>Last Update Date: {getFormattedDate(new Date(selectedAccount.accountLastUpdatedate))}</p>
-
-                            <Divider orientation="right">Personnel Information</Divider>
-
-                            <Row className="mb-3" gutter={{ xs: 4, sm: 8, md: 16, lg: 16 }}>
-                                <Col span={12}>
-                                    <Card>
-                                        <p className="text-sm">Bidding</p>
-                                        <h5>{selectedAccount.biddingPersonnelEmployee?.firstName + " " + selectedAccount.biddingPersonnelEmployee?.lastName}</h5>
-                                        <p>{selectedAccount.biddingPersonnelEmployee?.email}</p>
-
-                                    </Card>
-                                </Col>
-
-                                <Col span={12}>
-                                    <Card>
-                                        <p className="text-sm">Sales</p>
-                                        <h5>{selectedAccount.salesPersonnelEmployee?.firstName + " " + selectedAccount.salesPersonnelEmployee?.lastName}</h5>
-                                        <p>{selectedAccount.salesPersonnelEmployee?.email}</p>
-                                    </Card>
-                                </Col>
-                            </Row>
-
-                            <Row gutter={{ xs: 4, sm: 8, md: 16, lg: 16 }}>
-                                <Col span={12}>
-                                    <Card>
-                                        <p className="text-sm">Solution Architect</p>
-                                        <h5>{selectedAccount.solutionArchitectPersonnelEmployee?.firstName + " " + selectedAccount.solutionArchitectPersonnelEmployee?.lastName}</h5>
-                                        <p>{selectedAccount.solutionArchitectPersonnelEmployee?.email}</p>
-                                    </Card>
-                                </Col>
-
-                                <Col span={12}>
-                                    <Card>
-                                        <p className="text-sm">Customer Success</p>
-                                        <h5>{selectedAccount.customerSuccessPersonnelEmployee?.firstName + " " + selectedAccount.customerSuccessPersonnelEmployee?.lastName}</h5>
-                                        <p>{selectedAccount.customerSuccessPersonnelEmployee?.email}</p>
-                                    </Card>
-                                </Col>
-                            </Row>
-
-                            
-                        </Col>
-
-                        <Col span={8}>
-                            <Divider orientation="right">Documents</Divider>
-                            <List
-                                dataSource={documents}
-                                renderItem={(item) => (
-                                  <List.Item>
-                                    <p className="text-sky-600">{item}</p>
-                                  </List.Item>
-                                )}
-                            />
-                            
-                            <div className="h-30">
-                                <UploadFile onUploadSuccess={handleUploadSuccess}/>
-                            </div>
-                        </Col>
-
-                    </Row>
+                    <ClientDetail selectedAccount={selectedAccount} departmentId={departmentId}/>
                 </>
             )}
 
@@ -442,7 +402,7 @@ function DepartmentDashboard() {
           <div className="flex flex-wrap mt-6 -mx-3">
             <div className="w-full max-w-full px-3 shrink-0 lg:flex-0 lg:w-6/12">
               
-                <Card className="relative flex flex-col h-40 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                <Card className="relative flex flex-col h-60 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                     <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                     <div className="flex justify-between">
                         <div className="flex gap-3 items-center">
@@ -451,9 +411,15 @@ function DepartmentDashboard() {
                         </div>
                         <Button type="link" onClick={handleAnnouncementHistoryClicked}>History in 7 days</Button>
                     </div>
-                    <div className="ml-3 mr-3">
+                    <div className="ml-3 mr-3 mt-3">
                         {announcementList ? (
-                            <Text mark>{announcementList.at(0)?.content}</Text>
+                            <div>
+                                <Text mark>{announcementList.at(0)?.content}</Text>
+                                <p className="text-right text-sm"> Created By {announcementList.at(0)?.creatorId}</p>
+                                {announcementList.at(0) && (<p className="text-right text-sm"> Posted At {getFormattedDate(new Date(announcementList.at(0)!.creationDate))}</p>)}
+                                
+                            </div>
+                            
                         ): (
                             <Spin size="large"/>
                         )}
@@ -469,35 +435,28 @@ function DepartmentDashboard() {
             <div className="w-full max-w-full px-3 mt-6 shrink-0 lg:mt-0 lg:flex-0 lg:w-6/12">
                 <Card className="relative flex flex-col h-60 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                     <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-                    <div className="flex justify-between">
-                        <div className="flex gap-3 items-center">
-                        <TeamOutlined />
-                        <h5 className="mb-0 text-lg">TEAM MEMBERS</h5>
+                        <div className="flex justify-between">
+                            <div className="flex gap-3 items-center">
+                            <TeamOutlined />
+                            <h5 className="mb-0 text-lg">TEAM MEMBERS</h5>
+                            </div>
+                            <Button type="link" onClick={handleManageTeamMemberClicked}>Manage Team Members</Button>
                         </div>
-                        <Button type="link" onClick={handleAnnouncementHistoryClicked}>Manage Team Members</Button>
-                    </div>
-                    {/* <div className="flex flex-wrap -mx-3"> */}
-                        {/* <div className="w-full max-w-full px-3 flex-0"> */}
-                            {/* <div className="relative flex flex-col min-w-0 overflow-scroll break-words bg-white border-0 shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"> */}
-                                <div className="flex flex-auto p-3">
-                                {teamMemberList ? (
-                                    teamMemberList.map((member) => (
-                                        <div className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12">
-                                            <a className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-blue-500 border-solid w-14 h-14 rounded-circle">
-                                                <Image src={ member.employee.profileUrl} alt="Profile"/>
-                                            </a>
-                                            <p className="text-sm">{member.employee.firstName + " " + member.employee.lastName}</p>
-                                            <p className="text-sm">{member.role}</p>
-                                        </div>
-                                    ))
-                                ): (
-                                    <Spin size="large"/>
-                                )}
-                                </div>
-                            {/* </div> */}
-                        {/* </div> */}
-                        
-                    {/* </div> */}
+                        <div className="flex flex-auto p-3">
+                            {teamMemberList ? (
+                                teamMemberList.map((member) => (
+                                    <div className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12">
+                                        <a className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-blue-500 border-solid w-14 h-14 rounded-circle">
+                                            <Image src={ member.employee.profileUrl} alt="Profile" preview = {false}/>
+                                        </a>
+                                        <p className="text-sm">{member.employee.firstName + " " + member.employee.lastName}</p>
+                                        <p className="text-sm">{member.role}</p>
+                                    </div>
+                                ))
+                            ): (
+                                <Spin size="large"/>
+                            )}
+                        </div>
                     </div>
                     <div className="flex-auto p-6 pt-0">
                     
@@ -505,8 +464,8 @@ function DepartmentDashboard() {
               </Card>
             </div>
               
-              
-              <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-4/12">
+                <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                 <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                   <div className="flex justify-between">
                     <div className="flex gap-3 items-center">
@@ -554,6 +513,45 @@ function DepartmentDashboard() {
                   )}
                 </div>
               </Card>
+            </div>
+              
+            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-4/12">
+                <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                    <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                    <div className="flex justify-between">
+                        <div className="flex gap-3 items-center">
+                        <AppstoreOutlined />
+                        <h5 className="mb-0 text-lg">EVENTS INVOLVED</h5>
+                        <Button
+                            type="link"
+                            icon={<FilterOutlined />}
+                            onClick={showClientFilterModal}
+                        />
+                        </div>
+                    </div>
+                    </div>
+                </Card>
+            </div>
+
+
+            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-4/12">
+                <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                    <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                    <div className="flex justify-between">
+                        <div className="flex gap-3 items-center">
+                        <AppstoreOutlined />
+                        <h5 className="mb-0 text-lg">TICKETS RELATED</h5>
+                        <Button
+                            type="link"
+                            icon={<FilterOutlined />}
+                            onClick={showClientFilterModal}
+                        />
+                        </div>
+                    </div>
+                    </div>
+                </Card>
+            </div>
+
           </div>
         </div>
       </Content>
