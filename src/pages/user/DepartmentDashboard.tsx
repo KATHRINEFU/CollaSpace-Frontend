@@ -29,6 +29,9 @@ import { getFormattedDate } from "../../utils/functions";
 import { mapDataToEmployee, mapDataToTeamMember } from "../../utils/functions";
 import InviteTeamMember from "../../components/user/InviteMember";
 import ClientDetail from "../../components/user/ClientDetail";
+import EventList from "../../components/user/EventList";
+import TicketAssignedList from "../../components/user/TicketAssignedList";
+import { useGetTicketsByTeamQuery } from "../../redux/api/apiSlice";
 
 function DepartmentDashboard() {
   const { departmentId } = useParams();
@@ -37,6 +40,7 @@ function DepartmentDashboard() {
     useGetDepartmentAccountsQuery(departmentId);
   const {data: announcements, isLoading: isAnnouncementsLoading} = useGetTeamAnnouncementInSevenDaysQuery(departmentId);
   const {data: teamMembers, isLoading: isTeamMembersLoading} = useGetTeamMembersQuery(departmentId);
+  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsByTeamQuery(departmentId);
 
   const [accountList, setAccountList] = useState<IAccount[]>([]);
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
@@ -56,6 +60,8 @@ function DepartmentDashboard() {
   const [isAnnouncementHistoryModalVisible, setIsAnnouncementHistoryModalVisible] =
     useState(false);
   const [isTeamMemberModalVisible, setIsTeamMemberModalVisible] = useState(false);
+  const [isEventFilterModalVisible, setIsEventFilterModalVisible] = useState(false);
+  const [isTicketFilterModalVisible, setIsTicketFilterModalVisible] = useState(false);
 
   const [clientFilterOptions, setClientFilterOptions] = useState<{
     type: string[];
@@ -65,7 +71,16 @@ function DepartmentDashboard() {
     status: [],
   });
 
+  const [eventFilterOptions, setEventFilterOptions] = useState({
+    type: [],
+    team: [],
+  });
 
+  const [ticketFilterOptions, setTicketFilterOptions] = useState({
+    status: [],
+    priority: [],
+    role: [],
+  });
 
   const treeData = clientStatusByDepartment.map((departmentItem) => {
     return {
@@ -152,6 +167,49 @@ function DepartmentDashboard() {
     const updatedList = teamMemberList.filter((member) => member.employee.id !== id);
     setTeamMemberList(updatedList);
   };
+
+  const showEventFilterModal = () => {
+    setIsEventFilterModalVisible(true);
+  };
+
+  const handleEventFilterModalOk = () => {
+    // Apply filtering logic here based on filterOptions
+    setIsEventFilterModalVisible(false);
+  };
+
+  const handleEventFilterModalCancel = () => {
+    setIsEventFilterModalVisible(false);
+  };
+
+  const handleEventResetFilter = () => {
+    setEventFilterOptions({
+      type: [],
+      team: [],
+    });
+  };
+
+  const showTicketFilterModal = () => {
+    setIsTicketFilterModalVisible(true);
+  };
+
+  const handleTicketFilterModalOk = () => {
+    // Apply filtering logic here based on filterOptions
+    setIsTicketFilterModalVisible(false);
+  };
+
+  const handleTicketFilterModalCancel = () => {
+    setIsTicketFilterModalVisible(false);
+  };
+
+  const handleTicketResetFilter = () => {
+    setTicketFilterOptions({
+      status: [],
+      priority: [],
+      role: [],
+    });
+  };
+
+
 
 
   // const loadMoreData = () => {
@@ -246,23 +304,48 @@ function DepartmentDashboard() {
 
 
   useEffect(() => {
+    const baseUrl = "http://localhost:8080";
     if (!isAnnouncementsLoading && announcements) {
-      // Convert and sort announcements by creation date (newest first)
-      const sortedAnnouncements = announcements
-        .map((announcement: any) => ({
-          id: announcement.announcementId,
-          teamId: departmentId,
-          teamName: "",
-          creatorId: announcement.announcementCreator,
-          creatorName:"",
-          creationDate: new Date(announcement.announcementCreationdate),
-          content: announcement.announcementContent,
-        }))
-        .sort((a: IAnnouncement, b:IAnnouncement) => b.creationDate.getTime() - a.creationDate.getTime());
+        const fetchAnnouncementCreatorName = async (id: number) => {
+            try {
+                const response = await axios.get(`${baseUrl}/employee/${id}`);
+                return response.data;
+              } catch (error) {
+                console.error("Error fetching announcement creator name: ", error);
+                return null;
+              }
+          }
+        
 
-      setAnnouncementList(sortedAnnouncements);
-    }
-  }, [announcements, isAnnouncementsLoading]);
+      // Convert and sort announcements by creation date (newest first)
+      const updateAnnouncementList = async () => {
+        const updatedAnnouncements = await Promise.all(
+          announcements.map(async (announcement: any) => {
+            const creatorInfo = await fetchAnnouncementCreatorName(announcement.announcementCreator);
+  
+            return {
+              id: announcement.announcementId,
+              teamId: departmentId,
+              teamName: '',
+              creatorId: announcement.announcementCreator,
+              creatorName: creatorInfo.employeeFirstname+ " "+ creatorInfo.employeeLastname || '', // Assign the fetched creator name or an empty string
+              creationDate: new Date(announcement.announcementCreationdate),
+              content: announcement.announcementContent,
+            };
+          })
+        );
+  
+        // Sort announcements by creation date (newest first)
+        const sortedAnnouncements = updatedAnnouncements.sort(
+          (a: IAnnouncement, b: IAnnouncement) => b.creationDate.getTime() - a.creationDate.getTime()
+        );
+  
+        setAnnouncementList(sortedAnnouncements); 
+    };
+
+    updateAnnouncementList();
+  }
+}, [announcements, isAnnouncementsLoading]);
 
   useEffect(() => {
     if(!isTeamMembersLoading && teamMembers){
@@ -270,6 +353,10 @@ function DepartmentDashboard() {
         setTeamMemberList(mappedTeamMembers);
     }
   }, [teamMembers, isTeamMembersLoading])
+
+  useEffect(() => {
+
+  }, [tickets, isTicketsLoading])
 
   return (
     <>
@@ -395,6 +482,112 @@ function DepartmentDashboard() {
             )}
 
         </Modal>
+
+        <Modal
+          title="Event Filter"
+          open={isEventFilterModalVisible}
+          onOk={handleEventFilterModalOk}
+          onCancel={handleEventFilterModalCancel}
+        >
+          <div className="mb-4">
+            <label>Event Type:</label>
+            <Select
+              mode="multiple"
+              className="w-full"
+              placeholder="Select event type"
+              value={eventFilterOptions.type}
+              onChange={(value) =>
+                setEventFilterOptions({ ...eventFilterOptions, type: value })
+              }
+            >
+              <Option value="activity">Activity</Option>
+              <Option value="document">Document</Option>
+              <Option value="meeting">Meeting</Option>
+              <Option value="other">Other</Option>
+            </Select>
+          </div>
+
+          <div className="text-right">
+            <Button type="link" onClick={handleEventResetFilter}>
+              Reset
+            </Button>
+          </div>
+        </Modal>
+
+        <Modal
+          title="Ticket Filter"
+          open={isTicketFilterModalVisible}
+          onOk={handleTicketFilterModalOk}
+          onCancel={handleTicketFilterModalCancel}
+        >
+          <div className="mb-4">
+            <label>Ticket Status:</label>
+            <Select
+              mode="multiple"
+              className="w-full"
+              placeholder="Select ticket statys"
+              value={ticketFilterOptions.status}
+              onChange={(value) =>
+                setTicketFilterOptions({
+                  ...ticketFilterOptions,
+                  status: value,
+                })
+              }
+            >
+              <Option value="new">New</Option>
+              <Option value="pending">Pending</Option>
+              <Option value="in progress">In Progress</Option>
+              <Option value="under review">Under Review</Option>
+              <Option value="resolved">Resolved</Option>
+            </Select>
+          </div>
+
+          <div className="mb-4">
+            <label>Ticket Priority:</label>
+            <Select
+              mode="multiple"
+              className="w-full"
+              placeholder="Select ticket Priority"
+              value={ticketFilterOptions.priority}
+              onChange={(value) =>
+                setTicketFilterOptions({
+                  ...ticketFilterOptions,
+                  priority: value,
+                })
+              }
+            >
+              <Option value="1">1</Option>
+              <Option value="2">2</Option>
+              <Option value="3">3</Option>
+              <Option value="4">4</Option>
+              <Option value="5">5</Option>
+            </Select>
+          </div>
+
+          <div className="mb-4">
+            <label>My role as:</label>
+            <Select
+              mode="multiple"
+              className="w-full"
+              placeholder="Select my role for tickets"
+              value={ticketFilterOptions.role}
+              onChange={(value) =>
+                setTicketFilterOptions({ ...ticketFilterOptions, role: value })
+              }
+            >
+              <Option value="creator">Creator</Option>
+              <Option value="assignee">Assignee</Option>
+              <Option value="supervisor">Supervisor</Option>
+              <Option value="viewer">Viewer</Option>
+            </Select>
+          </div>
+
+          <div className="text-right">
+            <Button type="link" onClick={handleTicketResetFilter}>
+              Reset
+            </Button>
+          </div>
+        </Modal>
         <div
           className="rounded-lg"
           style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}
@@ -415,7 +608,7 @@ function DepartmentDashboard() {
                         {announcementList ? (
                             <div>
                                 <Text mark>{announcementList.at(0)?.content}</Text>
-                                <p className="text-right text-sm"> Created By {announcementList.at(0)?.creatorId}</p>
+                                <p className="text-right text-sm"> Created By {announcementList.at(0)?.creatorName}</p>
                                 {announcementList.at(0) && (<p className="text-right text-sm"> Posted At {getFormattedDate(new Date(announcementList.at(0)!.creationDate))}</p>)}
                                 
                             </div>
@@ -464,7 +657,7 @@ function DepartmentDashboard() {
               </Card>
             </div>
               
-            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-4/12">
+            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-12/12">
                 <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                 <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                   <div className="flex justify-between">
@@ -515,7 +708,7 @@ function DepartmentDashboard() {
               </Card>
             </div>
               
-            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-4/12">
+            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-6/12">
                 <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                     <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                     <div className="flex justify-between">
@@ -525,16 +718,20 @@ function DepartmentDashboard() {
                         <Button
                             type="link"
                             icon={<FilterOutlined />}
-                            onClick={showClientFilterModal}
+                            onClick={showEventFilterModal}
                         />
                         </div>
                     </div>
+                    </div>
+
+                    <div className="flex-auto p-6 pt-0">
+                        <EventList teamIds={[Number(departmentId)]} filterOptions={eventFilterOptions} />
                     </div>
                 </Card>
             </div>
 
 
-            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-4/12">
+            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-6/12">
                 <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                     <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                     <div className="flex justify-between">
@@ -544,10 +741,14 @@ function DepartmentDashboard() {
                         <Button
                             type="link"
                             icon={<FilterOutlined />}
-                            onClick={showClientFilterModal}
+                            onClick={showTicketFilterModal}
                         />
                         </div>
                     </div>
+                    </div>
+
+                    <div className="flex-auto p-6 pt-0">
+                        <TicketAssignedList tickets={[]} filterOptions={ticketFilterOptions}/>
                     </div>
                 </Card>
             </div>

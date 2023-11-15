@@ -16,7 +16,7 @@ import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
 import {
   useGetEmployeeTeamsQuery,
-  useGetTicketsQuery,
+  useGetTicketsByEmployeeQuery,
 } from "../../redux/api/apiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
 import {
@@ -56,7 +56,7 @@ export function Component() {
 
   const { data: teams, isLoading: isTeamsLoading } =
     useGetEmployeeTeamsQuery(4);
-  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsQuery(4);
+  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsByEmployeeQuery(4);
 
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
   const [sortedAnnouncementList, setSortedAnnouncementList] = useState<

@@ -58,7 +58,7 @@ const ClientList: React.FC<ClientListProps> = ({
             onClick={() => onOpenClientDetailModal(item)}
             // actions={[<a key="list-loadmore-edit">edit</a>, <a key="list-loadmore-more">more</a>]}
           >
-            <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-3 flex flex-col items-center justify-center gap-3">
+            <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-3 flex items-center justify-center gap-3">
               <div className="flex gap-3 items-center">
                 <Image src={item.accountCompany?.companyLogoUrl} preview ={false} width={80}/>
                 <p className="font-bold text-center">
