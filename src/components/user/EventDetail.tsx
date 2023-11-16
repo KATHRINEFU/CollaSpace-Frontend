@@ -8,23 +8,43 @@ import {
   Select,
   List,
 } from "antd";
+import { useState, useEffect } from "react";
 import { IActivityEvent, IDocumentEvent, IMeetingEvent } from "../../types";
 import { getEventTypeColor } from "../../utils/functions";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import TeamSearchAutocomplete from "./TeamSearchAutocomplete";
+import { useGetAllTeamsQuery } from "../../redux/api/apiSlice";
 
 interface EventDetailProps {
   selectedEvent: IDocumentEvent | IActivityEvent | IMeetingEvent;
-  allTeamIdAndNames: { id: number; name: string }[];
 }
 
 const EventDetail: React.FC<EventDetailProps> = ({
   selectedEvent,
-  allTeamIdAndNames,
 }) => {
+    const [allTeamIdAndNames, setAllTeamIdAndNames] = useState<
+    { id: number; name: string }[]
+  >([]);
+   const { data: allTeams, isLoading: isAllTeamsLoading } = useGetAllTeamsQuery(
+        {},
+      );
+
+    useEffect(() => {
+        if (!isAllTeamsLoading && allTeams) {
+          allTeams.map((team: any) => {
+            setAllTeamIdAndNames((prevList) => [
+              ...prevList,
+              { id: team.teamId, name: team.teamName },
+            ]);
+          });
+        }
+      }, [allTeams, isAllTeamsLoading]);
+
   const [eventForm] = Form.useForm();
   eventForm.setFieldsValue(selectedEvent);
+
+//   console.log(selectedEvent);
 
   dayjs.extend(customParseFormat);
   const dateFormat = "M/D/YYYY hh:mm:ss A";
@@ -71,7 +91,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
         {selectedEvent?.eventType === "document" && (
           <div>
             {/* Display Document Event specific information */}
-            <Form.Item name="link" label="Link">
+            <Form.Item name="documentLink" label="Link">
               <Input disabled />
             </Form.Item>
 
@@ -114,7 +134,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
               </Form.Item>
             </div>
 
-            <Form.Item name="location" label="location">
+            <Form.Item name="meetingLocation" label="location">
               <Input disabled />
             </Form.Item>
 
@@ -198,7 +218,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
               </Form.Item>
             </div>
 
-            <Form.Item name="location" label="location">
+            <Form.Item name="activityLocation" label="location">
               <Input disabled />
             </Form.Item>
 

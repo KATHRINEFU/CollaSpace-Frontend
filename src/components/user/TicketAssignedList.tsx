@@ -1,5 +1,7 @@
-import { List, Rate } from "antd";
+import { List, Rate, Modal, Button } from "antd";
 import { ITicket } from "../../types";
+import { useState, useEffect } from "react";
+import TicketDetail from "./TicketDetail";
 
 interface FilterOptions {
   status: string[];
@@ -36,6 +38,25 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
   tickets,
   filterOptions,
 }) => {
+  const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
+  const [isTicketDetailModalVisible, setIsTicketDetailModalVisible] = useState(false);
+ 
+  const [ticketInitialValue, setTicketInitialValue] = useState<{
+    ticketTitle: string;
+    ticketDescription: string;
+    ticketStatus: string;
+    priority: number;
+    fromTeamName: string | undefined;
+    ticketCreatorName: string | undefined;
+    toTeamName: string | undefined;
+    assignToName: string | undefined;
+  }>();
+
+  const handleTicketClick = (ticket: ITicket) => {
+    setSelectedTicket(ticket);
+    setIsTicketDetailModalVisible(true);
+  };
+
   const filteredTickets = tickets.filter((ticket) => {
     // Check if the ticket's status is in the selected status filter options
     const statusFilterMatch =
@@ -90,8 +111,46 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
     "super important",
   ];
 
+  useEffect(() => {
+    if (selectedTicket) {
+      setTicketInitialValue({
+        ticketTitle: selectedTicket.ticketTitle,
+        ticketDescription: selectedTicket.ticketDescription,
+        ticketStatus: selectedTicket.ticketStatus,
+        priority: selectedTicket.priority,
+        fromTeamName: selectedTicket.fromTeamName,
+        ticketCreatorName: selectedTicket.ticketCreatorName,
+        toTeamName: selectedTicket.assigns.find(
+          (assign) => assign.role === "assignee",
+        )?.teamName,
+        assignToName: selectedTicket.assigns.find(
+          (assign) => assign.role === "assignee",
+        )?.employeeName,
+      });
+    }
+  }, [selectedTicket]);
+
   return (
     <>
+        <Modal
+          width={1000}
+          title="Ticket Information"
+          open={isTicketDetailModalVisible}
+          onCancel={() => setIsTicketDetailModalVisible(false)}
+          footer={[
+            <Button key="back" onClick={() => setIsTicketDetailModalVisible(false)}>
+              Close
+            </Button>,
+          ]}
+        >
+          {ticketInitialValue && selectedTicket && (
+            <TicketDetail
+              selectedTicket={selectedTicket}
+              initialValue={ticketInitialValue}
+            />
+          )}
+        </Modal>
+
       <div className="flex items-center justify-center gap-3">
         <div className="w-20 h-10 rounded text-center text-sm bg-teal-100">
           NEW
@@ -119,9 +178,10 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
         dataSource={filteredTickets}
         renderItem={(item) => (
           <List.Item
-            className={`relative flex flex-col h-full min-w-0 my-3 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border ${getBackgroundColor(
+            className={`relative flex flex-col h-full min-w-0 my-3 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border cursor-pointer ${getBackgroundColor(
               item.ticketStatus,
             )}`}
+            onClick={() => handleTicketClick(item)}
           >
             <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
               <div className="w-full flex justify-between">

@@ -453,7 +453,6 @@ export function Component() {
             </Button>
           </div>
         </Modal>
-
         <div
           className="rounded-lg"
           style={{ padding: 24, minHeight: 600, background: "#F2EBE9" }}

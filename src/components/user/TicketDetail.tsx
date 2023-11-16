@@ -21,13 +21,11 @@ import { getStatusColor } from "../../utils/functions";
 interface TicketDetailProps {
   selectedTicket: ITicket;
   initialValue: any;
-  teamNames: string[];
 }
 
 const TicketDetail: React.FC<TicketDetailProps> = ({
   selectedTicket,
   initialValue,
-  teamNames,
 }) => {
   const priorityTexts = [
     "casual",
@@ -35,6 +33,13 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
     "don't delay",
     "do it",
     "super important",
+  ];
+
+  const teamNames = [
+    "Support Team",
+    "Development Team",
+    "Testing Team",
+    "Maintenance Team",
   ];
 
   const getPriorityText = (priority: number) => {

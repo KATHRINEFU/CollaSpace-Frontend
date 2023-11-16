@@ -76,6 +76,7 @@ function DepartmentDashboard() {
   const { Text } = Typography;
 
   const [selectedAccount, setSelectedAccount] = useState<IAccount | null>(null);
+
   const [isClientDetailModalVisible, setIsClientDetailModalVisible] =
     useState(false);
   const [isClientFilterModalVisible, setIsClientFilterModalVisible] =

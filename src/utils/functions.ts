@@ -168,11 +168,11 @@ export function mapTicketToCalendarItem(data: ITicket) {
 export const getEventTypeColor = (eventType: string) => {
   switch (eventType) {
     case "document":
-      return "#5cdbd3";
+      return "#ffedd5";
     case "meeting":
-      return "#ffd666";
+      return "#fce7f3";
     case "activity":
-      return "#b37feb";
+      return "#ccfbf1";
     default:
       return "";
   }

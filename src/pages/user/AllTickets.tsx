@@ -16,13 +16,6 @@ import {
 } from "../../utils/functions";
 import TicketDetail from "../../components/user/TicketDetail";
 
-const teamNames = [
-  "Support Team",
-  "Development Team",
-  "Testing Team",
-  "Maintenance Team",
-];
-
 const getPriorityText = (priority: number) => {
   return priorityTexts[priority - 1];
 };
@@ -574,7 +567,6 @@ export function Component() {
             <TicketDetail
               selectedTicket={selectedTicket}
               initialValue={initialValue}
-              teamNames={teamNames}
             />
           )}
         </Modal>

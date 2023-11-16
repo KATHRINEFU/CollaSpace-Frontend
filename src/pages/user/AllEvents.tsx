@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { ColumnsType } from "antd/es/table";
 import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";
 import {
-  useGetAllTeamsQuery,
   useGetEmployeeTeamsQuery,
 } from "../../redux/api/apiSlice";
 import dayjs from "dayjs";
@@ -19,9 +18,6 @@ export function Component() {
   >(null);
   const { data: teams, isLoading: isTeamsLoading } =
     useGetEmployeeTeamsQuery(4);
-  const { data: allTeams, isLoading: isAllTeamsLoading } = useGetAllTeamsQuery(
-    {},
-  );
   const [eventList, setEventList] = useState<
     (IDocumentEvent | IMeetingEvent | IActivityEvent)[]
   >([]);
@@ -29,9 +25,6 @@ export function Component() {
   const [isTableLoading, setIsTableLoading] = useState(true); // Add loading state
   const [teamNameFilterArray, setTeamNameFilterArray] = useState<
     { text: string; value: string }[]
-  >([]);
-  const [allTeamIdAndNames, setAllTeamIdAndNames] = useState<
-    { id: number; name: string }[]
   >([]);
   const [eventForm] = Form.useForm();
   eventForm.setFieldsValue(selectedEvent);
@@ -44,17 +37,6 @@ export function Component() {
     setSelectedEvent(record);
     setIsModalVisible(true);
   };
-
-  useEffect(() => {
-    if (!isAllTeamsLoading && allTeams) {
-      allTeams.map((team: any) => {
-        setAllTeamIdAndNames((prevList) => [
-          ...prevList,
-          { id: team.teamId, name: team.teamName },
-        ]);
-      });
-    }
-  }, [allTeams, isAllTeamsLoading]);
 
   useEffect(() => {
     const baseUrl = "http://localhost:8080";
@@ -276,7 +258,6 @@ export function Component() {
           {selectedEvent && (
             <EventDetail
               selectedEvent={selectedEvent}
-              allTeamIdAndNames={allTeamIdAndNames}
             />
           )}
         </Modal>

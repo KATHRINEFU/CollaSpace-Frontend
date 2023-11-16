@@ -1,6 +1,9 @@
-import { List } from "antd";
+import { List, Modal, Button } from "antd";
 import { useGetEventsQuery } from "../../redux/api/apiSlice";
 import { IEvent } from "../../types";
+import { useState } from "react";
+import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";
+import EventDetail from "./EventDetail";
 
 interface FilterOptions {
   type: string[];
@@ -37,6 +40,11 @@ const EventFetcher: React.FC<EventFetcherProps> = ({
   filterOptions,
 }) => {
   const { data: teamEvents } = useGetEventsQuery(teamId);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<
+    IDocumentEvent | IMeetingEvent | IActivityEvent | null
+  >(null);
   // console.log("team ", teamId, teamEvents);
 
   if (!teamEvents) {
@@ -52,16 +60,40 @@ const EventFetcher: React.FC<EventFetcherProps> = ({
         filterOptions.team.includes(event.team!.teamName)),
   );
 
+  const handleEventClick = (event: IDocumentEvent | IActivityEvent | IMeetingEvent) => {
+    setSelectedEvent(event);
+    setIsModalVisible(true);
+  };
+
   // Render the filtered events
   return (
-    <List
+    <div>
+      <Modal
+          title="Event Information"
+          open={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={[
+            <Button key="back" onClick={() => setIsModalVisible(false)}>
+              Close
+            </Button>,
+          ]}
+        >
+          {selectedEvent && (
+            <EventDetail
+              selectedEvent={selectedEvent}
+            />
+          )}
+        </Modal>
+
+        <List
       itemLayout="horizontal"
       dataSource={filteredEvents.slice(0, 5)}
       renderItem={(item: IEvent) => (
         <List.Item
-          className={`relative flex flex-col my-3 h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border ${getBackgroundColor(
+          className={`relative flex flex-col my-3 h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border cursor-pointer ${getBackgroundColor(
             item.eventType,
           )}`}
+          onClick={() => handleEventClick(item)}
         >
           <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
             <div className="w-full flex justify-between">
@@ -79,6 +111,8 @@ const EventFetcher: React.FC<EventFetcherProps> = ({
         </List.Item>
       )}
     />
+    </div>
+    
   );
 };
 
