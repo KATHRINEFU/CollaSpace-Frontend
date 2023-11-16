@@ -17,6 +17,7 @@ import TicketAssignedList from "../../components/user/TicketAssignedList";
 import {
   useGetEmployeeTeamsQuery,
   useGetTicketsByEmployeeQuery,
+  useGetDepartmentAccountsQuery
 } from "../../redux/api/apiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
 import {
@@ -25,10 +26,20 @@ import {
   ITicket,
   ITicketAssign,
   ITicketLog,
+  IAccount
 } from "../../types";
 import { useNavigate } from "react-router-dom";
+import { mapDataToEmployee } from "../../utils/functions";
+import axios from "../../api/axios";
 
 export function Component() {
+  const { data: teams, isLoading: isTeamsLoading } =
+  useGetEmployeeTeamsQuery(4);
+  const { data: tickets, isLoading: isTicketsLoading } =
+  useGetTicketsByEmployeeQuery(4);
+  const { data: accounts, isLoading: isAccountsLoading } =
+    useGetDepartmentAccountsQuery(3);
+
   const { Content } = Layout;
   const { Option } = Select;
   const navigate = useNavigate();
@@ -53,18 +64,101 @@ export function Component() {
   const [ticketAssignedCount, setTicketAssignedCount] = useState(0);
   const [ticketCreatedCount, setTicketCreatedCount] = useState(0);
   const [ticketList, setTicketList] = useState<ITicket[]>([]);
-
-  const { data: teams, isLoading: isTeamsLoading } =
-    useGetEmployeeTeamsQuery(4);
-  const { data: tickets, isLoading: isTicketsLoading } =
-    useGetTicketsByEmployeeQuery(4);
-
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
   const [sortedAnnouncementList, setSortedAnnouncementList] = useState<
     IAnnouncement[]
   >([]);
+  const [accountList, setAccountList] = useState<IAccount[]>([]);
+
 
   const [uniqueEventIds, setUniqueEventIds] = useState(new Set());
+
+  useEffect(() => {
+    if (accounts && !isAccountsLoading) {
+      // setAccountList(accounts)
+      const baseUrl = "http://localhost:8080";
+      const fetchCompanyInfo = async (companyId: number) => {
+        try {
+          const response = await axios.get(`${baseUrl}/client/${companyId}`);
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching company info: ", error);
+          return null;
+        }
+      };
+
+      const fetchPersonnelInfo = async (personnelId: number) => {
+        try {
+          const response = await axios.get(
+            `${baseUrl}/employee/${personnelId}`,
+          );
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching personnel info: ", error);
+          return null;
+        }
+      };
+      const fetchAndSetAccount = async () => {
+        // for each account, we have all fields except ICompany
+        // fetch its company info by calling baseurl/client/{compantId}
+        // set its company field with fetched company
+        const accountsWithAdditionalData = await Promise.all(
+          accounts.map(async (account: any) => {
+            let updatedAccount = { ...account };
+
+            if (account.companyId) {
+              const companyInfo = await fetchCompanyInfo(account.companyId);
+              if (companyInfo) {
+                updatedAccount.accountCompany = companyInfo;
+              }
+            }
+
+            if (account.biddingPersonnel) {
+              const personnelInfo = await fetchPersonnelInfo(
+                account.biddingPersonnel,
+              );
+              if (personnelInfo) {
+                updatedAccount.biddingPersonnelEmployee =
+                  mapDataToEmployee(personnelInfo);
+              }
+            }
+            if (account.salesPersonnel) {
+              const personnelInfo = await fetchPersonnelInfo(
+                account.salesPersonnel,
+              );
+              if (personnelInfo) {
+                updatedAccount.salesPersonnelEmployee =
+                  mapDataToEmployee(personnelInfo);
+              }
+            }
+
+            if (account.solutionArchitectPersonnel) {
+              const personnelInfo = await fetchPersonnelInfo(
+                account.solutionArchitectPersonnel,
+              );
+              if (personnelInfo) {
+                updatedAccount.solutionArchitectPersonnelEmployee =
+                  mapDataToEmployee(personnelInfo);
+              }
+            }
+
+            if (account.customerSuccessPersonnel) {
+              const personnelInfo = await fetchPersonnelInfo(
+                account.customerSuccessPersonnel,
+              );
+              if (personnelInfo) {
+                updatedAccount.customerSuccessPersonnelEmployee =
+                  mapDataToEmployee(personnelInfo);
+              }
+            }
+            return updatedAccount;
+          }),
+        );
+        setAccountList(accountsWithAdditionalData);
+      };
+      fetchAndSetAccount();
+    }
+  }, [accounts, isAccountsLoading]);
 
   useEffect(() => {
     if (!isTicketsLoading && tickets) {
@@ -571,7 +665,7 @@ export function Component() {
                   <h5 className="mb-0 text-lg">CLIENT IN PROGRESS</h5>
                 </div>
                 <div className="flex flex-auto p-6 gap-9">
-                  <ClientLogoList accountIds={uniqueAccountIds} />
+                  <ClientLogoList accountList={accountList} />
                 </div>
               </Card>
 

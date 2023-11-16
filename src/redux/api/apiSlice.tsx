@@ -33,6 +33,9 @@ export const apiSlice = createApi({
     getEmployeeDetail: builder.query({
       query: (employeeId) => `/employee/${employeeId}`,
     }),
+    getEmployeeAccounts: builder.query({
+      query: (employeeId) => `/account/byemployee/${employeeId}`,
+    }),
     getDepartmentAccounts: builder.query({
       query: (departmentId) => `/account/bydepartment/${departmentId}`,
     }),
@@ -54,6 +57,7 @@ export const {
   useGetTicketsByTeamQuery,
   useGetAllTeamsQuery,
   useGetEmployeeDetailQuery,
+  useGetEmployeeAccountsQuery,
   useGetDepartmentAccountsQuery,
   useGetTeamAnnouncementInSevenDaysQuery,
   useGetTeamMembersQuery,

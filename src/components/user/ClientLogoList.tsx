@@ -1,7 +1,9 @@
-import { useGetClientQuery } from "../../redux/api/apiSlice";
+import { IAccount } from "../../types";
+import { Spin } from "antd";
+import { Fragment } from 'react';
 
 interface ClientLogoListProps {
-  accountIds: number[];
+  accountList: IAccount[];
 }
 
 interface ClientLogoProps {
@@ -27,24 +29,21 @@ const ClientLogo: React.FC<ClientLogoProps> = ({ name, logoUrl }) => (
   </div>
 );
 
-const ClientLogoList: React.FC<ClientLogoListProps> = ({ accountIds }) => {
+const ClientLogoList: React.FC<ClientLogoListProps> = ({ accountList }) => {
   return (
     <div className="flex flex-auto p-6 gap-9">
-      {accountIds.map((accountId) => {
-        const { data } = useGetClientQuery(accountId);
-        // console.log(accountId, data);
-        if (!data) {
-          return null; // or a loader, placeholder, etc.
-        }
-
-        return (
-          <ClientLogo
-            key={accountId}
-            name={data.company.companyName}
-            logoUrl={data.company.companyLogoUrl}
-          />
-        );
-      })}
+      {accountList.map((account) => (
+      <Fragment key={account.accountId}>
+      {account.accountCompany ? (
+        <ClientLogo
+          name={account.accountCompany?.companyName}
+          logoUrl={account.accountCompany?.companyLogoUrl}
+        />
+      ) : (
+        <Spin />
+      )}
+    </Fragment>
+  ))}
     </div>
   );
 };

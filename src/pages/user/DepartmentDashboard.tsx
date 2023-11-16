@@ -14,6 +14,8 @@ import {
   Divider,
   Typography,
   Avatar,
+  Form,
+  Input
   // Skeleton,
   // Divider
 } from "antd";
@@ -74,6 +76,7 @@ function DepartmentDashboard() {
   const { Option } = Select;
   const { SHOW_PARENT } = TreeSelect;
   const { Text } = Typography;
+  const [announcementForm] = Form.useForm();
 
   const [selectedAccount, setSelectedAccount] = useState<IAccount | null>(null);
 
@@ -85,6 +88,7 @@ function DepartmentDashboard() {
     isAnnouncementHistoryModalVisible,
     setIsAnnouncementHistoryModalVisible,
   ] = useState(false);
+  const [isAnnouncementPostModalVisible, setIsAnnouncementPostModalVisible] = useState(false);
   const [isTeamMemberModalVisible, setIsTeamMemberModalVisible] =
     useState(false);
   const [isEventFilterModalVisible, setIsEventFilterModalVisible] =
@@ -139,6 +143,21 @@ function DepartmentDashboard() {
     style: {
       width: "100%",
     },
+  };
+  
+  const onPostNewAnnouncement = (values: any) => {
+    console.log("posting new announcement: " + values.content);
+  }
+
+  const handlePostBtnClicked = () => {
+    setIsAnnouncementPostModalVisible(true);
+  }
+  const handleAnnouncementPostModalOk = () => {
+    setIsAnnouncementPostModalVisible(false);
+  };
+
+  const handleAnnouncementPostModalCancel = () => {
+    setIsAnnouncementPostModalVisible(false);
   };
 
   const handleClientDetailModalOk = () => {
@@ -513,6 +532,36 @@ function DepartmentDashboard() {
         </Modal>
 
         <Modal
+          title="Post new Announcement"
+          open={isAnnouncementPostModalVisible}
+          onOk={handleAnnouncementPostModalOk}
+          onCancel={handleAnnouncementPostModalCancel}
+        >
+          <Form
+            form={announcementForm}
+            onFinish={onPostNewAnnouncement}
+            scrollToFirstError
+            className="flex flex-col justify-center"
+          >
+            <Form.Item
+            name="content"
+            rules={[
+              {
+                required: true,
+                message: "Please input your content",
+              },
+            ]}
+            >
+                <Input.TextArea rows={4}/>
+            </Form.Item>
+
+            <Button type="primary" htmlType="submit" className="w-30 m-auto">
+              Post
+            </Button>
+          </Form>
+        </Modal>
+
+        <Modal
           title="Manage Team Members"
           open={isTeamMemberModalVisible}
           onOk={handleTeamMemberModalOk}
@@ -755,7 +804,7 @@ function DepartmentDashboard() {
                     </Button>
                   </div>
                   <div className="ml-3 mr-3 mt-3">
-                    {announcementList ? (
+                    { announcementList && announcementList.length>0 ? (
                       <div>
                         <Text mark>{announcementList.at(0)?.content}</Text>
                         <p className="text-right text-sm">
@@ -773,8 +822,18 @@ function DepartmentDashboard() {
                         )}
                       </div>
                     ) : (
-                      <Spin size="large" />
+                        <div>
+                            {announcementList ? (
+                            <Text mark> No Annoucements</Text>
+                            ) : (
+                            <Spin size="large" />
+                            )}
+                        </div>
                     )}
+                  </div>
+
+                  <div className="mt-16 text-right">
+                    <Button shape="round" type="primary" onClick={handlePostBtnClicked}>Post</Button>
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0"></div>
