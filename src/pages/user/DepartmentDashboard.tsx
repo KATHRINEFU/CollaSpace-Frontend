@@ -17,10 +17,26 @@ import {
   // Skeleton,
   // Divider
 } from "antd";
-import { useGetDepartmentAccountsQuery, useGetTeamAnnouncementInSevenDaysQuery, useGetTeamMembersQuery } from "../../redux/api/apiSlice";
+import {
+  useGetDepartmentAccountsQuery,
+  useGetTeamAnnouncementInSevenDaysQuery,
+  useGetTeamMembersQuery,
+} from "../../redux/api/apiSlice";
 import { useEffect, useState } from "react";
-import { IAccount, IAnnouncement, ITeamMember, ITicket, ITicketAssign, ITicketLog } from "../../types";
-import { FilterOutlined, NotificationOutlined, AppstoreOutlined, TeamOutlined} from "@ant-design/icons";
+import {
+  IAccount,
+  IAnnouncement,
+  ITeamMember,
+  ITicket,
+  ITicketAssign,
+  ITicketLog,
+} from "../../types";
+import {
+  FilterOutlined,
+  NotificationOutlined,
+  AppstoreOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 // import InfiniteScroll from 'react-infinite-scroll-component';
 import axios from "../../api/axios";
 import ClientList from "../../components/user/ClientList";
@@ -38,15 +54,20 @@ function DepartmentDashboard() {
   // const [loading, setLoading] = useState(false);
   const { data: accounts, isLoading: isAccountsLoading } =
     useGetDepartmentAccountsQuery(departmentId);
-  const {data: announcements, isLoading: isAnnouncementsLoading} = useGetTeamAnnouncementInSevenDaysQuery(departmentId);
-  const {data: teamMembers, isLoading: isTeamMembersLoading} = useGetTeamMembersQuery(departmentId);
-  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsByTeamQuery(departmentId);
+  const { data: announcements, isLoading: isAnnouncementsLoading } =
+    useGetTeamAnnouncementInSevenDaysQuery(departmentId);
+  const { data: teamMembers, isLoading: isTeamMembersLoading } =
+    useGetTeamMembersQuery(departmentId);
+  const { data: tickets, isLoading: isTicketsLoading } =
+    useGetTicketsByTeamQuery(departmentId);
 
   const [accountList, setAccountList] = useState<IAccount[]>([]);
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
   const [teamMemberList, setTeamMemberList] = useState<ITeamMember[]>([]);
   const [ticketList, setTicketList] = useState<ITicket[]>([]);
-  const [teamMemberOptions, setTeamMemberOptions] = useState<{value: string, label: string}[]>([]);
+  const [teamMemberOptions, setTeamMemberOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   // const [value, setValue] = useState([]);
   const { Content } = Layout;
@@ -59,11 +80,16 @@ function DepartmentDashboard() {
     useState(false);
   const [isClientFilterModalVisible, setIsClientFilterModalVisible] =
     useState(false);
-  const [isAnnouncementHistoryModalVisible, setIsAnnouncementHistoryModalVisible] =
+  const [
+    isAnnouncementHistoryModalVisible,
+    setIsAnnouncementHistoryModalVisible,
+  ] = useState(false);
+  const [isTeamMemberModalVisible, setIsTeamMemberModalVisible] =
     useState(false);
-  const [isTeamMemberModalVisible, setIsTeamMemberModalVisible] = useState(false);
-  const [isEventFilterModalVisible, setIsEventFilterModalVisible] = useState(false);
-  const [isTicketFilterModalVisible, setIsTicketFilterModalVisible] = useState(false);
+  const [isEventFilterModalVisible, setIsEventFilterModalVisible] =
+    useState(false);
+  const [isTicketFilterModalVisible, setIsTicketFilterModalVisible] =
+    useState(false);
 
   const [clientFilterOptions, setClientFilterOptions] = useState<{
     type: string[];
@@ -143,7 +169,7 @@ function DepartmentDashboard() {
 
   const handleAnnouncementHistoryClicked = () => {
     setIsAnnouncementHistoryModalVisible(true);
-  }
+  };
 
   const handleAnnouncementHistoryModalOk = () => {
     setIsAnnouncementHistoryModalVisible(false);
@@ -155,7 +181,7 @@ function DepartmentDashboard() {
 
   const handleManageTeamMemberClicked = () => {
     setIsTeamMemberModalVisible(true);
-  }
+  };
 
   const handleTeamMemberModalOk = () => {
     setIsTeamMemberModalVisible(false);
@@ -166,7 +192,9 @@ function DepartmentDashboard() {
   };
 
   const handleDeleteTeamMember = (id: number) => {
-    const updatedList = teamMemberList.filter((member) => member.employee.id !== id);
+    const updatedList = teamMemberList.filter(
+      (member) => member.employee.id !== id,
+    );
     setTeamMemberList(updatedList);
   };
 
@@ -211,9 +239,6 @@ function DepartmentDashboard() {
     });
   };
 
-
-
-
   // const loadMoreData = () => {
   //     if (loading) {
   //         return;
@@ -243,16 +268,17 @@ function DepartmentDashboard() {
         }
       };
 
-
       const fetchPersonnelInfo = async (personnelId: number) => {
         try {
-            const response = await axios.get(`${baseUrl}/employee/${personnelId}`);
-            return response.data;
-          } catch (error) {
-            console.error("Error fetching personnel info: ", error);
-            return null;
-          }
-      }
+          const response = await axios.get(
+            `${baseUrl}/employee/${personnelId}`,
+          );
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching personnel info: ", error);
+          return null;
+        }
+      };
       const fetchAndSetAccount = async () => {
         // for each account, we have all fields except ICompany
         // fetch its company info by calling baseurl/client/{compantId}
@@ -268,32 +294,43 @@ function DepartmentDashboard() {
               }
             }
 
-            if(account.biddingPersonnel){
-                const personnelInfo = await fetchPersonnelInfo(account.biddingPersonnel)
-                if(personnelInfo){
-                    updatedAccount.biddingPersonnelEmployee = mapDataToEmployee(personnelInfo)
-                    
-                }
+            if (account.biddingPersonnel) {
+              const personnelInfo = await fetchPersonnelInfo(
+                account.biddingPersonnel,
+              );
+              if (personnelInfo) {
+                updatedAccount.biddingPersonnelEmployee =
+                  mapDataToEmployee(personnelInfo);
+              }
             }
-            if(account.salesPersonnel){
-                const personnelInfo = await fetchPersonnelInfo(account.salesPersonnel)
-                if(personnelInfo){
-                    updatedAccount.salesPersonnelEmployee = mapDataToEmployee(personnelInfo)
-                }
-            }
-
-            if(account.solutionArchitectPersonnel){
-                const personnelInfo = await fetchPersonnelInfo(account.solutionArchitectPersonnel)
-                if(personnelInfo){
-                    updatedAccount.solutionArchitectPersonnelEmployee = mapDataToEmployee(personnelInfo)
-                }
+            if (account.salesPersonnel) {
+              const personnelInfo = await fetchPersonnelInfo(
+                account.salesPersonnel,
+              );
+              if (personnelInfo) {
+                updatedAccount.salesPersonnelEmployee =
+                  mapDataToEmployee(personnelInfo);
+              }
             }
 
-            if(account.customerSuccessPersonnel){
-                const personnelInfo = await fetchPersonnelInfo(account.customerSuccessPersonnel)
-                if(personnelInfo){
-                    updatedAccount.customerSuccessPersonnelEmployee = mapDataToEmployee(personnelInfo)
-                }
+            if (account.solutionArchitectPersonnel) {
+              const personnelInfo = await fetchPersonnelInfo(
+                account.solutionArchitectPersonnel,
+              );
+              if (personnelInfo) {
+                updatedAccount.solutionArchitectPersonnelEmployee =
+                  mapDataToEmployee(personnelInfo);
+              }
+            }
+
+            if (account.customerSuccessPersonnel) {
+              const personnelInfo = await fetchPersonnelInfo(
+                account.customerSuccessPersonnel,
+              );
+              if (personnelInfo) {
+                updatedAccount.customerSuccessPersonnelEmployee =
+                  mapDataToEmployee(personnelInfo);
+              }
             }
             return updatedAccount;
           }),
@@ -304,67 +341,72 @@ function DepartmentDashboard() {
     }
   }, [accounts, isAccountsLoading]);
 
-
   useEffect(() => {
     const baseUrl = "http://localhost:8080";
     if (!isAnnouncementsLoading && announcements) {
-        const fetchAnnouncementCreatorName = async (id: number) => {
-            try {
-                const response = await axios.get(`${baseUrl}/employee/${id}`);
-                return response.data;
-              } catch (error) {
-                console.error("Error fetching announcement creator name: ", error);
-                return null;
-              }
-          }
-        
+      const fetchAnnouncementCreatorName = async (id: number) => {
+        try {
+          const response = await axios.get(`${baseUrl}/employee/${id}`);
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching announcement creator name: ", error);
+          return null;
+        }
+      };
 
       // Convert and sort announcements by creation date (newest first)
       const updateAnnouncementList = async () => {
         const updatedAnnouncements = await Promise.all(
           announcements.map(async (announcement: any) => {
-            const creatorInfo = await fetchAnnouncementCreatorName(announcement.announcementCreator);
-  
+            const creatorInfo = await fetchAnnouncementCreatorName(
+              announcement.announcementCreator,
+            );
+
             return {
               id: announcement.announcementId,
               teamId: departmentId,
-              teamName: '',
+              teamName: "",
               creatorId: announcement.announcementCreator,
-              creatorName: creatorInfo.employeeFirstname+ " "+ creatorInfo.employeeLastname || '', // Assign the fetched creator name or an empty string
+              creatorName:
+                creatorInfo.employeeFirstname +
+                  " " +
+                  creatorInfo.employeeLastname || "", // Assign the fetched creator name or an empty string
               creationDate: new Date(announcement.announcementCreationdate),
               content: announcement.announcementContent,
             };
-          })
+          }),
         );
-  
+
         // Sort announcements by creation date (newest first)
         const sortedAnnouncements = updatedAnnouncements.sort(
-          (a: IAnnouncement, b: IAnnouncement) => b.creationDate.getTime() - a.creationDate.getTime()
+          (a: IAnnouncement, b: IAnnouncement) =>
+            b.creationDate.getTime() - a.creationDate.getTime(),
         );
-  
-        setAnnouncementList(sortedAnnouncements); 
-    };
 
-    updateAnnouncementList();
-  }
-}, [announcements, isAnnouncementsLoading]);
+        setAnnouncementList(sortedAnnouncements);
+      };
 
-  useEffect(() => {
-    if(!isTeamMembersLoading && teamMembers){
-        const mappedTeamMembers = teamMembers.map((teamMember: any) => mapDataToTeamMember(teamMember));
-        setTeamMemberList(mappedTeamMembers);
+      updateAnnouncementList();
     }
-  }, [teamMembers, isTeamMembersLoading])
+  }, [announcements, isAnnouncementsLoading]);
 
   useEffect(() => {
-    const teamMembers= teamMemberList.map((member) => ({
-        value: member.employee.id.toString(), // Assuming employee ID is a number
-        label: `${member.employee.firstName} ${member.employee.lastName}`,
-      }));
+    if (!isTeamMembersLoading && teamMembers) {
+      const mappedTeamMembers = teamMembers.map((teamMember: any) =>
+        mapDataToTeamMember(teamMember),
+      );
+      setTeamMemberList(mappedTeamMembers);
+    }
+  }, [teamMembers, isTeamMembersLoading]);
 
-    setTeamMemberOptions(teamMembers)
-    
-  }, teamMemberList)
+  useEffect(() => {
+    const teamMembers = teamMemberList.map((member) => ({
+      value: member.employee.id.toString(), // Assuming employee ID is a number
+      label: `${member.employee.firstName} ${member.employee.lastName}`,
+    }));
+
+    setTeamMemberOptions(teamMembers);
+  }, teamMemberList);
 
   useEffect(() => {
     if (!isTicketsLoading && tickets) {
@@ -451,57 +493,62 @@ function DepartmentDashboard() {
     <>
       <Content style={{ margin: "24px 16px 0" }}>
         <Modal
-            title="Announcements in past seven days"
-            open = {isAnnouncementHistoryModalVisible}
-            onOk={handleAnnouncementHistoryModalOk}
-            onCancel={handleAnnouncementHistoryModalCancel}
+          title="Announcements in past seven days"
+          open={isAnnouncementHistoryModalVisible}
+          onOk={handleAnnouncementHistoryModalOk}
+          onCancel={handleAnnouncementHistoryModalCancel}
         >
-            <List
-                bordered
-                dataSource={announcementList}
-                renderItem={(item) => (
-                    <List.Item>
-                        <div>{item.content}</div>
-                        <Divider type="vertical"/>
-                        <div>{getFormattedDate(item.creationDate)}</div>
-                    </List.Item>
-                )}
-            />
-
+          <List
+            bordered
+            dataSource={announcementList}
+            renderItem={(item) => (
+              <List.Item>
+                <div>{item.content}</div>
+                <Divider type="vertical" />
+                <div>{getFormattedDate(item.creationDate)}</div>
+              </List.Item>
+            )}
+          />
         </Modal>
 
         <Modal
-            title="Manage Team Members"
-            open = {isTeamMemberModalVisible}
-            onOk={handleTeamMemberModalOk}
-            onCancel={handleTeamMemberModalCancel}
-            width={600}
+          title="Manage Team Members"
+          open={isTeamMemberModalVisible}
+          onOk={handleTeamMemberModalOk}
+          onCancel={handleTeamMemberModalCancel}
+          width={600}
         >
-            <List
-                bordered
-                dataSource={teamMemberList}
-                renderItem={(item) => (
-                    <List.Item>
-                        <List.Item.Meta
-                            avatar={<Avatar src={item.employee.profileUrl}/>}
-                            title={<p>{item.employee.firstName+ " " + item.employee.lastName}</p>}
-                        />
-                        
-                        <div>Joined at {getFormattedDate(item.joindate)}</div>
-                        <Divider type="vertical"/>
-                        <div>{item.role}</div>
+          <List
+            bordered
+            dataSource={teamMemberList}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  avatar={<Avatar src={item.employee.profileUrl} />}
+                  title={
+                    <p>
+                      {item.employee.firstName + " " + item.employee.lastName}
+                    </p>
+                  }
+                />
 
-                        <Button type="link" danger onClick={() => handleDeleteTeamMember(item.employee.id)}>
-                            Delete
-                        </Button>
-                    </List.Item>
-                )}
-            />
-            <div className="mt-3 flex items-center justify-center w-full">
-                <InviteTeamMember/>
-            </div>
-            
+                <div>Joined at {getFormattedDate(item.joindate)}</div>
+                <Divider type="vertical" />
+                <div>{item.role}</div>
 
+                <Button
+                  type="link"
+                  danger
+                  onClick={() => handleDeleteTeamMember(item.employee.id)}
+                >
+                  Delete
+                </Button>
+              </List.Item>
+            )}
+          />
+          <div className="mt-3 flex items-center justify-center w-full">
+            <InviteTeamMember />
+          </div>
         </Modal>
 
         <Modal
@@ -559,17 +606,22 @@ function DepartmentDashboard() {
           onOk={handleClientDetailModalOk}
           onCancel={() => setIsClientDetailModalVisible(false)}
           footer={[
-            <Button key="back" onClick={() => setIsClientDetailModalVisible(false)}>
+            <Button
+              key="back"
+              onClick={() => setIsClientDetailModalVisible(false)}
+            >
               Close
             </Button>,
           ]}
         >
-            {selectedAccount && (
-                <>
-                    <ClientDetail selectedAccount={selectedAccount} departmentId={departmentId}/>
-                </>
-            )}
-
+          {selectedAccount && (
+            <>
+              <ClientDetail
+                selectedAccount={selectedAccount}
+                departmentId={departmentId}
+              />
+            </>
+          )}
         </Modal>
 
         <Modal
@@ -669,9 +721,9 @@ function DepartmentDashboard() {
             >
               {teamMemberOptions.map((option) => (
                 <Option key={option.value} value={option.value}>
-                    {option.label}
+                  {option.label}
                 </Option>
-                ))}
+              ))}
             </Select>
           </div>
 
@@ -687,71 +739,89 @@ function DepartmentDashboard() {
         >
           <div className="flex flex-wrap mt-6 -mx-3">
             <div className="w-full max-w-full px-3 shrink-0 lg:flex-0 lg:w-6/12">
-              
-                <Card className="relative flex flex-col h-60 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                    <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-                    <div className="flex justify-between">
-                        <div className="flex gap-3 items-center">
-                        <NotificationOutlined />
-                        <h5 className="mb-0 text-lg">ANNOUNCEMENT</h5>
-                        </div>
-                        <Button type="link" onClick={handleAnnouncementHistoryClicked}>History in 7 days</Button>
+              <Card className="relative flex flex-col h-60 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                  <div className="flex justify-between">
+                    <div className="flex gap-3 items-center">
+                      <NotificationOutlined />
+                      <h5 className="mb-0 text-lg">ANNOUNCEMENT</h5>
                     </div>
-                    <div className="ml-3 mr-3 mt-3">
-                        {announcementList ? (
-                            <div>
-                                <Text mark>{announcementList.at(0)?.content}</Text>
-                                <p className="text-right text-sm"> Created By {announcementList.at(0)?.creatorName}</p>
-                                {announcementList.at(0) && (<p className="text-right text-sm"> Posted At {getFormattedDate(new Date(announcementList.at(0)!.creationDate))}</p>)}
-                                
-                            </div>
-                            
-                        ): (
-                            <Spin size="large"/>
+                    <Button
+                      type="link"
+                      onClick={handleAnnouncementHistoryClicked}
+                    >
+                      History in 7 days
+                    </Button>
+                  </div>
+                  <div className="ml-3 mr-3 mt-3">
+                    {announcementList ? (
+                      <div>
+                        <Text mark>{announcementList.at(0)?.content}</Text>
+                        <p className="text-right text-sm">
+                          {" "}
+                          Created By {announcementList.at(0)?.creatorName}
+                        </p>
+                        {announcementList.at(0) && (
+                          <p className="text-right text-sm">
+                            {" "}
+                            Posted At{" "}
+                            {getFormattedDate(
+                              new Date(announcementList.at(0)!.creationDate),
+                            )}
+                          </p>
                         )}
-                        
-                    </div>
-                    </div>
-                    <div className="flex-auto p-6 pt-0">
-                    
-                    </div>
+                      </div>
+                    ) : (
+                      <Spin size="large" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex-auto p-6 pt-0"></div>
               </Card>
             </div>
 
             <div className="w-full max-w-full px-3 mt-6 shrink-0 lg:mt-0 lg:flex-0 lg:w-6/12">
-                <Card className="relative flex flex-col h-60 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                    <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-                        <div className="flex justify-between">
-                            <div className="flex gap-3 items-center">
-                            <TeamOutlined />
-                            <h5 className="mb-0 text-lg">TEAM MEMBERS</h5>
-                            </div>
-                            <Button type="link" onClick={handleManageTeamMemberClicked}>Manage Team Members</Button>
-                        </div>
-                        <div className="flex flex-auto p-3">
-                            {teamMemberList ? (
-                                teamMemberList.map((member) => (
-                                    <div className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12">
-                                        <a className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-blue-500 border-solid w-14 h-14 rounded-circle">
-                                            <Image src={ member.employee.profileUrl} alt="Profile" preview = {false}/>
-                                        </a>
-                                        <p className="text-sm">{member.employee.firstName + " " + member.employee.lastName}</p>
-                                        <p className="text-sm">{member.role}</p>
-                                    </div>
-                                ))
-                            ): (
-                                <Spin size="large"/>
-                            )}
-                        </div>
+              <Card className="relative flex flex-col h-60 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                  <div className="flex justify-between">
+                    <div className="flex gap-3 items-center">
+                      <TeamOutlined />
+                      <h5 className="mb-0 text-lg">TEAM MEMBERS</h5>
                     </div>
-                    <div className="flex-auto p-6 pt-0">
-                    
-                    </div>
+                    <Button type="link" onClick={handleManageTeamMemberClicked}>
+                      Manage Team Members
+                    </Button>
+                  </div>
+                  <div className="flex flex-auto p-3">
+                    {teamMemberList ? (
+                      teamMemberList.map((member) => (
+                        <div className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12">
+                          <a className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-blue-500 border-solid w-14 h-14 rounded-circle">
+                            <Image
+                              src={member.employee.profileUrl}
+                              alt="Profile"
+                              preview={false}
+                            />
+                          </a>
+                          <p className="text-sm">
+                            {member.employee.firstName +
+                              " " +
+                              member.employee.lastName}
+                          </p>
+                          <p className="text-sm">{member.role}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <Spin size="large" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex-auto p-6 pt-0"></div>
               </Card>
             </div>
-              
+
             <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-12/12">
-                <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+              <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                 <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
                   <div className="flex justify-between">
                     <div className="flex gap-3 items-center">
@@ -800,52 +870,56 @@ function DepartmentDashboard() {
                 </div>
               </Card>
             </div>
-              
-            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-6/12">
-                <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                    <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-                    <div className="flex justify-between">
-                        <div className="flex gap-3 items-center">
-                        <AppstoreOutlined />
-                        <h5 className="mb-0 text-lg">EVENTS INVOLVED</h5>
-                        <Button
-                            type="link"
-                            icon={<FilterOutlined />}
-                            onClick={showEventFilterModal}
-                        />
-                        </div>
-                    </div>
-                    </div>
-
-                    <div className="flex-auto p-6 pt-0">
-                        <EventList teamIds={[Number(departmentId)]} filterOptions={eventFilterOptions} />
-                    </div>
-                </Card>
-            </div>
-
 
             <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-6/12">
-                <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                    <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-                    <div className="flex justify-between">
-                        <div className="flex gap-3 items-center">
-                        <AppstoreOutlined />
-                        <h5 className="mb-0 text-lg">TICKETS RELATED</h5>
-                        <Button
-                            type="link"
-                            icon={<FilterOutlined />}
-                            onClick={showTicketFilterModal}
-                        />
-                        </div>
+              <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                  <div className="flex justify-between">
+                    <div className="flex gap-3 items-center">
+                      <AppstoreOutlined />
+                      <h5 className="mb-0 text-lg">EVENTS INVOLVED</h5>
+                      <Button
+                        type="link"
+                        icon={<FilterOutlined />}
+                        onClick={showEventFilterModal}
+                      />
                     </div>
-                    </div>
+                  </div>
+                </div>
 
-                    <div className="flex-auto p-6 pt-0">
-                        <TicketAssignedList tickets={ticketList} filterOptions={ticketFilterOptions}/>
-                    </div>
-                </Card>
+                <div className="flex-auto p-6 pt-0">
+                  <EventList
+                    teamIds={[Number(departmentId)]}
+                    filterOptions={eventFilterOptions}
+                  />
+                </div>
+              </Card>
             </div>
 
+            <div className="w-full max-w-full px-3 mt-3 shrink-0 lg:flex-0 lg:w-6/12">
+              <Card className="relative flex flex-col h-full min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                <div className="border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+                  <div className="flex justify-between">
+                    <div className="flex gap-3 items-center">
+                      <AppstoreOutlined />
+                      <h5 className="mb-0 text-lg">TICKETS RELATED</h5>
+                      <Button
+                        type="link"
+                        icon={<FilterOutlined />}
+                        onClick={showTicketFilterModal}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-auto p-6 pt-0">
+                  <TicketAssignedList
+                    tickets={ticketList}
+                    filterOptions={ticketFilterOptions}
+                  />
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
       </Content>

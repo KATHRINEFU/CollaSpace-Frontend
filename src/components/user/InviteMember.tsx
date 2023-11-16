@@ -31,8 +31,8 @@ function InviteTeamMember() {
   };
 
   const handleSendInivitation = () => {
-    console.log("sending team member inivitation")
-  }
+    console.log("sending team member inivitation");
+  };
 
   return (
     <div className="flex flex-col justify-center p-3 border-2 rounded-lg bg-lime-100">
@@ -76,24 +76,26 @@ function InviteTeamMember() {
           >
             <h4>{member.employee}</h4>
             <Select
-                  value={member.authority}
-                  style={{ width: 120 }}
-                  onChange={(value) => {
-                    const updatedList = [...membersList];
-                    updatedList[index].authority = value as Member["authority"];
-                    setMembersList(updatedList);
-                  }}
-                >
-                  <Option value="viewer">Viewer</Option>
-                  <Option value="supervisor">Supervisor</Option>
-                  <Option value="editor">Editor</Option>
-                  <Option value="leader">Leader</Option>
-                </Select>
+              value={member.authority}
+              style={{ width: 120 }}
+              onChange={(value) => {
+                const updatedList = [...membersList];
+                updatedList[index].authority = value as Member["authority"];
+                setMembersList(updatedList);
+              }}
+            >
+              <Option value="viewer">Viewer</Option>
+              <Option value="supervisor">Supervisor</Option>
+              <Option value="editor">Editor</Option>
+              <Option value="leader">Leader</Option>
+            </Select>
           </List.Item>
         )}
       />
 
-      <Button type="primary" onClick={handleSendInivitation}>Send Invitation</Button>
+      <Button type="primary" onClick={handleSendInivitation}>
+        Send Invitation
+      </Button>
     </div>
   );
 }

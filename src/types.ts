@@ -169,7 +169,7 @@ export interface IEmployee {
   departmentName: string;
   startdate: Date;
   role: string;
-  profileUrl: string
+  profileUrl: string;
 }
 
 export interface ITeamMember {

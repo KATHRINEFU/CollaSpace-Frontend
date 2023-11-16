@@ -115,11 +115,11 @@ export function mapDataToEmployee(data: any) {
     departmentName: data.departmentName,
     startdate: data.employeeStartdate,
     role: data.employeeRole,
-    profileUrl: data.employeeProfileUrl
+    profileUrl: data.employeeProfileUrl,
   };
 }
 
-export function mapDataToTeamMember(data: any){
+export function mapDataToTeamMember(data: any) {
   return {
     employee: {
       id: data.employeeId,
@@ -130,7 +130,7 @@ export function mapDataToTeamMember(data: any){
       locationCountry: data.employeeLocationCountry,
       locationCity: data.employeeLocationCity,
       departmentId: data.departmentId,
-      departmentName: '',
+      departmentName: "",
       startdate: new Date(data.employeeStartdate),
       role: data.employeeRole,
       profileUrl: data.employeeProfileUrl,
@@ -138,7 +138,6 @@ export function mapDataToTeamMember(data: any){
     joindate: new Date(data.joindate),
     role: data.role,
   };
-  
 }
 
 export function mapEventToCalendarItem(data: any) {
@@ -174,6 +173,38 @@ export const getEventTypeColor = (eventType: string) => {
       return "#ffd666";
     case "activity":
       return "#b37feb";
+    default:
+      return "";
+  }
+};
+
+export const getStatusColor = (status: string) => {
+  switch (status) {
+    case "pending":
+      return "#d3f261";
+    case "in progress":
+      return "#ffd666";
+    case "in review":
+      return "#b37feb";
+    case "resolved":
+      return "#5cdbd3";
+    default:
+      return "";
+  }
+};
+
+export const getPriorityColor = (priority: number) => {
+  switch (priority) {
+    case 1:
+      return "#fff0f6";
+    case 2:
+      return "#ffadd2";
+    case 3:
+      return "#ff85c0";
+    case 4:
+      return "#eb2f96";
+    case 5:
+      return "#9e1068";
     default:
       return "";
   }

@@ -1,34 +1,20 @@
-import {
-  Table,
-  Modal,
-  Button,
-  Tag,
-  Form,
-  Input,
-  Rate,
-  Select,
-  Avatar,
-  Tooltip,
-  List,
-  Space,
-  Row,
-  Col,
-} from "antd";
+import { Table, Modal, Button, Tag, Form, Input, Space } from "antd";
 import { useEffect, useState, useRef } from "react";
 import { ITicket } from "../../types";
-import {
-  UserOutlined,
-  AntDesignOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { useGetTicketsQuery } from "../../redux/api/apiSlice";
+import { SearchOutlined } from "@ant-design/icons";
+import { useGetTicketsByEmployeeQuery } from "../../redux/api/apiSlice";
 import axios from "../../api/axios";
 import type { ColumnType, ColumnsType } from "antd/es/table";
 import type { FilterConfirmProps } from "antd/es/table/interface";
 import type { InputRef } from "antd";
 import Highlighter from "react-highlight-words";
-import MessageList from "../../components/user/MessageList";
-import { mapDataToTickets } from "../../utils/functions";
+import {
+  mapDataToTickets,
+  getFormattedDate,
+  getPriorityColor,
+  getStatusColor,
+} from "../../utils/functions";
+import TicketDetail from "../../components/user/TicketDetail";
 
 const teamNames = [
   "Support Team",
@@ -36,48 +22,6 @@ const teamNames = [
   "Testing Team",
   "Maintenance Team",
 ];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "pending":
-      return "#d3f261";
-    case "in progress":
-      return "#ffd666";
-    case "in review":
-      return "#b37feb";
-    case "resolved":
-      return "#5cdbd3";
-    default:
-      return "";
-  }
-};
-
-const getPriorityColor = (priority: number) => {
-  switch (priority) {
-    case 1:
-      return "#fff0f6";
-    case 2:
-      return "#ffadd2";
-    case 3:
-      return "#ff85c0";
-    case 4:
-      return "#eb2f96";
-    case 5:
-      return "#9e1068";
-    default:
-      return "";
-  }
-};
-
-function getFormattedDate(date: Date) {
-  var month = ("0" + (date.getMonth() + 1)).slice(-2);
-  var day = ("0" + date.getDate()).slice(-2);
-  var year = date.getFullYear();
-  var hour = ("0" + date.getHours()).slice(-2);
-  var min = ("0" + date.getMinutes()).slice(-2);
-  var seg = ("0" + date.getSeconds()).slice(-2);
-  return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + seg;
-}
 
 const getPriorityText = (priority: number) => {
   return priorityTexts[priority - 1];
@@ -93,7 +37,7 @@ const priorityTexts = [
 
 export function Component() {
   const maxRows = 10;
-  const { Option } = Select;
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [ticketForm] = Form.useForm();
@@ -105,7 +49,8 @@ export function Component() {
     { text: string; value: string }[]
   >([]);
 
-  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsQuery(4);
+  const { data: tickets, isLoading: isTicketsLoading } =
+    useGetTicketsByEmployeeQuery(4);
   const [allTickets, setAllTickets] = useState<ITicket[]>([]);
   const [initialValue, setInitialValue] = useState<{
     ticketTitle: string;
@@ -300,10 +245,6 @@ export function Component() {
   const showTicketModal = (record: ITicket) => {
     setSelectedTicket(record);
     setIsModalVisible(true);
-  };
-
-  const handleAcceptClicked = () => {
-    ticketForm.setFieldsValue({ status: "in progress" });
   };
 
   const [searchText, setSearchText] = useState("");
@@ -630,191 +571,11 @@ export function Component() {
           ]}
         >
           {initialValue && selectedTicket && (
-            <Form
-              form={ticketForm}
-              initialValues={initialValue}
-              key={selectedTicket.ticketId}
-            >
-              <Row>
-                <Col span={12}>
-                  <Form.Item name="ticketTitle" label="Title">
-                    <Input disabled />
-                  </Form.Item>
-                  <Form.Item name="ticketDescription" label="Description">
-                    <Input.TextArea rows={4} disabled />
-                  </Form.Item>
-
-                  <div className="flex gap-3">
-                    <Form.Item name="ticketStatus" label="Status">
-                      <Tag color={getStatusColor(selectedTicket.ticketStatus)}>
-                        {selectedTicket.ticketStatus}
-                      </Tag>
-                    </Form.Item>
-
-                    {selectedTicket.ticketStatus === "pending" && (
-                      <Form.Item>
-                        <Button
-                          type="primary"
-                          size="small"
-                          onClick={handleAcceptClicked}
-                          style={{ height: "10px" }}
-                        >
-                          Accept
-                        </Button>
-                      </Form.Item>
-                    )}
-                  </div>
-
-                  <Form.Item name="priority" label="Priority">
-                    <Rate
-                      tooltips={priorityTexts}
-                      value={selectedTicket.priority}
-                      disabled={true}
-                    />
-                    {selectedTicket.priority ? (
-                      <span className="ant-rate-text">
-                        {getPriorityText(selectedTicket.priority)}
-                      </span>
-                    ) : (
-                      ""
-                    )}
-                  </Form.Item>
-
-                  <div className="flex gap-3 w-full justify-between">
-                    <Form.Item
-                      name="fromTeamName"
-                      label="From Team"
-                      style={{ width: "250px" }}
-                    >
-                      <Select placeholder="from team" disabled={true}>
-                        {teamNames.map((teamName, index) => (
-                          <Option key={index} value={`team${index}`}>
-                            {teamName}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-
-                    <Form.Item
-                      name="toTeamName"
-                      label="To Team"
-                      style={{ width: "250px" }}
-                    >
-                      <Input disabled></Input>
-                    </Form.Item>
-                  </div>
-
-                  <div className="flex gap-3 w-full justify-between">
-                    <Form.Item
-                      name="ticketCreatorName"
-                      label="Created By"
-                      style={{ width: "250px" }}
-                    >
-                      <Input disabled />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="assignToName"
-                      label="Assigned To"
-                      style={{ width: "250px" }}
-                    >
-                      <Input disabled />
-                    </Form.Item>
-                  </div>
-
-                  <div className="flex gap-3 w-full justify-between">
-                    <div className="flex gap-3 items-center">
-                      <p>Viewers: </p>
-
-                      {/*TODO: get viewer's profile photo, popover to show fullname */}
-                      <Avatar.Group
-                        maxCount={5}
-                        size="large"
-                        maxStyle={{
-                          color: "#f56a00",
-                          backgroundColor: "#fde3cf",
-                        }}
-                      >
-                        <Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=3" />
-                        <Avatar style={{ backgroundColor: "#f56a00" }}>
-                          K
-                        </Avatar>
-                        <Tooltip title="Ant User" placement="top">
-                          <Avatar
-                            style={{ backgroundColor: "#87d068" }}
-                            icon={<UserOutlined />}
-                          />
-                        </Tooltip>
-                        <Avatar
-                          style={{ backgroundColor: "#1677ff" }}
-                          icon={<AntDesignOutlined />}
-                        />
-                      </Avatar.Group>
-                    </div>
-
-                    <div className="flex gap-3 items-center">
-                      <p>Supervisors: </p>
-
-                      {/*TODO: get viewer's profile photo, popover to show fullname */}
-                      <Avatar.Group
-                        maxCount={5}
-                        size="large"
-                        maxStyle={{
-                          color: "#f56a00",
-                          backgroundColor: "#fde3cf",
-                        }}
-                      >
-                        <Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=3" />
-                        <Avatar style={{ backgroundColor: "#f56a00" }}>
-                          K
-                        </Avatar>
-                        <Tooltip title="Ant User" placement="top">
-                          <Avatar
-                            style={{ backgroundColor: "#87d068" }}
-                            icon={<UserOutlined />}
-                          />
-                        </Tooltip>
-                        <Avatar
-                          style={{ backgroundColor: "#1677ff" }}
-                          icon={<AntDesignOutlined />}
-                        />
-                      </Avatar.Group>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 mt-3">
-                    <p>Attachments: </p>
-                    {/*TODO: filename, filepath */}
-                    <List
-                      size="small"
-                      bordered
-                      dataSource={selectedTicket.files}
-                      style={{ width: "300px" }}
-                      renderItem={(file) => (
-                        <List.Item>
-                          <a
-                            href={`path_to_your_files/${file}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {file}
-                          </a>
-                        </List.Item>
-                      )}
-                    />
-                  </div>
-                </Col>
-                <Col span={12}>
-                  <div className="ml-3 bg-lime-100 w-full h-full rounded-xl">
-                    <p className="ml-3 text-base mb-3">Ticket Logs</p>
-                    <MessageList
-                      logs={selectedTicket.ticketLogs}
-                      currentUserId={4}
-                    />
-                  </div>
-                </Col>
-              </Row>
-            </Form>
+            <TicketDetail
+              selectedTicket={selectedTicket}
+              initialValue={initialValue}
+              teamNames={teamNames}
+            />
           )}
         </Modal>
       </div>

@@ -52,35 +52,34 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
       return statusFilterMatch && priorityFilterMatch;
     }
     // replace 4 with cur user id
-    if(filterOptions.role){
+    if (filterOptions.role) {
       const hasSelectedRole =
-      filterOptions.role?.length === 0 || // No role selected (matches all roles)
-      ticket.assigns.some((assign) => {
-        // Check if the user's ID is found in the assigns
-        if (filterOptions.role?.includes(assign.role)) {
-          return 4 === assign.employeeId; // replace 4 with cur user id
-        }
-        return false;
-      });
+        filterOptions.role?.length === 0 || // No role selected (matches all roles)
+        ticket.assigns.some((assign) => {
+          // Check if the user's ID is found in the assigns
+          if (filterOptions.role?.includes(assign.role)) {
+            return 4 === assign.employeeId; // replace 4 with cur user id
+          }
+          return false;
+        });
       return statusFilterMatch && priorityFilterMatch && hasSelectedRole;
-
     }
 
-    if(filterOptions.teamMember){
-      const hasSelectedTeamMember = filterOptions.teamMember.length === 0 ||
-       filterOptions.teamMember.some((teamMemberId) => {
-        const isCreator = ticket.ticketCreator === Number(teamMemberId);
-        const isAssigned = ticket.assigns.some(
-          (assign) => assign.employeeId === Number(teamMemberId)
-        );
-        return isCreator || isAssigned;
-      });
+    if (filterOptions.teamMember) {
+      const hasSelectedTeamMember =
+        filterOptions.teamMember.length === 0 ||
+        filterOptions.teamMember.some((teamMemberId) => {
+          const isCreator = ticket.ticketCreator === Number(teamMemberId);
+          const isAssigned = ticket.assigns.some(
+            (assign) => assign.employeeId === Number(teamMemberId),
+          );
+          return isCreator || isAssigned;
+        });
 
       return statusFilterMatch && priorityFilterMatch && hasSelectedTeamMember;
     }
-    
 
-    return statusFilterMatch && priorityFilterMatch ;
+    return statusFilterMatch && priorityFilterMatch;
   });
 
   const priorityTexts = [
