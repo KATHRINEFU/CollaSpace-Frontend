@@ -19,7 +19,7 @@ import {
 } from "antd";
 import { useGetDepartmentAccountsQuery, useGetTeamAnnouncementInSevenDaysQuery, useGetTeamMembersQuery } from "../../redux/api/apiSlice";
 import { useEffect, useState } from "react";
-import { IAccount, IAnnouncement, ITeamMember } from "../../types";
+import { IAccount, IAnnouncement, ITeamMember, ITicket, ITicketAssign, ITicketLog } from "../../types";
 import { FilterOutlined, NotificationOutlined, AppstoreOutlined, TeamOutlined} from "@ant-design/icons";
 // import InfiniteScroll from 'react-infinite-scroll-component';
 import axios from "../../api/axios";
@@ -45,6 +45,8 @@ function DepartmentDashboard() {
   const [accountList, setAccountList] = useState<IAccount[]>([]);
   const [announcementList, setAnnouncementList] = useState<IAnnouncement[]>([]);
   const [teamMemberList, setTeamMemberList] = useState<ITeamMember[]>([]);
+  const [ticketList, setTicketList] = useState<ITicket[]>([]);
+  const [teamMemberOptions, setTeamMemberOptions] = useState<{value: string, label: string}[]>([]);
 
   // const [value, setValue] = useState([]);
   const { Content } = Layout;
@@ -79,7 +81,7 @@ function DepartmentDashboard() {
   const [ticketFilterOptions, setTicketFilterOptions] = useState({
     status: [],
     priority: [],
-    role: [],
+    teamMember: [],
   });
 
   const treeData = clientStatusByDepartment.map((departmentItem) => {
@@ -205,7 +207,7 @@ function DepartmentDashboard() {
     setTicketFilterOptions({
       status: [],
       priority: [],
-      role: [],
+      teamMember: [],
     });
   };
 
@@ -355,8 +357,95 @@ function DepartmentDashboard() {
   }, [teamMembers, isTeamMembersLoading])
 
   useEffect(() => {
+    const teamMembers= teamMemberList.map((member) => ({
+        value: member.employee.id.toString(), // Assuming employee ID is a number
+        label: `${member.employee.firstName} ${member.employee.lastName}`,
+      }));
 
-  }, [tickets, isTicketsLoading])
+    setTeamMemberOptions(teamMembers)
+    
+  }, teamMemberList)
+
+  useEffect(() => {
+    if (!isTicketsLoading && tickets) {
+      const mappedTickets = tickets.map((ticketData: any) => {
+        const {
+          ticketId,
+          ticketCreator,
+          ticketCreatorName,
+          ticketCreationdate,
+          ticketLastUpdatedate,
+          ticketTitle,
+          ticketDescription,
+          ticketStatus,
+          ticketPriority,
+          ticketFromTeam,
+          ticketDuedate,
+          assigns,
+          ticketLogs,
+          files,
+        } = ticketData;
+
+        // Map assigns data into ITicketAssign objects
+        const mappedAssigns: ITicketAssign[] = assigns.map(
+          (assignData: any) => {
+            const {
+              ticketAssignId,
+              employeeId,
+              teamId,
+              role,
+              ticketAssigndate,
+            } = assignData;
+
+            return {
+              ticketAssignId,
+              employeeId,
+              teamId,
+              role,
+              ticketAssigndate: new Date(ticketAssigndate),
+            };
+          },
+        );
+
+        const mappedTicketLogs: ITicketLog[] = ticketLogs.map(
+          (logData: any) => {
+            const {
+              ticketLogId,
+              ticketLogCreator,
+              ticketLogCreationdate,
+              ticketLogContent,
+            } = logData;
+
+            return {
+              ticketLogId,
+              ticketLogCreator,
+              ticketLogCreationdate: new Date(ticketLogCreationdate),
+              ticketLogContent,
+            };
+          },
+        );
+
+        return {
+          ticketId,
+          ticketCreator,
+          ticketCreatorName,
+          ticketCreationdate: new Date(ticketCreationdate),
+          ticketLastUpdatedate: new Date(ticketLastUpdatedate),
+          ticketTitle,
+          ticketDescription,
+          ticketStatus,
+          priority: ticketPriority,
+          fromTeamId: ticketFromTeam,
+          dueDate: new Date(ticketDuedate),
+          assigns: mappedAssigns,
+          ticketLogs: mappedTicketLogs,
+          files,
+        };
+      });
+
+      setTicketList(mappedTickets);
+    }
+  }, [isTicketsLoading, tickets]);
 
   return (
     <>
@@ -525,7 +614,7 @@ function DepartmentDashboard() {
             <Select
               mode="multiple"
               className="w-full"
-              placeholder="Select ticket statys"
+              placeholder="Select ticket status"
               value={ticketFilterOptions.status}
               onChange={(value) =>
                 setTicketFilterOptions({
@@ -565,20 +654,24 @@ function DepartmentDashboard() {
           </div>
 
           <div className="mb-4">
-            <label>My role as:</label>
+            <label>Ticket Member Involved:</label>
             <Select
               mode="multiple"
               className="w-full"
-              placeholder="Select my role for tickets"
-              value={ticketFilterOptions.role}
+              placeholder="Select ticket member involved"
+              value={ticketFilterOptions.teamMember}
               onChange={(value) =>
-                setTicketFilterOptions({ ...ticketFilterOptions, role: value })
+                setTicketFilterOptions({
+                  ...ticketFilterOptions,
+                  teamMember: value,
+                })
               }
             >
-              <Option value="creator">Creator</Option>
-              <Option value="assignee">Assignee</Option>
-              <Option value="supervisor">Supervisor</Option>
-              <Option value="viewer">Viewer</Option>
+              {teamMemberOptions.map((option) => (
+                <Option key={option.value} value={option.value}>
+                    {option.label}
+                </Option>
+                ))}
             </Select>
           </div>
 
@@ -748,7 +841,7 @@ function DepartmentDashboard() {
                     </div>
 
                     <div className="flex-auto p-6 pt-0">
-                        <TicketAssignedList tickets={[]} filterOptions={ticketFilterOptions}/>
+                        <TicketAssignedList tickets={ticketList} filterOptions={ticketFilterOptions}/>
                     </div>
                 </Card>
             </div>

@@ -4,7 +4,8 @@ import { ITicket } from "../../types";
 interface FilterOptions {
   status: string[];
   priority: string[];
-  role: string[];
+  role?: string[];
+  teamMember?: number[];
 }
 
 interface TicketAssignedListProps {
@@ -15,6 +16,8 @@ interface TicketAssignedListProps {
 function getBackgroundColor(status: string) {
   switch (status) {
     case "new":
+      return "bg-teal-100";
+    case "submitted":
       return "bg-teal-100";
     case "pending":
       return "bg-red-100";
@@ -45,21 +48,39 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
       filterOptions.priority.includes(ticket.priority.toString()); // Convert priority to string for comparison
 
     // replace 4 with cur user id
-    if (4 === ticket.ticketCreator && filterOptions.role.includes("creator")) {
+    if (4 === ticket.ticketCreator && filterOptions.role?.includes("creator")) {
       return statusFilterMatch && priorityFilterMatch;
     }
     // replace 4 with cur user id
-    const hasSelectedRole =
-      filterOptions.role.length === 0 || // No role selected (matches all roles)
+    if(filterOptions.role){
+      const hasSelectedRole =
+      filterOptions.role?.length === 0 || // No role selected (matches all roles)
       ticket.assigns.some((assign) => {
         // Check if the user's ID is found in the assigns
-        if (filterOptions.role.includes(assign.role)) {
+        if (filterOptions.role?.includes(assign.role)) {
           return 4 === assign.employeeId; // replace 4 with cur user id
         }
         return false;
       });
+      return statusFilterMatch && priorityFilterMatch && hasSelectedRole;
 
-    return statusFilterMatch && priorityFilterMatch && hasSelectedRole;
+    }
+
+    if(filterOptions.teamMember){
+      const hasSelectedTeamMember = filterOptions.teamMember.length === 0 ||
+       filterOptions.teamMember.some((teamMemberId) => {
+        const isCreator = ticket.ticketCreator === Number(teamMemberId);
+        const isAssigned = ticket.assigns.some(
+          (assign) => assign.employeeId === Number(teamMemberId)
+        );
+        return isCreator || isAssigned;
+      });
+
+      return statusFilterMatch && priorityFilterMatch && hasSelectedTeamMember;
+    }
+    
+
+    return statusFilterMatch && priorityFilterMatch ;
   });
 
   const priorityTexts = [
