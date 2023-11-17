@@ -1,6 +1,5 @@
 import { RouteObject } from "react-router-dom";
 import TeamDashboard from "../pages/user/TeamDashboard";
-import DepartmentDashboard from "../pages/user/DepartmentDashboard";
 
 export const UserRoutes: RouteObject[] = [
   {
@@ -38,9 +37,5 @@ export const UserRoutes: RouteObject[] = [
   {
     path: "/user/team/:teamId",
     element: <TeamDashboard />,
-  },
-  {
-    path: "/user/department/:departmentId",
-    element: <DepartmentDashboard />,
   },
 ];
