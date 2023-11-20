@@ -10,14 +10,15 @@ export const apiSlice = createApi({
   // “endpoints” 代表对该服务器的操作和请求
   endpoints: (builder) => ({
     // `getPosts` endpoint 是一个返回数据的 “Query” 操作
+    getAllEmployees: builder.query({
+      query: () => `/employee/all`,
+    }),
     getEmployeeTeams: builder.query({
       query: (employeeId) => `/employee/teams/${employeeId}`,
     }),
-
     getClient: builder.query({
       query: (clientId) => `/account/withcompany/${clientId}`,
     }),
-
     getEvents: builder.query({
       query: (teamId) => `/event/byteam/${teamId}`,
     }),
@@ -40,7 +41,7 @@ export const apiSlice = createApi({
       query: (teamId) => `/team/${teamId}`,
     }),
     getTeamAccounts: builder.query({
-      query: (teamId) => `/account/byteam/${teamId}`,
+      query: (teamId) => `/team/accounts/${teamId}`,
     }),
     getDepartmentAccounts: builder.query({
       query: (departmentId) => `/account/bydepartment/${departmentId}`,
@@ -56,6 +57,7 @@ export const apiSlice = createApi({
 
 // 为 `getPosts` Query endpoint 导出自动生成的 hooks
 export const {
+  useGetAllEmployeesQuery,
   useGetEmployeeTeamsQuery,
   useGetClientQuery,
   useGetEventsQuery,

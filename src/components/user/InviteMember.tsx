@@ -1,27 +1,76 @@
-import { useState } from "react";
-import { Input, Button, Select, List } from "antd";
+import { useState, useMemo } from "react";
+import { Button, Select, List, AutoComplete} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-const { Option } = Select;
+import { useGetAllEmployeesQuery } from "../../redux/api/apiSlice";
+import { IEmployee } from "../../types";
+import { mapDataToEmployee } from "../../utils/functions";
 
 interface Member {
-  employee: string;
+  employeeId: number,
+  employeeName: string,
   authority: "viewer" | "supervisor" | "editor" | "leader";
 }
 
 function InviteTeamMember() {
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const {data: employees, isLoading: isEmployeesLoading} = useGetAllEmployeesQuery({});
   const [authority, setAuthority] = useState<Member["authority"]>("viewer");
   const [membersList, setMembersList] = useState<Member[]>([]);
+  const [selectedOption, setSelectedOption] = useState<{label: string, value: number}>({label: '', value: 0});
+  const [inputValue, setInputValue] = useState('');
+
+
+  const { Option } = Select;
+
+  const employeeOptions = useMemo(() => {
+    if (!employees || isEmployeesLoading) return [];
+
+    const employeeList: IEmployee[] = employees.map((employeeData: any) =>
+      mapDataToEmployee(employeeData)
+    );
+
+    return employeeList.map((employee: IEmployee) => ({
+      label: `${employee.firstName} ${employee.lastName}`,
+      value: `${employee.id}`,
+    }));
+  }, [employees, isEmployeesLoading]);
+
+  const onSelect = (data: any, option: any) => {
+    setSelectedOption(option);
+    setInputValue(option.label);
+  };
+
+  const onChange = (data: any, option: any) => {
+    setInputValue(data);
+    setSelectedOption(option);
+  };
+
 
   const handleAddMember = () => {
-    if (searchQuery) {
-      // Add the selected employee and their authority to the members list.
-      setMembersList([...membersList, { employee: searchQuery, authority }]);
-      // Clear the search input and reset authority.
-      setSearchQuery("");
-      setAuthority("viewer");
+    if (selectedOption) {
+      // Check if the selected option is not already in the membersList
+      const exists = membersList.find(
+        (member) => member.employeeId === selectedOption.value
+      );
+
+      if (!exists) {
+        const newMember: Member = {
+          employeeId: selectedOption.value,
+          employeeName: selectedOption.label,
+          authority,
+        };
+
+        setMembersList([...membersList, newMember]);
+        setSelectedOption({label: '', value: 0});
+        setInputValue('');
+      } else {
+        // <Alert 
+        //   type="warning"
+        //   closable
+        //   message="This person is already added"/>;
+      }
     }
   };
+
 
   const handleRemoveMember = (index: number) => {
     // Remove a member from the list.
@@ -40,15 +89,21 @@ function InviteTeamMember() {
         Invite Team Member
       </h2>
       <div className="flex gap-3">
-        <Input
-          placeholder="Enter employee name"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ width: 200, marginRight: 8 }}
-        />
+      <AutoComplete
+        value={inputValue}
+        options={employeeOptions}
+        autoFocus={true}
+        style={{ width: 200, height: "40px" }}
+        filterOption={(inputValue, option) =>
+          option?.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+        }
+        onSelect={onSelect}
+        onChange={onChange}
+      />
+
         <Select
           value={authority}
-          style={{ width: 120, marginRight: 8 }}
+          style={{ width: 120, height: "40px", marginRight: 8 }}
           onChange={(value) => setAuthority(value as Member["authority"])}
         >
           <Option value="viewer">Viewer</Option>
@@ -74,7 +129,7 @@ function InviteTeamMember() {
               </Button>,
             ]}
           >
-            <h4>{member.employee}</h4>
+            <h4>{member.employeeName}</h4>
             <Select
               value={member.authority}
               style={{ width: 120 }}

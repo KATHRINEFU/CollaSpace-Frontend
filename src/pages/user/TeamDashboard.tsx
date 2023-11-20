@@ -78,12 +78,15 @@ function TeamDashboard() {
   const { SHOW_PARENT } = TreeSelect;
   const { Text } = Typography;
   const [announcementForm] = Form.useForm();
+  const [clientForm] = Form.useForm();
 
   const [selectedAccount, setSelectedAccount] = useState<IAccount | null>(null);
 
   const [isClientDetailModalVisible, setIsClientDetailModalVisible] =
     useState(false);
   const [isClientFilterModalVisible, setIsClientFilterModalVisible] =
+    useState(false);
+  const [isAddClientModalVisible, setIsAddClientModalVisible] =
     useState(false);
   const [
     isAnnouncementHistoryModalVisible,
@@ -145,6 +148,22 @@ function TeamDashboard() {
       width: "100%",
     },
   };
+
+  const onAddClient = (values: any) => {
+    console.log(values.clientId);
+  }
+
+  const handleAddClientBtnClicked = () => {
+    setIsAddClientModalVisible(true);
+  }
+  const handleAddClientModalOk = () => {
+    setIsAddClientModalVisible(false);
+  };
+
+  const handleAddClientModalCancel = () => {
+    setIsAddClientModalVisible(false);
+  };
+
   
   const onPostNewAnnouncement = (values: any) => {
     console.log("posting new announcement: " + values.content);
@@ -569,6 +588,36 @@ function TeamDashboard() {
         </Modal>
 
         <Modal
+          title="Add Client"
+          open={isAddClientModalVisible}
+          onOk={handleAddClientModalOk}
+          onCancel={handleAddClientModalCancel}
+        >
+          <Form
+            form={clientForm}
+            onFinish={onAddClient}
+            scrollToFirstError
+            className="flex flex-col justify-center"
+          >
+            <Form.Item
+            name="content"
+            rules={[
+              {
+                required: true,
+                message: "Please input your content",
+              },
+            ]}
+            >
+                <Input.TextArea rows={4}/>
+            </Form.Item>
+
+            <Button type="primary" htmlType="submit" className="w-30 m-auto">
+              Post
+            </Button>
+          </Form>
+        </Modal>
+
+        <Modal
           title="Manage Team Members"
           open={isTeamMemberModalVisible}
           onOk={handleTeamMemberModalOk}
@@ -909,21 +958,41 @@ function TeamDashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-center gap-6">
-                  <div className="w-16 h-4 rounded text-center text-sm bg-teal-100">
-                    Standard
-                  </div>
-
-                  <div className="w-16 h-4 rounded text-center text-sm bg-pink-100">
-                    Premium
-                  </div>
-                </div>
                 <div className="flex-auto p-6 pt-0">
                   {isAccountsLoading && accountList ? (
                     <div className="spinner-container">
                       <Spin size="large" />
                     </div>
                   ) : (
+                    <div>
+                      {accountList.length===0 ? (
+                        <Text mark className="text-center ml-6"> No Clients</Text>
+                        ) : (
+
+                          <div>
+                            <div className="flex items-center justify-center gap-6">
+                              <div className="w-16 h-4 rounded text-center text-sm bg-teal-100">
+                                Standard
+                              </div>
+
+                              <div className="w-16 h-4 rounded text-center text-sm bg-pink-100">
+                                Premium
+                              </div>
+                            </div>
+
+                            <ClientList
+                              accountList={accountList}
+                              filterOptions={clientFilterOptions}
+                              onOpenClientDetailModal={handleOpenClientDetailModal}
+                            />
+                          </div>
+                      )}
+
+                      <div className="mt-3 text-right">
+                        <Button shape="round" type="primary" onClick={handleAddClientBtnClicked}>Add</Button>
+                      </div>
+                      
+                    </div>
                     // <InfiniteScroll
                     //     dataLength={accountList.length}
                     //     next={loadMoreData}
@@ -934,11 +1003,7 @@ function TeamDashboard() {
                     // >
 
                     // </InfiniteScroll>
-                    <ClientList
-                      accountList={accountList}
-                      filterOptions={clientFilterOptions}
-                      onOpenClientDetailModal={handleOpenClientDetailModal}
-                    />
+                    
                   )}
                 </div>
               </Card>
