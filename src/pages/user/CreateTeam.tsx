@@ -2,6 +2,7 @@ import { Button, Col, Form, Input, Row, Select, Modal } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import InviteTeamMember from "../../components/user/InviteMember";
+import InviteClient from "../../components/user/InviteClient";
 
 const formItemLayout = {
   labelCol: {
@@ -128,26 +129,9 @@ export function Component() {
 
             <Col span={10}>
               <div>
-                <InviteTeamMember />
-                {/* <p className='inline-block mb-1 ml-1 text-base font-semibold text-slate-700'>Invite Team Members</p>
-                          <Form.Item
-                              name="viewers"
-                          >
-                              <AutoComplete
-                                    options={searchViewerResults.map((user) => ({ value: user }))}
-                                    onSearch={handleViewerSearch}
-                                    onSelect={handleSelectViewer}
-                                    placeholder="Search for users"
-                                    value={inputValue}
-                                />
-                                <div>
-                                    {selectedViewers.map((user) => (
-                                    <span key={user} className="selected-user">
-                                        {user} <Button type="link" onClick={() => handleRemoveViewer(user)}>Remove</Button>
-                                    </span>
-                                    ))}
-                                </div>
-                          </Form.Item> */}
+                <InviteTeamMember existingTeamMembers={[]}/>
+                <div className="mb-3"></div>
+                <InviteClient existingTeamAccounts={[]}/>
               </div>
             </Col>
 

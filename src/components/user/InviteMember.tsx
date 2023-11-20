@@ -2,16 +2,16 @@ import { useState, useMemo } from "react";
 import { Button, Select, List, AutoComplete} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useGetAllEmployeesQuery } from "../../redux/api/apiSlice";
-import { IEmployee } from "../../types";
+import { IEmployee, ITeamMember } from "../../types";
 import { mapDataToEmployee } from "../../utils/functions";
-
+import { message } from 'antd';
 interface Member {
   employeeId: number,
   employeeName: string,
   authority: "viewer" | "supervisor" | "editor" | "leader";
 }
 
-function InviteTeamMember() {
+function InviteTeamMember({ existingTeamMembers }: { existingTeamMembers: ITeamMember[] }) {
   const {data: employees, isLoading: isEmployeesLoading} = useGetAllEmployeesQuery({});
   const [authority, setAuthority] = useState<Member["authority"]>("viewer");
   const [membersList, setMembersList] = useState<Member[]>([]);
@@ -47,10 +47,24 @@ function InviteTeamMember() {
 
   const handleAddMember = () => {
     if (selectedOption) {
+      const isExistingTeamAccount = existingTeamMembers.find(
+        (teamMember: ITeamMember) => teamMember.employee.id === Number(selectedOption.value)
+      );
+
+      if (isExistingTeamAccount) {
+        message.error('Employee already exists in the team.');
+        return;
+      }
+
       // Check if the selected option is not already in the membersList
       const exists = membersList.find(
         (member) => member.employeeId === selectedOption.value
       );
+
+      if(exists){
+        message.error('Employee already added.');
+        return;
+      }
 
       if (!exists) {
         const newMember: Member = {

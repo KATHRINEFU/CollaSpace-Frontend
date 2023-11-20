@@ -9,7 +9,7 @@ import {
 } from "../../types";
 import {
   useGetEmployeeTeamsQuery,
-  useGetTicketsQuery,
+  useGetTicketsByEmployeeQuery,
 } from "../../redux/api/apiSlice";
 import {
   mapEventDataToEvent,
@@ -21,7 +21,7 @@ import {
 export function Component() {
   const { data: teams, isLoading: isTeamsLoading } =
     useGetEmployeeTeamsQuery(4);
-  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsQuery(4);
+  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsByEmployeeQuery(4);
 
   const [eventList, setEventList] = useState<
     (IDocumentEvent | IMeetingEvent | IActivityEvent)[]

@@ -51,6 +51,7 @@ import ClientDetail from "../../components/user/ClientDetail";
 import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
 import { useGetTicketsByTeamQuery, useGetTeamQuery, useGetTeamAccountsQuery } from "../../redux/api/apiSlice";
+import InviteClient from "../../components/user/InviteClient";
 
 function TeamDashboard() {
   const { teamId } = useParams();
@@ -78,7 +79,6 @@ function TeamDashboard() {
   const { SHOW_PARENT } = TreeSelect;
   const { Text } = Typography;
   const [announcementForm] = Form.useForm();
-  const [clientForm] = Form.useForm();
 
   const [selectedAccount, setSelectedAccount] = useState<IAccount | null>(null);
 
@@ -148,10 +148,6 @@ function TeamDashboard() {
       width: "100%",
     },
   };
-
-  const onAddClient = (values: any) => {
-    console.log(values.clientId);
-  }
 
   const handleAddClientBtnClicked = () => {
     setIsAddClientModalVisible(true);
@@ -593,28 +589,7 @@ function TeamDashboard() {
           onOk={handleAddClientModalOk}
           onCancel={handleAddClientModalCancel}
         >
-          <Form
-            form={clientForm}
-            onFinish={onAddClient}
-            scrollToFirstError
-            className="flex flex-col justify-center"
-          >
-            <Form.Item
-            name="content"
-            rules={[
-              {
-                required: true,
-                message: "Please input your content",
-              },
-            ]}
-            >
-                <Input.TextArea rows={4}/>
-            </Form.Item>
-
-            <Button type="primary" htmlType="submit" className="w-30 m-auto">
-              Post
-            </Button>
-          </Form>
+          <InviteClient existingTeamAccounts={accountList}/>
         </Modal>
 
         <Modal
@@ -653,7 +628,7 @@ function TeamDashboard() {
             )}
           />
           <div className="mt-3 flex items-center justify-center w-full">
-            <InviteTeamMember />
+            <InviteTeamMember existingTeamMembers={teamMemberList}/>
           </div>
         </Modal>
 
