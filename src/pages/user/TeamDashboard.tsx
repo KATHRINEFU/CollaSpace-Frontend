@@ -962,10 +962,14 @@ function TeamDashboard() {
                             />
                           </div>
                       )}
-
-                      <div className="mt-3 text-right">
-                        <Button shape="round" type="primary" onClick={handleAddClientBtnClicked}>Add</Button>
-                      </div>
+                      
+                      {!curTeam?.teamDepartmentId && (
+                        <div className="mt-3 text-right">
+                          <Button shape="round" type="primary" onClick={handleAddClientBtnClicked}>Add</Button>
+                        </div>
+                        )
+                      }
+                      
                       
                     </div>
                     // <InfiniteScroll

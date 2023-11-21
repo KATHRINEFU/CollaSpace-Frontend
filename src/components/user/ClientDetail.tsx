@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { IAccount } from "../../types";
-import { Card, Image, Row, Col, Divider, List } from "antd";
+import { Card, Image, Row, Col, Divider, List, Form, Select, Button, ConfigProvider } from "antd";
 import ClientTimeline from "./ClientTimeline";
 import UploadFile from "./UploadFile";
 import { getFormattedDate } from "../../utils/functions";
+import { clientStatusByDepartment } from "../../utils/constants";
 
 interface ClientDetailProps {
   selectedAccount: IAccount;
@@ -14,6 +15,10 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
   selectedAccount,
   departmentId,
 }) => {
+
+  const [clientStatusForm] = Form.useForm();
+  const {Option} = Select;
+
   const [documents, setDocuments] = useState([
     "www.googledoc.com/clientfile/1",
     "ClientFile-Version1.doc",
@@ -23,10 +28,23 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
     "ClientFile-Final.pdf",
   ]);
 
+  const currentDepartmentId = departmentId;
+  const currentDepartmentProcesses = currentDepartmentId ? clientStatusByDepartment.find(
+    (department) => department.departmentId === Number(currentDepartmentId)
+  )?.processes : [];
+
   const handleUploadSuccess = (fileName: string) => {
     // Add the uploaded file name to the documents list
     setDocuments([fileName, ...documents]);
   };
+
+  const onUpdateClientStatus = (values: any) => {
+    console.log(values);
+  }
+
+  const handlePushToNextDepartment = () => {
+
+  }
 
   return (
     <div>
@@ -122,6 +140,56 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
               </Card>
             </Col>
           </Row>
+
+          <Divider orientation="right">Status Update</Divider>
+            <div className="flex flex-col justify-center">
+              <Form
+                form={clientStatusForm}
+                onFinish={onUpdateClientStatus}
+                scrollToFirstError
+                className="flex flex-col justify-center"
+              >
+                <Form.Item
+                 name="status"
+                 rules={[
+                   {
+                     required: true,
+                     message: "Please select status",
+                   },
+                 ]}
+                >
+
+                  <span className="mr-3">New Status: </span>
+                  <Select
+                    placeholder="Select Client Status"
+                    style={{ width: 250 }}
+                    onChange={(value) => clientStatusForm.setFieldsValue({ status: value })}
+                  >
+                    {currentDepartmentProcesses &&
+                      currentDepartmentProcesses.map((process, index) => (
+                        <Option key={index} value={process}>
+                          {process}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+
+                <Button className="" htmlType="submit"> Update</Button>
+              </Form>
+
+
+              <ConfigProvider
+                theme={{
+                  token: {
+                    colorPrimary: '#D2DE32',
+                  },
+                }}
+              >
+                <Button className = "w-full mt-3" type="primary" onClick={handlePushToNextDepartment} >Push to next department</Button>
+              </ConfigProvider>
+            </div>
+              
+
         </Col>
 
         <Col span={8}>

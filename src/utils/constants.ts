@@ -51,10 +51,12 @@ export const roleOptions: SelectProps["options"] = [
 
 export const clientStatusByDepartment = [
   {
+    departmentId: 1,
     department: "Bidding",
     processes: ["Initial Reachout", "Presale Demo", "Intention Confirmed"],
   },
   {
+    departmentId: 2,
     department: "Sales",
     processes: [
       "Requirement Analysis",
@@ -67,6 +69,7 @@ export const clientStatusByDepartment = [
     ],
   },
   {
+    departmentId: 3,
     department: "Solution Architect",
     processes: [
       "Technical Implementation Planning",
@@ -77,6 +80,7 @@ export const clientStatusByDepartment = [
     ],
   },
   {
+    departmentId: 4,
     department: "Customer Success",
     processes: [
       "Training",
