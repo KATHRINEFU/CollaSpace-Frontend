@@ -1,5 +1,5 @@
 import { Avatar, Button, Form, Input, Spin } from "antd";
-import { useGetEmployeeDetailQuery } from "../../redux/api/apiSlice";
+import { useGetEmployeeDetailQuery } from "../../redux/user/userApiSlice";
 import { useEffect, useState } from "react";
 import axios from "../../api/axios";
 import { IEmployee } from "../../types";

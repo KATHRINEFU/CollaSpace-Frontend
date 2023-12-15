@@ -18,7 +18,7 @@ import {
   useGetEmployeeTeamsQuery,
   useGetTicketsByEmployeeQuery,
   useGetDepartmentAccountsQuery
-} from "../../redux/api/apiSlice";
+} from "../../redux/user/userApiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
 import {
   IAnnouncement,

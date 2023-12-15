@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button, List, AutoComplete} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { useGetAllAccountsQuery } from "../../redux/api/apiSlice";
+import { useGetAllAccountsQuery } from "../../redux/user/userApiSlice";
 import { IAccount } from "../../types";
 import { mapDataToEmployee } from "../../utils/functions";
 import axios from "../../api/axios";

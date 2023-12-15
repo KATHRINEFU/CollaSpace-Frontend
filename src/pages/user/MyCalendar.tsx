@@ -10,7 +10,7 @@ import {
 import {
   useGetEmployeeTeamsQuery,
   useGetTicketsByEmployeeQuery,
-} from "../../redux/api/apiSlice";
+} from "../../redux/user/userApiSlice";
 import {
   mapEventDataToEvent,
   mapDataToTickets,

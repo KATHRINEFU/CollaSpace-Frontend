@@ -1,5 +1,5 @@
 import { List, Modal, Button } from "antd";
-import { useGetEventsQuery } from "../../redux/api/apiSlice";
+import { useGetEventsQuery } from "../../redux/user/userApiSlice";
 import { IEvent } from "../../types";
 import { useState } from "react";
 import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";

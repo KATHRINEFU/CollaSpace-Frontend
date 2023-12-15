@@ -4,7 +4,7 @@ import { ColumnsType } from "antd/es/table";
 import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";
 import {
   useGetEmployeeTeamsQuery,
-} from "../../redux/api/apiSlice";
+} from "../../redux/user/userApiSlice";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { mapEventDataToEvent, getEventTypeColor } from "../../utils/functions";

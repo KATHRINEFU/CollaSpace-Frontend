@@ -23,7 +23,7 @@ import {
   useGetDepartmentAccountsQuery,
   useGetTeamAnnouncementInSevenDaysQuery,
   useGetTeamMembersQuery,
-} from "../../redux/api/apiSlice";
+} from "../../redux/user/userApiSlice";
 import { useEffect, useState } from "react";
 import {
   IAccount,
@@ -50,7 +50,7 @@ import InviteTeamMember from "../../components/user/InviteMember";
 import ClientDetail from "../../components/user/ClientDetail";
 import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
-import { useGetTicketsByTeamQuery, useGetTeamQuery, useGetTeamAccountsQuery } from "../../redux/api/apiSlice";
+import { useGetTicketsByTeamQuery, useGetTeamQuery, useGetTeamAccountsQuery } from "../../redux/user/userApiSlice";
 import InviteClient from "../../components/user/InviteClient";
 
 function TeamDashboard() {

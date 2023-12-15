@@ -6,15 +6,18 @@ import moment from "moment-timezone";
 import { useAppDispatch } from "../../redux/hooks";
 import { setCredentials } from "../../redux/auth/authSlice";
 import { useSignUpMutation } from "../../redux/auth/authApiSlice";
-import { useNavigate } from "react-router-dom";
+// import { useGetAllAccountsQuery } from "../../redux/user/userApiSlice";
+// import { useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 
 export const SignUp = () => {
   const [error, setError] = useState("");
   const [registerFormRef] = Form.useForm();
+  // const [signUp, { isLoading: isSubmitting }] = useSignUpMutation();
+  // const {data: employees, isLoading } = useGetAllEmployeesQuery({});
   const dispatch = useAppDispatch();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  // const [isSubmitting, setIsSubmitting] = useState(false);
+  // const navigate = useNavigate();
 
   moment.tz.setDefault("America/New_York");
 
@@ -43,12 +46,7 @@ export const SignUp = () => {
     role: string;
     password: string;
   }) => {
-    console.log(values);
-    setIsSubmitting(true);
-
-    axios.get("/employee/all").then((r) => {
-      console.log(r.data);
-    });
+    // setIsSubmitting(true);
 
     let payload = {
       employeeFirstname: values.firstname,
@@ -61,17 +59,45 @@ export const SignUp = () => {
       employeeRole: values.role,
       employeePassword: values.password,
     };
+
+    console.log(payload);
+    // console.log(employees)
+
+    // const { data } = await signUp({payload}).unwrap();
+    // dispatch(
+    //   setCredentials({
+    //     user: {
+    //       ...data,
+    //     },
+    //   })
+    // );
+    // notification.success({
+    //   type: "success",
+    //   message: "Sign up successful",
+    // });
+
+   const tokenData = {
+    "username": "hh@impact.com",
+    "password": "testpwd"
+  }
+    axios.post("/auth/token", tokenData);
+
     axios
-      .post("/employee/create", payload, {
+      .post("/auth/register", payload, {
         headers: {
           "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS,DELETE,PUT",
+          "user-agent" : "PostmanRuntime/7.35.0", 
+          "accept": "*/*", 
+          "cache-control": "no-cache", 
+          "postman-token": "123ab082-deac-4c50-8420-4ade705f7a92",
+          "host" : "localhost:8080", 
+          "accept-encoding": "gzip, deflate, br", 
         },
       })
       .then((r) => {
-        setIsSubmitting(false);
-        localStorage.setItem("token", r.data.token);
-        navigate("/dashboard");
-
+    
         dispatch(
           setCredentials({
             user: {
@@ -86,7 +112,6 @@ export const SignUp = () => {
         });
       })
       .catch((error: any) => {
-        setIsSubmitting(false);
         setError(error?.data?.message ?? error?.message);
       });
   };
@@ -351,8 +376,8 @@ export const SignUp = () => {
 
               <div className="text-center">
                 <Button
-                  disabled={isSubmitting}
-                  icon={isSubmitting ? <Spin size="small" /> : null}
+                  // disabled={isSubmitting}
+                  // icon={isSubmitting ? <Spin size="small" /> : null}
                   htmlType="submit"
                   type="primary"
                   className="bg-primary-blue inline-block w-full px-5 py-2.5 mt-2 mb-3 text-sm font-bold text-center text-white align-middle transition-all ease-in bg-transparent border-0 rounded-lg shadow-md cursor-pointer active:-translate-y-px hover:-translate-y-px hover:shadow-xs leading-normal tracking-tight-rem bg-150 bg-x-25 bg-gradient-to-tl from-zinc-800 to-zinc-700 hover:border-slate-700 hover:bg-slate-700 hover:text-white"

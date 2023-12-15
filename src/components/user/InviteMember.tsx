@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Button, Select, List, AutoComplete} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { useGetAllEmployeesQuery } from "../../redux/api/apiSlice";
+import { useGetAllEmployeesQuery } from "../../redux/user/userApiSlice";
 import { IEmployee, ITeamMember } from "../../types";
 import { mapDataToEmployee } from "../../utils/functions";
 import { message } from 'antd';

@@ -21,13 +21,14 @@ import ErrorBoundary from "../ErrorBoundary";
 import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
 import type { MenuProps } from "antd";
-import { useGetEmployeeTeamsQuery } from "../../redux/api/apiSlice";
+import { useGetEmployeeTeamsQuery } from "../../redux/user/userApiSlice";
 
 export default function UserLayout() {
   let { pathname } = useLocation();
   pathname = pathname.split("/")[2];
   const navigate = useNavigate();
   const { data: teams, isLoading } = useGetEmployeeTeamsQuery(4);
+  console.log(teams);
   // const [myDepartment, setMyDepartment] = useState<ITeam>();
   // const [myTeams, setMyTeams] = useState<ITeam[]>([]);
 

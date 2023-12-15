@@ -14,7 +14,7 @@ import { getEventTypeColor } from "../../utils/functions";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import TeamSearchAutocomplete from "./TeamSearchAutocomplete";
-import { useGetAllTeamsQuery } from "../../redux/api/apiSlice";
+import { useGetAllTeamsQuery } from "../../redux/user/userApiSlice";
 
 interface EventDetailProps {
   selectedEvent: IDocumentEvent | IActivityEvent | IMeetingEvent;

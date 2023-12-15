@@ -2,7 +2,7 @@ import { Table, Modal, Button, Tag, Form, Input, Space } from "antd";
 import { useEffect, useState, useRef } from "react";
 import { ITicket } from "../../types";
 import { SearchOutlined } from "@ant-design/icons";
-import { useGetTicketsByEmployeeQuery } from "../../redux/api/apiSlice";
+import { useGetTicketsByEmployeeQuery } from "../../redux/user/userApiSlice";
 import axios from "../../api/axios";
 import type { ColumnType, ColumnsType } from "antd/es/table";
 import type { FilterConfirmProps } from "antd/es/table/interface";
