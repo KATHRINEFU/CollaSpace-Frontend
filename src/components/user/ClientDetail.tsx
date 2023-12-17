@@ -2,7 +2,7 @@ import { useState } from "react";
 import { IAccount } from "../../types";
 import { Card, Image, Row, Col, Divider, List, Form, Select, Button, ConfigProvider } from "antd";
 import ClientTimeline from "./ClientTimeline";
-import UploadFile from "./UploadFile";
+import UploadFile from "./UploadUserFile";
 import { getFormattedDate } from "../../utils/functions";
 import { clientStatusByDepartment } from "../../utils/constants";
 

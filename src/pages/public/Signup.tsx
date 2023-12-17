@@ -60,7 +60,7 @@ export const SignUp = () => {
       employeePassword: values.password,
     };
 
-    console.log(payload);
+    // console.log(payload);
     // console.log(employees)
 
     // const { data } = await signUp({payload}).unwrap();
@@ -76,26 +76,20 @@ export const SignUp = () => {
     //   message: "Sign up successful",
     // });
 
-   const tokenData = {
-    "username": "hh@impact.com",
-    "password": "testpwd"
-  }
-    axios.post("/auth/token", tokenData);
+  //  const tokenData = {
+  //   "username": "hh@impact.com",
+  //   "password": "testpwd"
+  // }
+  //   axios.post("/auth/token", tokenData);
+
+
+    axios.get("/employee/all")
+        .then(function (response) {
+            console.log(response.data);
+        });
 
     axios
-      .post("/auth/register", payload, {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET,POST,OPTIONS,DELETE,PUT",
-          "user-agent" : "PostmanRuntime/7.35.0", 
-          "accept": "*/*", 
-          "cache-control": "no-cache", 
-          "postman-token": "123ab082-deac-4c50-8420-4ade705f7a92",
-          "host" : "localhost:8080", 
-          "accept-encoding": "gzip, deflate, br", 
-        },
-      })
+      .post("/employee/create", payload)
       .then((r) => {
     
         dispatch(

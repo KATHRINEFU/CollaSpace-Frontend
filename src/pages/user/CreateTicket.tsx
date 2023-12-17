@@ -12,7 +12,7 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { SelectProps } from "antd/es/select";
-import UploadFile from "../../components/user/UploadFile";
+import UploadUserFile from "../../components/user/UploadUserFile";
 
 const formItemLayout = {
   labelCol: {
@@ -48,6 +48,7 @@ export function Component() {
   const [selectedViewers, setSelectedViewers] = useState<string[]>([]);
   const [searchViewerResults, setSearchViewerResults] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState<string>("");
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
 
   const [options, setOptions] = useState<SelectProps<object>["options"]>([]);
   const getRandomInt = (max: number, min = 0) =>
@@ -133,6 +134,12 @@ export function Component() {
 
   const onFinish = (values: any) => {
     console.log("Received values of form: ", values);
+    console.log("Received uploaded file urls", uploadedUrls);
+  };
+
+  const handleFileUploadComplete = (urls: string[]) => {
+    setUploadedUrls(urls);
+    // You can now use 'uploadedUrls' for further processing or sending to backend
   };
 
   return (
@@ -300,7 +307,7 @@ export function Component() {
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Add Supporting Files
                 </p>
-                <UploadFile />
+                <UploadUserFile onUploadComplete={handleFileUploadComplete}/>
               </div>
             </Col>
 
