@@ -8,12 +8,12 @@ import { setCredentials } from "../../redux/auth/authSlice";
 import { useSignUpMutation } from "../../redux/auth/authApiSlice";
 // import { useGetAllAccountsQuery } from "../../redux/user/userApiSlice";
 // import { useNavigate } from "react-router-dom";
-import axios from "../../api/axios";
+import axios from 'axios';
 
 export const SignUp = () => {
   const [error, setError] = useState("");
   const [registerFormRef] = Form.useForm();
-  // const [signUp, { isLoading: isSubmitting }] = useSignUpMutation();
+  const [signUp, { isLoading: isSubmitting }] = useSignUpMutation();
   // const {data: employees, isLoading } = useGetAllEmployeesQuery({});
   const dispatch = useAppDispatch();
   // const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,14 +82,13 @@ export const SignUp = () => {
   // }
   //   axios.post("/auth/token", tokenData);
 
-
-    axios.get("/employee/all")
+    axios.get("/api/employee/all")
         .then(function (response) {
             console.log(response.data);
         });
 
     axios
-      .post("/employee/create", payload)
+      .post("/api/employee/create", payload)
       .then((r) => {
     
         dispatch(

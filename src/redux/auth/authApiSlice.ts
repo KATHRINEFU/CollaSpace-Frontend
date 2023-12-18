@@ -6,14 +6,14 @@ export const authApiSplice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     signIn: builder.mutation<any, ISignIn>({
       query: (body) => ({
-        url: body?.token ? "/auth/google/sign-in" : "/employee/login",
+        url: body?.token ? "/auth/google/sign-in" : "/api/employee/login",
         method: HTTP.POST,
         body,
       }),
     }),
     signUp: builder.mutation<any, any>({
       query: (body) => ({
-        url: "/auth/register",
+        url: "/api/employee/create",
         method: HTTP.POST,
         body,
       }),

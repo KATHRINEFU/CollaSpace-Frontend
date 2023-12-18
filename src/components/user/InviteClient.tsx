@@ -4,7 +4,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useGetAllAccountsQuery } from "../../redux/user/userApiSlice";
 import { IAccount } from "../../types";
 import { mapDataToEmployee } from "../../utils/functions";
-import axios from "../../api/axios";
+import axios from 'axios'
 import { message } from 'antd';
 
 function InviteClient({ existingTeamAccounts }: { existingTeamAccounts: IAccount[] }) {

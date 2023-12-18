@@ -2,7 +2,7 @@ import { useState } from "react";
 import { IAccount } from "../../types";
 import { Card, Image, Row, Col, Divider, List, Form, Select, Button, ConfigProvider } from "antd";
 import ClientTimeline from "./ClientTimeline";
-import UploadFile from "./UploadUserFile";
+import UploadUserFile from "./UploadUserFile";
 import { getFormattedDate } from "../../utils/functions";
 import { clientStatusByDepartment } from "../../utils/constants";
 
@@ -32,11 +32,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
   const currentDepartmentProcesses = currentDepartmentId ? clientStatusByDepartment.find(
     (department) => department.departmentId === Number(currentDepartmentId)
   )?.processes : [];
-
-  const handleUploadSuccess = (fileName: string) => {
-    // Add the uploaded file name to the documents list
-    setDocuments([fileName, ...documents]);
-  };
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
 
   const onUpdateClientStatus = (values: any) => {
     console.log(values);
@@ -45,6 +41,11 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
   const handlePushToNextDepartment = () => {
 
   }
+
+  const handleFileUploadComplete = (urls: string[]) => {
+    setUploadedUrls(urls);
+    // You can now use 'uploadedUrls' for further processing or sending to backend
+  };
 
   return (
     <div>
@@ -204,7 +205,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
           />
 
           <div className="h-30">
-            <UploadFile onUploadSuccess={handleUploadSuccess} />
+            <UploadUserFile onUploadComplete={handleFileUploadComplete} />
           </div>
         </Col>
       </Row>

@@ -41,7 +41,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 // import InfiniteScroll from 'react-infinite-scroll-component';
-import axios from "../../api/axios";
+import axios from "axios";
 import ClientList from "../../components/user/ClientList";
 import { clientStatusByDepartment } from "../../utils/constants";
 import { getFormattedDate, mapDataToTeam } from "../../utils/functions";

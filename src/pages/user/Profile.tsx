@@ -1,7 +1,7 @@
 import { Avatar, Button, Form, Input, Spin } from "antd";
 import { useGetEmployeeDetailQuery } from "../../redux/user/userApiSlice";
 import { useEffect, useState } from "react";
-import axios from "../../api/axios";
+import axios from "axios";
 import { IEmployee } from "../../types";
 import { mapDataToEmployee, getFormattedDate } from "../../utils/functions";
 

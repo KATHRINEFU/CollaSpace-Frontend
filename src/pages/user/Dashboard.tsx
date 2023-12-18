@@ -30,7 +30,7 @@ import {
 } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { mapDataToEmployee } from "../../utils/functions";
-import axios from "../../api/axios";
+import axios from "axios";
 
 export function Component() {
   const { data: teams, isLoading: isTeamsLoading } =
