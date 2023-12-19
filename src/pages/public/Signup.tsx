@@ -83,9 +83,12 @@ export const SignUp = () => {
   //   axios.post("/auth/token", tokenData);
 
     axios
-      .post("/api/employee/create", payload)
+      .post("/api/auth/register", payload)
       .then((r) => {
-    
+        if(!r.data){
+          setError("Error: Signup failed, email already exist, please try another email or login");
+          return;
+        }
         dispatch(
           setCredentials({
             user: {
@@ -100,8 +103,8 @@ export const SignUp = () => {
         });
         navigate("/user/dashboard");
       })
-      .catch((error: any) => {
-        setError(error?.data?.message ?? error?.message);
+      .catch(() => {
+        setError("Signup failed, email already exist, please try another email or login");
       });
   };
 

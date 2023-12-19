@@ -1,5 +1,5 @@
 import { GoogleAuthButton } from "../../components/common/GoogleAuth";
-import { Alert, Button, Form, Input, Spin, notification } from "antd";
+import { Alert, Button, Form, Input, notification } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../redux/hooks";
@@ -14,7 +14,7 @@ export const Login = () => {
   const [loginFormRef] = Form.useForm();
   const dispatch = useAppDispatch();
   const [isCookieDisabled] = useIsCookieDisabled();
-  const [requireCookie, setRequireCookie] = useState(false);
+  const [, setRequireCookie] = useState(false);
 
   const handleSignupClick = () => {
     navigate("/sign-up");

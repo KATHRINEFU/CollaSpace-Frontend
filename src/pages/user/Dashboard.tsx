@@ -31,8 +31,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { mapDataToEmployee } from "../../utils/functions";
 import axios from "axios";
-import Cookies from "js-cookie";
-import { CS_TOKEN } from "../../utils/constants";
 
 export function Component() {
   const { data: teams, isLoading: isTeamsLoading } =
@@ -74,9 +72,6 @@ export function Component() {
 
 
   const [uniqueEventIds, setUniqueEventIds] = useState(new Set());
-
-  const token = Cookies.get(CS_TOKEN);
-  console.log(token);
 
   useEffect(() => {
     if (accounts && !isAccountsLoading) {
@@ -569,17 +564,18 @@ export function Component() {
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
-                      <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
+                      
                         {isTeamsLoading ? (
                           <div className="spinner-container">
                             <Spin size="large" />
                           </div>
                         ) : (
-                          <p className="text-xl text-white">
-                            {uniqueAccountIds.length}
-                          </p>
+                          <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
+                            <p className="text-xl text-white">
+                              {uniqueAccountIds.length}
+                            </p>
+                          </div>
                         )}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -627,11 +623,18 @@ export function Component() {
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
-                      <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">
-                          {ticketAssignedCount}
-                        </p>
-                      </div>
+
+                      {isTicketsLoading ? (
+                        <div className="spinner-container">
+                          <Spin size="large" />
+                        </div>
+                      ): (
+                        <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
+                          <p className="text-xl text-white">
+                            {ticketAssignedCount}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -650,11 +653,17 @@ export function Component() {
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
-                      <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                        <p className="text-xl text-white">
-                          {ticketCreatedCount}
-                        </p>
+                      {isTicketsLoading ? (
+                        <div className="spinner-container">
+                          <Spin size="large" />
+                        </div>
+                      ): (
+                        <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
+                          <p className="text-xl text-white">
+                            {ticketCreatedCount}
+                          </p>
                       </div>
+                      )}
                     </div>
                   </div>
                 </div>
