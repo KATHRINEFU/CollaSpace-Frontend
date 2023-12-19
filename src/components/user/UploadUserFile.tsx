@@ -25,8 +25,8 @@ const UploadUserFile: React.FC<UploadFileProps> = ({onUploadComplete}) => {
   const s3BaseUrl = `https://${S3_BUCKET}.s3.${REGION}.amazonaws.com`;
 
   AWS.config.update({
-    accessKeyId: "AKIA422XPOVU75BHECNE",
-    secretAccessKey: "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",
+    accessKeyId: "id",
+    secretAccessKey: "new_key",
   });
   const s3 = new AWS.S3({
     region: REGION,
