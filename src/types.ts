@@ -45,11 +45,9 @@ export interface ISignIn {
   token?: string;
 }
 export interface IUser {
-  id: string;
-  firstName: string;
-  lastName: string;
+  id: number;
   email: string;
-  token?: string;
+  token: string;
 }
 export interface IAnnouncement {
   id: number;

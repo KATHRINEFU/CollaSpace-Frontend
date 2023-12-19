@@ -22,6 +22,7 @@ import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
 import type { MenuProps } from "antd";
 import { useGetEmployeeTeamsQuery } from "../../redux/user/userApiSlice";
+import { logOut } from "../../redux/auth/authSlice";
 
 export default function UserLayout() {
   let { pathname } = useLocation();
@@ -57,6 +58,11 @@ export default function UserLayout() {
   const handleProfileBtnClicked = () => {
     navigate("/user/profile");
   };
+
+  const handleLogout = () => {
+    logOut();
+    navigate("/login");
+  }
 
   type MenuItem = Required<MenuProps>["items"][number];
   function getItem(
@@ -204,6 +210,7 @@ export default function UserLayout() {
                     icon={<LogoutOutlined />}
                     style={{ width: "42px" }}
                     className="mr-3"
+                    onClick={handleLogout}
                   />
                 </div>
               </div>

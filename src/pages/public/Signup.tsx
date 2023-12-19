@@ -1,23 +1,23 @@
 import { GoogleAuthButton } from "../../components/common/GoogleAuth";
-import { Alert, Button, Form, Input, notification, Select, Spin } from "antd";
+import { Alert, Button, Form, Input, notification, Select } from "antd";
 import { useState, useEffect } from "react";
 import { departmentOptions, roleOptions } from "../../utils/constants";
 import moment from "moment-timezone";
 import { useAppDispatch } from "../../redux/hooks";
 import { setCredentials } from "../../redux/auth/authSlice";
-import { useSignUpMutation } from "../../redux/auth/authApiSlice";
+// import { useSignUpMutation } from "../../redux/auth/authApiSlice";
 // import { useGetAllAccountsQuery } from "../../redux/user/userApiSlice";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 export const SignUp = () => {
   const [error, setError] = useState("");
   const [registerFormRef] = Form.useForm();
-  const [signUp, { isLoading: isSubmitting }] = useSignUpMutation();
+  // const [signUp, { isLoading: isSubmitting }] = useSignUpMutation();
   // const {data: employees, isLoading } = useGetAllEmployeesQuery({});
   const dispatch = useAppDispatch();
   // const [isSubmitting, setIsSubmitting] = useState(false);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   moment.tz.setDefault("America/New_York");
 
@@ -82,11 +82,6 @@ export const SignUp = () => {
   // }
   //   axios.post("/auth/token", tokenData);
 
-    axios.get("/api/employee/all")
-        .then(function (response) {
-            console.log(response.data);
-        });
-
     axios
       .post("/api/employee/create", payload)
       .then((r) => {
@@ -103,6 +98,7 @@ export const SignUp = () => {
           type: "success",
           message: "Register successful",
         });
+        navigate("/user/dashboard");
       })
       .catch((error: any) => {
         setError(error?.data?.message ?? error?.message);

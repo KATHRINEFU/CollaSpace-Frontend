@@ -31,6 +31,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { mapDataToEmployee } from "../../utils/functions";
 import axios from "axios";
+import Cookies from "js-cookie";
+import { CS_TOKEN } from "../../utils/constants";
 
 export function Component() {
   const { data: teams, isLoading: isTeamsLoading } =
@@ -72,6 +74,9 @@ export function Component() {
 
 
   const [uniqueEventIds, setUniqueEventIds] = useState(new Set());
+
+  const token = Cookies.get(CS_TOKEN);
+  console.log(token);
 
   useEffect(() => {
     if (accounts && !isAccountsLoading) {
