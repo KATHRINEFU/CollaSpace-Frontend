@@ -1,4 +1,4 @@
-import { Avatar, Button, Form, Input, Spin, message, Upload, notification } from "antd";
+import { Avatar, Button, Form, Input, Spin, message, Upload, notification, Select } from "antd";
 import { useGetEmployeeDetailQuery } from "../../redux/user/userApiSlice";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -9,6 +9,7 @@ import type { UploadChangeParam } from 'antd/es/upload';
 import type { RcFile, UploadFile, UploadProps } from 'antd/es/upload/interface';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import AWS from "aws-sdk";
+import { roleOptions } from "../../utils/constants";
 
 export function Component() {
   const user = useUser();
@@ -30,13 +31,17 @@ export function Component() {
   }>();
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | undefined>(employee?.profileUrl);
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState({});
+  let refreshPage = false;
+
 
   // S3 Configuration
-  const S3_BUCKET = process.env.REACT_APP_AWS_S3_BUCKET as string;
-  const REGION = process.env.REACT_APP_AWS_REGION;
+  const S3_BUCKET = import.meta.env.VITE_AWS_S3_BUCKET as string;
+  const REGION = import.meta.env.VITE_AWS_REGION;
   const s3BaseUrl = `https://${S3_BUCKET}.s3.${REGION}.amazonaws.com`;
-  const ACCESS_KEY = process.env.REACT_APP_AWS_ACCESS_KEY;
-  const SECRET_KEY = process.env.REACT_APP_AWS_SECRET_KEY;
+  const ACCESS_KEY = import.meta.env.VITE_AWS_ACCESS_KEY;
+  const SECRET_KEY = import.meta.env.VITE_AWS_SECRET_KEY;
 
   AWS.config.update({
     accessKeyId: ACCESS_KEY,
@@ -51,9 +56,35 @@ export function Component() {
     setIsEditting(true);
   };
 
-  const handleSaveBtnClicked = () => {
+  const handleCancelBtnClicked = () => {
+    refreshPage = !true;
     setIsEditting(false);
   };
+
+  const handleUpdateProfile = (values: any) => {
+    setIsEditting(false);
+    console.log(values);
+    axios.put("api/employee/edit" + user?.id,values)
+    .then((response) => {
+      if(response.status >= 200 && response.status < 300) {
+        notification.success({
+          type: "success",
+          message: "Update Profile Success",
+        });
+      } else {
+        notification.error({
+          type: "error",
+          message: "Failed to Update Profile",
+        });
+      }
+    })
+    .catch(() => {
+      notification.error({
+        type: "error",
+        message: "Failed to Update Profile",
+      });
+    })
+  }
   
   const beforeUpload = (file: RcFile) => {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
@@ -140,6 +171,21 @@ export function Component() {
       <div style={{ marginTop: 8 }}>Upload</div>
     </div>
   );
+
+  useEffect(() => {
+    fetch(
+      "https://valid.layercode.workers.dev/list/countries?format=select&flags=true&value=code",
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setCountries(data.countries);
+        setSelectedCountry(data.userSelectValue);
+      });
+  }, []);
+
+  useEffect(() => {
+    
+  }, [refreshPage])
 
   useEffect(() => {
     const baseUrl = "http://localhost:8080";
@@ -244,6 +290,8 @@ export function Component() {
                 className="mb-32"
                 form={profileForm}
                 initialValues={initialValue}
+                onFinish={handleUpdateProfile}
+                onValuesChange={() => profileForm.resetFields()}
               >
                 <div className="flex flex-wrap mt-4 -mx-3">
                   <div className="w-full max-w-full px-3 flex-0 sm:w-6/12">
@@ -253,7 +301,7 @@ export function Component() {
                       </p>
                       <Input
                         disabled={!isEditting}
-                        value={initialValue.firstName}
+                        // value={initialValue.firstName}
                       />
                       {/* <p>{employee.firstName}</p> */}
                     </Form.Item>
@@ -282,7 +330,7 @@ export function Component() {
                       <Input
                         value={initialValue.email}
                         className="focus:shadow-primary-outline text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-                        disabled={!isEditting}
+                        disabled={true}
                       />
                     </Form.Item>
                   </div>
@@ -307,9 +355,17 @@ export function Component() {
                       <p className="mb-1 ml-1 text-xs font-bold text-slate-700 ">
                         Location Country
                       </p>
-                      <Input
+                      {/* <Input
                         value={initialValue.locationCountry}
                         className="focus:shadow-primary-outline text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+                        disabled={!isEditting}
+                      /> */}
+                      <Select
+                        options={countries}
+                        value={selectedCountry}
+                        onChange={(selectedOption) =>
+                          setSelectedCountry(selectedOption)
+                        }
                         disabled={!isEditting}
                       />
                     </Form.Item>
@@ -338,7 +394,7 @@ export function Component() {
                       <Input
                         value={initialValue.startdate}
                         className="focus:shadow-primary-outline text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
-                        disabled={!isEditting}
+                        disabled={true}
                       />
                     </Form.Item>
                   </div>
@@ -348,9 +404,16 @@ export function Component() {
                       <p className="mb-1 ml-1 text-xs font-bold text-slate-700 ">
                         Role
                       </p>
-                      <Input
+                      {/* <Input
                         value={initialValue.role}
                         className="focus:shadow-primary-outline text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+                        disabled={!isEditting}
+                      /> */}
+                      <Select
+                        className=""
+                        value={initialValue.role}
+                        allowClear
+                        options={roleOptions}
                         disabled={!isEditting}
                       />
                     </Form.Item>
@@ -358,10 +421,19 @@ export function Component() {
                 </div>
 
                 <div className="flex gap-3 items-center justify-center">
+                  {isEditting ? (
+                    <Button type="primary" onClick={handleCancelBtnClicked}>
+                    Cancel
+                    </Button>
+                  ) : (
+
                   <Button type="primary" onClick={handleEditBtnClicked}>
-                    Edit
+                  Edit
                   </Button>
-                  <Button type="primary" onClick={handleSaveBtnClicked}>
+                    
+                  )}
+                  
+                  <Button htmlType="submit" type="primary" disabled={!isEditting}>
                     Save
                   </Button>
                 </div>
