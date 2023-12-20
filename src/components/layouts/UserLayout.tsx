@@ -197,7 +197,19 @@ export default function UserLayout() {
                     className="flex items-center justify-center gap-2 mr-6 cursor-pointer"
                     onClick={handleProfileBtnClicked}
                   >
-                    <Avatar
+                    {curEmployee?.profileUrl ? (
+                      <Avatar
+                      src={
+                        <img
+                          src={
+                            curEmployee.profileUrl
+                          }
+                          alt="Profile"
+                        />
+                      }
+                    />
+                    ) : (
+                      <Avatar
                       src={
                         <img
                           src={
@@ -207,6 +219,8 @@ export default function UserLayout() {
                         />
                       }
                     />
+                    )}
+                    
                     <span className="text-black">{curEmployee?.firstName} {curEmployee?.lastName}</span>
                   </div>
 

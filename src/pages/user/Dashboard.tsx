@@ -26,7 +26,8 @@ import {
   ITicket,
   ITicketAssign,
   ITicketLog,
-  IAccount
+  IAccount,
+  ITeam
 } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { mapDataToEmployee } from "../../utils/functions";
@@ -295,29 +296,21 @@ export function Component() {
   }, [isTeamsLoading, teams]);
 
   useEffect(() => {
-    const baseUrl = "http://localhost:8080";
     const fetchEventIds = async () => {
+      if (!teams) {
+        return; // Return early if teams is not defined
+      }
       try {
-        // Fetch event data for each team
-        const eventPromises = teams.map(async (team: any) => {
-          const eventResponse = await fetch(
-            `${baseUrl}/event/byteam/${team.teamId}`,
-          );
-          if (!eventResponse.ok) {
-            throw new Error("Error fetching events in Dashboard");
-          }
-          const eventData = await eventResponse.json();
+        const eventPromises = teams.map(async (team: ITeam) => {
+          const response = await axios.get('/api/event/byteam/' + team.teamId);
+          const eventData = response.data;
 
-          // Collect unique event IDs in a Set
           eventData.forEach((event: IEvent) => {
             uniqueEventIds.add(event.eventId);
           });
         });
 
-        // Wait for all event requests to complete
         await Promise.all(eventPromises);
-
-        // Update the state with the unique event IDs
         setUniqueEventIds(new Set(uniqueEventIds));
       } catch (error) {
         console.error("Error fetching events in Dashboard:", error);
@@ -325,7 +318,7 @@ export function Component() {
     };
 
     fetchEventIds();
-  }, [teams, uniqueEventIds]);
+  }, [teams]);
 
   useEffect(() => {
     if (announcementList.length > 0) {

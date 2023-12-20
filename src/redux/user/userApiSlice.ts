@@ -45,9 +45,18 @@ export const userApiSlice = apiSlice.injectEndpoints({
         }),
         getTeamAnnouncementInSevenDays: builder.query({
           query: (teamId) => `/team/announcement/sevendays/byteam/${teamId}`,
+          providesTags: (result, error, teamId) => [{ type: 'Announcement', id: teamId }],
         }),
         getTeamMembers: builder.query({
           query: (teamId) => `/team/members/${teamId}`,
+        }),
+        createAnnouncement: builder.mutation({
+          query: (announcement) => ({
+            url: '/team/announcement/create',
+            method: 'POST',
+            body: announcement,
+          }),
+          invalidatesTags: [{ type: 'Announcement', id: 'LIST' }],
         }),
       }),
   });
@@ -69,4 +78,5 @@ export const userApiSlice = apiSlice.injectEndpoints({
     useGetDepartmentAccountsQuery,
     useGetTeamAnnouncementInSevenDaysQuery,
     useGetTeamMembersQuery,
+    useCreateAnnouncementMutation,
   } = userApiSlice;

@@ -1,8 +1,11 @@
-import { Button, Col, Form, Input, Row, Select, Modal } from "antd";
+import { Button, Col, Form, Input, Row, Select, Modal, notification } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import InviteTeamMember from "../../components/user/InviteMember";
-import InviteClient from "../../components/user/InviteClient";
+import axios from 'axios';
+import { useUser } from "../../hooks/useUser";
+// import InviteTeamMember from "../../components/user/InviteMember";
+// import InviteClient from "../../components/user/InviteClient";
+// import { IAccount, ITeamMember } from "../../types";
 
 const formItemLayout = {
   labelCol: {
@@ -29,10 +32,12 @@ const tailFormItemLayout = {
 };
 
 export function Component() {
+  const user = useUser();
   const [form] = Form.useForm();
   const { Option } = Select;
   const navigate = useNavigate();
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+  const [, setError] = useState("");
 
   const handleCancelCreateEvent = () => {
     setIsConfirmModalVisible(true);
@@ -48,7 +53,30 @@ export function Component() {
   };
 
   const onFinish = (values: any) => {
-    console.log("Received values of form: ", values);
+    const payload = {
+      teamCreator: user?.id,
+      teamName: values.title,
+      teamDescription: values.description,
+      teamTypes: values.type,
+    };
+
+    axios
+      .post("/api/team/create", payload)
+      .then((r) => {
+        if(!r.data){
+          setError("Error: Team creation failed");
+          return;
+        }
+        notification.success({
+          type: "success",
+          message: "Team Created successfully",
+        });
+        navigate("/user/dashboard");
+      })
+      .catch(() => {
+        setError("Error: Team creation failed");
+      });
+
   };
 
   return (
@@ -127,13 +155,15 @@ export function Component() {
               </div>
             </Col>
 
-            <Col span={10}>
+            {/* <Col span={10}>
               <div>
-                <InviteTeamMember existingTeamMembers={[]}/>
+                <InviteTeamMember 
+                  existingTeamMembers={[]}
+                  />
                 <div className="mb-3"></div>
                 <InviteClient existingTeamAccounts={[]}/>
               </div>
-            </Col>
+            </Col> */}
 
             <Col span={2} />
           </Row>

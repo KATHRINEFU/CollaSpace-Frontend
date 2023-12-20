@@ -15,7 +15,8 @@ import {
   Typography,
   Avatar,
   Form,
-  Input
+  Input,
+  notification
   // Skeleton,
   // Divider
 } from "antd";
@@ -52,8 +53,10 @@ import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
 import { useGetTicketsByTeamQuery, useGetTeamQuery, useGetTeamAccountsQuery } from "../../redux/user/userApiSlice";
 import InviteClient from "../../components/user/InviteClient";
+import { useUser } from "../../hooks/useUser";
 
 function TeamDashboard() {
+  const user = useUser();
   const { teamId } = useParams();
   const {data: team, isLoading: isTeamLoading} = useGetTeamQuery(teamId);
   const { data: accounts, isLoading: isAccountsLoading } = Number(teamId) <= 4 ?  useGetDepartmentAccountsQuery(teamId) : useGetTeamAccountsQuery(teamId);
@@ -72,6 +75,7 @@ function TeamDashboard() {
   const [teamMemberOptions, setTeamMemberOptions] = useState<
     { value: string; label: string }[]
   >([]);
+  const [, setError] = useState("");
 
   // const [value, setValue] = useState([]);
   const { Content } = Layout;
@@ -162,7 +166,31 @@ function TeamDashboard() {
 
   
   const onPostNewAnnouncement = (values: any) => {
-    console.log("posting new announcement: " + values.content);
+    const payload = {
+      teamId: teamId,
+      announcementCreator: user?.id,
+      announcementContent: values.content
+    }
+
+    axios
+      .post("/api/team/announcement/create", payload)
+      .then((r) => {
+        if(!r.data){
+          setError("Failed to post announcement, please try again");
+          return;
+        }
+
+        notification.success({
+          type: "success",
+          message: "Post announcement success",
+        });
+        setIsAnnouncementPostModalVisible(false);
+        window.location.reload();
+        // apiSlice.util.invalidateTags([{ type: 'Announcement', id: 'LIST' }]);
+      })
+      .catch(() => {
+        setError("Failed to post announcement, please try again");
+      });
   }
 
   const handlePostBtnClicked = () => {
@@ -869,7 +897,7 @@ function TeamDashboard() {
                     )}
                   </div>
 
-                  <div className="mt-16 text-right">
+                  <div className="mt-8 text-right">
                     <Button shape="round" type="primary" onClick={handlePostBtnClicked}>Post</Button>
                   </div>
                 </div>

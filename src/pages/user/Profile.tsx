@@ -301,7 +301,7 @@ export function Component() {
                       </p>
                       <Input
                         disabled={!isEditting}
-                        // value={initialValue.firstName}
+                        value={initialValue.firstName}
                       />
                       {/* <p>{employee.firstName}</p> */}
                     </Form.Item>
