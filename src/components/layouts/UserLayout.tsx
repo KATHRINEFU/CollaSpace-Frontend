@@ -9,6 +9,7 @@ import {
   ConfigProvider,
   Spin,
   Avatar,
+  notification
 } from "antd";
 import {
   HomeOutlined,
@@ -21,15 +22,26 @@ import ErrorBoundary from "../ErrorBoundary";
 import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
 import type { MenuProps } from "antd";
-import { useGetEmployeeTeamsQuery } from "../../redux/user/userApiSlice";
+import { useGetEmployeeTeamsQuery, useGetEmployeeDetailQuery } from "../../redux/user/userApiSlice";
 import { logOut } from "../../redux/auth/authSlice";
+import {useUser} from "../../hooks/useUser"
+import { useEffect, useState } from "react";
+import { mapDataToEmployee } from "../../utils/functions";
+import { IEmployee } from "../../types";
+import { useAppDispatch } from "../../redux/hooks";
 
 export default function UserLayout() {
+  const user = useUser();
+  const {data:employeeData, isLoading: isEmployeeDataLoading} = useGetEmployeeDetailQuery(user?.id);
+  const [curEmployee, setCurEmployee] = useState<IEmployee>();
+
+  const dispatch = useAppDispatch();
   let { pathname } = useLocation();
   pathname = pathname.split("/")[2];
   const navigate = useNavigate();
-  const { data: teams, isLoading } = useGetEmployeeTeamsQuery(4);
-  console.log(teams);
+  // console.log("current user id: ", user?.id);
+  const { data: teams, isLoading } = useGetEmployeeTeamsQuery(user?.id);
+  // console.log(teams);
   // const [myDepartment, setMyDepartment] = useState<ITeam>();
   // const [myTeams, setMyTeams] = useState<ITeam[]>([]);
 
@@ -58,11 +70,6 @@ export default function UserLayout() {
   const handleProfileBtnClicked = () => {
     navigate("/user/profile");
   };
-
-  const handleLogout = () => {
-    logOut();
-    navigate("/login");
-  }
 
   type MenuItem = Required<MenuProps>["items"][number];
   function getItem(
@@ -118,6 +125,12 @@ export default function UserLayout() {
     getItem("My Teams", "sub2", <TeamOutlined />, teamItems),
   ];
 
+  useEffect(() => {
+    if(!isEmployeeDataLoading && employeeData){
+      setCurEmployee(mapDataToEmployee(employeeData));
+    }
+  }, [employeeData, isEmployeeDataLoading])
+
   return (
     <>
       <ConfigProvider
@@ -170,10 +183,15 @@ export default function UserLayout() {
               }}
             >
               <div className="flex items-center justify-between mr-24 w-full">
-                <h2 className="text-xl font-bold ml-6 ">
-                  {" "}
-                  Good Morning! Yuehao
-                </h2>
+                  {isEmployeeDataLoading ? (
+                    <div className="spinner-container">
+                    <Spin size="large" />
+                  </div>
+                  ): (
+                    <h2 className="text-xl font-bold ml-6 ">
+                      Good Day! {curEmployee?.firstName} {curEmployee?.lastName}
+                    </h2>
+                  )}
                 <div className="w-50 flex items-center gap-1">
                   <div
                     className="flex items-center justify-center gap-2 mr-6 cursor-pointer"
@@ -189,7 +207,7 @@ export default function UserLayout() {
                         />
                       }
                     />
-                    <span className="text-black">Yuehao Fu</span>
+                    <span className="text-black">{curEmployee?.firstName} {curEmployee?.lastName}</span>
                   </div>
 
                   <Badge count={5}>
@@ -210,7 +228,13 @@ export default function UserLayout() {
                     icon={<LogoutOutlined />}
                     style={{ width: "42px" }}
                     className="mr-3"
-                    onClick={handleLogout}
+                    onClick={() => {
+                      dispatch(logOut());
+                      notification.success({
+                        message: "Logout successfully",
+                      });
+                      navigate("/login");
+                    }}
                   />
                 </div>
               </div>
