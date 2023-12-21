@@ -640,8 +640,12 @@ function TeamDashboard() {
                     </p>
                   }
                 />
-
-                <div>Joined at {getFormattedDate(item.joindate)}</div>
+                {Number(item.joindate.getFullYear())>=2023 ? (
+                  <div>Joined at {getFormattedDate(item.joindate)}</div>
+                ) : (
+                  <div>Pending Acceptance</div>
+                )}
+                
                 <Divider type="vertical" />
                 <div>{item.role}</div>
 
@@ -656,7 +660,7 @@ function TeamDashboard() {
             )}
           />
           <div className="mt-3 flex items-center justify-center w-full">
-            <InviteTeamMember existingTeamMembers={teamMemberList}/>
+            {teamId && <InviteTeamMember existingTeamMembers={teamMemberList} teamId={teamId}/>}
           </div>
         </Modal>
 

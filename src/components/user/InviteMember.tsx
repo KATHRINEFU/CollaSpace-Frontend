@@ -1,17 +1,18 @@
 import { useState, useMemo } from "react";
-import { Button, Select, List, AutoComplete} from "antd";
+import { Button, Select, List, AutoComplete, notification} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useGetAllEmployeesQuery } from "../../redux/user/userApiSlice";
 import { IEmployee, ITeamMember } from "../../types";
 import { mapDataToEmployee } from "../../utils/functions";
 import { message } from 'antd';
+import axios from 'axios';
 interface Member {
   employeeId: number,
   employeeName: string,
   authority: "viewer" | "supervisor" | "editor" | "leader";
 }
 
-function InviteTeamMember({ existingTeamMembers }: { existingTeamMembers: ITeamMember[] }) {
+function InviteTeamMember({ existingTeamMembers, teamId }: { existingTeamMembers: ITeamMember[], teamId: string }) {
   const {data: employees, isLoading: isEmployeesLoading} = useGetAllEmployeesQuery({});
   const [authority, setAuthority] = useState<Member["authority"]>("viewer");
   const [membersList, setMembersList] = useState<Member[]>([]);
@@ -94,7 +95,36 @@ function InviteTeamMember({ existingTeamMembers }: { existingTeamMembers: ITeamM
   };
 
   const handleSendInivitation = () => {
-    console.log("sending team member inivitation");
+    console.log("sending team member inivitation", membersList);
+    axios
+      .put("/api/team/invitemembers/" + teamId, {
+        members: membersList.map(member => ({
+          employeeId: member.employeeId,
+          authority: member.authority,
+          employeeName: member.employeeName
+        }))
+      })
+      .then((r) => {
+        if(!r.data){
+          notification.error({
+            type: "error",
+            message: "Invite member failed",
+          });
+          return;
+        }
+
+        notification.success({
+          type: "success",
+          message: "Invite member success",
+        });
+        window.location.reload();
+      })
+      .catch(() => {
+        notification.error({
+          type: "error",
+          message: "Invite member failed",
+        });
+      });
   };
 
   return (
