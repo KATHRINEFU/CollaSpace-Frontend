@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Button, List, AutoComplete} from "antd";
+import { Button, List, AutoComplete, notification} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useGetAllAccountsQuery } from "../../redux/user/userApiSlice";
 import { IAccount } from "../../types";
@@ -7,7 +7,7 @@ import { mapDataToEmployee } from "../../utils/functions";
 import axios from 'axios'
 import { message } from 'antd';
 
-function InviteClient({ existingTeamAccounts }: { existingTeamAccounts: IAccount[] }) {
+function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: IAccount[], teamId: string }) {
   const {data: accounts, isLoading: isAccountsLoading} = useGetAllAccountsQuery({});
   const [accountList, setAccountList] = useState<IAccount[]>([]);
   const [membersList, setMembersList] = useState<IAccount[]>([]);
@@ -159,7 +159,32 @@ function InviteClient({ existingTeamAccounts }: { existingTeamAccounts: IAccount
   };
 
   const handleSendClientInvitation = () => {
+    console.log(membersList);
+    axios
+      .put("/api/team/inviteclients/" + teamId, {
+        accountIds: membersList.map(account => account.accountId+1),
+      })
+      .then((r) => {
+        if(!r.data){
+          notification.error({
+            type: "error",
+            message: "Add client failed",
+          });
+          return;
+        }
 
+        notification.success({
+          type: "success",
+          message: "Add client success",
+        });
+        // window.location.reload();
+      })
+      .catch(() => {
+        notification.error({
+          type: "error",
+          message: "Add client failed",
+        });
+      });
   }
 
 

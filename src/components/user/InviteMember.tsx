@@ -95,7 +95,6 @@ function InviteTeamMember({ existingTeamMembers, teamId }: { existingTeamMembers
   };
 
   const handleSendInivitation = () => {
-    console.log("sending team member inivitation", membersList);
     axios
       .put("/api/team/invitemembers/" + teamId, {
         members: membersList.map(member => ({

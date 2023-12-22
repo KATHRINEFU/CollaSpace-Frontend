@@ -327,10 +327,9 @@ function TeamDashboard() {
   useEffect(() => {
     if (accounts && !isAccountsLoading) {
       // setAccountList(accounts)
-      const baseUrl = "http://localhost:8080";
       const fetchCompanyInfo = async (companyId: number) => {
         try {
-          const response = await axios.get(`${baseUrl}/client/${companyId}`);
+          const response = await axios.get('/api/client/'+companyId);
           return response.data;
         } catch (error) {
           console.error("Error fetching company info: ", error);
@@ -341,7 +340,7 @@ function TeamDashboard() {
       const fetchPersonnelInfo = async (personnelId: number) => {
         try {
           const response = await axios.get(
-            `${baseUrl}/employee/${personnelId}`,
+            '/api/employee/'+personnelId,
           );
           return response.data;
         } catch (error) {
@@ -407,6 +406,7 @@ function TeamDashboard() {
         );
         setAccountList(accountsWithAdditionalData);
       };
+      console.log(accounts);
       fetchAndSetAccount();
     }
   }, [accounts, isAccountsLoading]);
@@ -617,7 +617,7 @@ function TeamDashboard() {
           onOk={handleAddClientModalOk}
           onCancel={handleAddClientModalCancel}
         >
-          <InviteClient existingTeamAccounts={accountList}/>
+          {teamId && (<InviteClient existingTeamAccounts={accountList} teamId={teamId}/>)}
         </Modal>
 
         <Modal
@@ -924,7 +924,7 @@ function TeamDashboard() {
                   <div className="flex flex-auto p-3">
                     {teamMemberList ? (
                       teamMemberList.map((member) => (
-                        <div className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12">
+                        <div key={member.employee.id} className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12">
                           <a className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-blue-500 border-solid w-14 h-14 rounded-circle">
                             <Image
                               src={member.employee.profileUrl}
