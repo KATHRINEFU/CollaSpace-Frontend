@@ -17,7 +17,6 @@ import TicketAssignedList from "../../components/user/TicketAssignedList";
 import {
   useGetEmployeeTeamsQuery,
   useGetTicketsByEmployeeQuery,
-  useGetDepartmentAccountsQuery
 } from "../../redux/user/userApiSlice";
 import ClientLogoList from "../../components/user/ClientLogoList";
 import {
@@ -32,14 +31,16 @@ import {
 import { useNavigate } from "react-router-dom";
 import { mapDataToEmployee } from "../../utils/functions";
 import axios from "axios";
+import { useUser } from "../../hooks/useUser";
 
 export function Component() {
+  const user = useUser();
   const { data: teams, isLoading: isTeamsLoading } =
-  useGetEmployeeTeamsQuery(4);
+  useGetEmployeeTeamsQuery(user?.id);
   const { data: tickets, isLoading: isTicketsLoading } =
-  useGetTicketsByEmployeeQuery(4);
-  const { data: accounts, isLoading: isAccountsLoading } =
-    useGetDepartmentAccountsQuery(3);
+  useGetTicketsByEmployeeQuery(user?.id);
+  // const { data: accounts, isLoading: isAccountsLoading } =
+  //   useGetEmployeeAccountsQuery(user?.id);
 
   const { Content } = Layout;
   const { Option } = Select;
@@ -59,6 +60,7 @@ export function Component() {
     role: [],
   });
 
+  const [accounts, setAccounts] = useState([]);
   const [uniqueTeamIds, setUniqueTeamIds] = useState<number[]>([]);
   const [uniqueAccountIds, setUniqueAccountIds] = useState<number[]>([]);
   const [uniqueTeamNames, setUniqueTeamNames] = useState<string[]>([]);
@@ -75,7 +77,8 @@ export function Component() {
   const [uniqueEventIds, setUniqueEventIds] = useState(new Set());
 
   useEffect(() => {
-    if (accounts && !isAccountsLoading) {
+    if (accounts) {
+      console.log(accounts);
       // setAccountList(accounts)
       const baseUrl = "http://localhost:8080";
       const fetchCompanyInfo = async (companyId: number) => {
@@ -159,7 +162,7 @@ export function Component() {
       };
       fetchAndSetAccount();
     }
-  }, [accounts, isAccountsLoading]);
+  }, [accounts]);
 
   useEffect(() => {
     if (!isTicketsLoading && tickets) {
@@ -274,6 +277,17 @@ export function Component() {
       setUniqueTeamNames(Array.from(teamNames));
       setUniqueTeamIds(Array.from(teamIds));
       setUniqueAccountIds(Array.from(accountIds));
+
+      const fetchTeamAccounts = async () => {
+        try {
+          const response = await axios.post('/api/team/accounts/teamlist', Array.from(teamIds));
+          setAccounts(response.data); // Set the accounts data
+        } catch (error) {
+          console.error('Error fetching team accounts:', error);
+        }
+      };
+
+      fetchTeamAccounts();
 
       // extract announcements
       teams?.forEach((team: any) => {
