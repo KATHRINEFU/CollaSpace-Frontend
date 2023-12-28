@@ -9,15 +9,17 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { mapEventDataToEvent, getEventTypeColor } from "../../utils/functions";
 import EventDetail from "../../components/user/EventDetail";
+import { useUser } from "../../hooks/useUser";
 
 export function Component() {
   // const maxRows = 10;
+  const user = useUser();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<
     IDocumentEvent | IMeetingEvent | IActivityEvent | null
   >(null);
   const { data: teams, isLoading: isTeamsLoading } =
-    useGetEmployeeTeamsQuery(4);
+    useGetEmployeeTeamsQuery(user?.id);
   const [eventList, setEventList] = useState<
     (IDocumentEvent | IMeetingEvent | IActivityEvent)[]
   >([]);
