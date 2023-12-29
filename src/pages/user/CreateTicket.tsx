@@ -7,12 +7,15 @@ import {
   Select,
   Modal,
   Slider,
-  AutoComplete,
+  DatePicker,
+  notification,
 } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { SelectProps } from "antd/es/select";
 import UploadUserFile from "../../components/user/UploadUserFile";
+import { useUser } from "../../hooks/useUser";
+import { useGetEmployeeTeamsQuery, useGetAllEmployeesQuery } from "../../redux/user/userApiSlice";
+import axios from 'axios';
 
 const formItemLayout = {
   labelCol: {
@@ -38,86 +41,18 @@ const tailFormItemLayout = {
   },
 };
 
-const fakeUsers = ["User1", "User2", "User3", "User4", "User5"];
-
 export function Component() {
+  const user = useUser();
   const [form] = Form.useForm();
   const { Option } = Select;
   const navigate = useNavigate();
+  const [, setError] = useState("");
+
+  const { data: teams, isLoading } = useGetEmployeeTeamsQuery(user?.id);
+  const {data: employees, isLoading: isEmployeesLoading} = useGetAllEmployeesQuery({});
+
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
-  const [selectedViewers, setSelectedViewers] = useState<string[]>([]);
-  const [searchViewerResults, setSearchViewerResults] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState<string>("");
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
-
-  const [options, setOptions] = useState<SelectProps<object>["options"]>([]);
-  const getRandomInt = (max: number, min = 0) =>
-    Math.floor(Math.random() * (max - min + 1)) + min;
-
-  const handleViewerSearch = (value: string) => {
-    // Simulate searching for users based on the input value
-    const filteredUsers = fakeUsers.filter((user) =>
-      user.toLowerCase().includes(value.toLowerCase()),
-    );
-    setSearchViewerResults(filteredUsers);
-    setInputValue(value);
-  };
-
-  const handleSelectViewer = (value: string) => {
-    // Add the selected user to the list of selected users
-    setSelectedViewers([...selectedViewers, value]);
-    // Clear the search results
-    setInputValue("");
-    setSearchViewerResults([]);
-  };
-
-  const handleRemoveViewer = (userToRemove: string) => {
-    // Remove the user from the selected users list
-    const updatedUsers = selectedViewers.filter(
-      (user) => user !== userToRemove,
-    );
-    setSelectedViewers(updatedUsers);
-  };
-
-  const searchResult = (query: string) =>
-    new Array(getRandomInt(5))
-      .join(".")
-      .split(".")
-      .map((_, idx) => {
-        const category = `${query}${idx}`;
-        return {
-          value: category,
-          label: (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>
-                Found {query} on{" "}
-                <a
-                  href={`https://s.taobao.com/search?q=${query}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {category}
-                </a>
-              </span>
-              <span>{getRandomInt(200, 100)} results</span>
-            </div>
-          ),
-        };
-      });
-
-  // replace with query for employee in selected team
-  const handleSearch = (value: string) => {
-    setOptions(value ? searchResult(value) : []);
-  };
-
-  const onSelect = (value: string) => {
-    console.log("onSelect", value);
-  };
 
   const handleCancelCreateEvent = () => {
     setIsConfirmModalVisible(true);
@@ -133,8 +68,36 @@ export function Component() {
   };
 
   const onFinish = (values: any) => {
-    console.log("Received values of form: ", values);
     console.log("Received uploaded file urls", uploadedUrls);
+    const payload = {
+      ticketCreator: user?.id,
+      ticketTitle: values.title,
+      ticketDescription: values.description,
+      ticketPriority: values.priority,
+      ticketFromTeam: values.fromTeam,
+      ticketDueDate: values.dueDate,
+      assigneeId: values.assignTo,
+      viewerIds: values.viewers,
+    }
+    console.log(payload)
+
+    axios
+    .post("/api/ticket/create", payload)
+    .then((r) => {
+      if(!r.data){
+        setError("Error: Ticket creation failed");
+        return;
+      }
+      notification.success({
+        type: "success",
+        message: "Ticket Created successfully",
+      });
+      navigate("/user/dashboard");
+    })
+    .catch(() => {
+      setError("Error: Ticket creation failed");
+    });
+
   };
 
   const handleFileUploadComplete = (urls: string[]) => {
@@ -202,16 +165,20 @@ export function Component() {
                     },
                   ]}
                 >
-                  <Select placeholder="Select a team">
-                    <Option value="teamA">Team A</Option>
-                    <Option value="teamB">Team B</Option>
-                    <Option value="teamC">Team C</Option>
+                  <Select 
+                    loading = {isLoading}
+                    placeholder="Select a team">
+                      {teams && teams.map((team: any) => (
+                        <Option key={team.teamId} value={team.teamId}>
+                          {team.teamName}
+                        </Option>
+                      ))}
                   </Select>
                 </Form.Item>
               </div>
 
               {/* all teams*/}
-              <div>
+              {/* <div>
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   To Team
                 </p>
@@ -222,7 +189,7 @@ export function Component() {
                     <Option value="teamC">Team C</Option>
                   </Select>
                 </Form.Item>
-              </div>
+              </div> */}
 
               <div>
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
@@ -240,6 +207,19 @@ export function Component() {
                   <Slider min={1} max={5} marks={{ 1: 1, 5: 5 }} included />
                 </Form.Item>
               </div>
+
+              <div>
+                <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
+                  Ticket Due Date
+                </p>
+                <Form.Item
+                  name="dueDate"
+                >
+                  <DatePicker className="w-full" />
+                </Form.Item>
+              </div>
+
+
             </Col>
 
             <Col span={10}>
@@ -256,10 +236,20 @@ export function Component() {
                     },
                   ]}
                 >
-                  <AutoComplete
+                  <Select 
+                    loading = {isEmployeesLoading}
+                    placeholder="Select an assignee">
+                      {employees && employees.map((employee: any) => (
+                        <Option key={employee.employeeId} value={employee.employeeId}>
+                          {employee.employeeFirstname} {employee.employeeLastname}
+                        </Option>
+                      ))}
+                  </Select>
+
+                  {/* <AutoComplete
                     popupMatchSelectWidth={252}
                     style={{ width: 300 }}
-                    options={options}
+                    options={employeeOptions}
                     onSelect={onSelect}
                     onSearch={handleSearch}
                     size="large"
@@ -269,7 +259,7 @@ export function Component() {
                       placeholder="input here"
                       enterButton
                     />
-                  </AutoComplete>
+                  </AutoComplete> */}
                 </Form.Item>
               </div>
 
@@ -278,10 +268,18 @@ export function Component() {
                   Invite Viewers
                 </p>
                 <Form.Item name="viewers">
-                  <AutoComplete
-                    options={searchViewerResults.map((user) => ({
-                      value: user,
-                    }))}
+                  <Select 
+                    mode="multiple"
+                    loading = {isEmployeesLoading}
+                    placeholder="Select viewers">
+                      {employees && employees.map((employee: any) => (
+                        <Option key={employee.employeeId} value={employee.employeeId}>
+                          {employee.employeeFirstname} {employee.employeeLastname}
+                        </Option>
+                      ))}
+                  </Select>
+                  {/* <AutoComplete
+                    options={employeeOptions}
                     onSearch={handleViewerSearch}
                     onSelect={handleSelectViewer}
                     placeholder="Search for users"
@@ -299,7 +297,7 @@ export function Component() {
                         </Button>
                       </span>
                     ))}
-                  </div>
+                  </div> */}
                 </Form.Item>
               </div>
 

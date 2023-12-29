@@ -79,6 +79,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
               </Form.Item>
 
               {selectedTicket.ticketStatus === "pending" && (
+                // todo: check if cur user is the assignee
                 <Form.Item>
                   <Button
                     type="primary"
@@ -120,14 +121,6 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
                     </Option>
                   ))}
                 </Select>
-              </Form.Item>
-
-              <Form.Item
-                name="toTeamName"
-                label="To Team"
-                style={{ width: "250px" }}
-              >
-                <Input disabled></Input>
               </Form.Item>
             </div>
 

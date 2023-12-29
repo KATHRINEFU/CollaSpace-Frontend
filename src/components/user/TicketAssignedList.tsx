@@ -2,6 +2,7 @@ import { List, Rate, Modal, Button } from "antd";
 import { ITicket } from "../../types";
 import { useState, useEffect } from "react";
 import TicketDetail from "./TicketDetail";
+import { useUser } from "../../hooks/useUser";
 
 interface FilterOptions {
   status: string[];
@@ -38,6 +39,7 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
   tickets,
   filterOptions,
 }) => {
+  const user = useUser();
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [isTicketDetailModalVisible, setIsTicketDetailModalVisible] = useState(false);
  
@@ -68,18 +70,17 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
       filterOptions.priority.length === 0 ||
       filterOptions.priority.includes(ticket.priority.toString()); // Convert priority to string for comparison
 
-    // replace 4 with cur user id
-    if (4 === ticket.ticketCreator && filterOptions.role?.includes("creator")) {
+    if ( user?.id === ticket.ticketCreator && filterOptions.role?.includes("creator")) {
       return statusFilterMatch && priorityFilterMatch;
     }
-    // replace 4 with cur user id
+
     if (filterOptions.role) {
       const hasSelectedRole =
         filterOptions.role?.length === 0 || // No role selected (matches all roles)
         ticket.assigns.some((assign) => {
           // Check if the user's ID is found in the assigns
           if (filterOptions.role?.includes(assign.role)) {
-            return 4 === assign.employeeId; // replace 4 with cur user id
+            return user?.id === assign.employeeId;
           }
           return false;
         });
@@ -113,6 +114,8 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
 
   useEffect(() => {
     if (selectedTicket) {
+      console.log(selectedTicket);
+      // todo: query for employee name and team name
       setTicketInitialValue({
         ticketTitle: selectedTicket.ticketTitle,
         ticketDescription: selectedTicket.ticketDescription,
@@ -129,6 +132,11 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
       });
     }
   }, [selectedTicket]);
+
+  useEffect(() => {
+    // console.log(ticketInitialValue);
+    // console.log(selectedTicket);
+  }, [ticketInitialValue])
 
   return (
     <>

@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { ITicket } from "../../types";
 import { SearchOutlined } from "@ant-design/icons";
 import { useGetTicketsByEmployeeQuery } from "../../redux/user/userApiSlice";
-import axios from "../../api/axios";
+import axios from "axios";
 import type { ColumnType, ColumnsType } from "antd/es/table";
 import type { FilterConfirmProps } from "antd/es/table/interface";
 import type { InputRef } from "antd";

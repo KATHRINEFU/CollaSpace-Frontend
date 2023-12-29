@@ -247,13 +247,13 @@ export function Component() {
 
   useEffect(() => {
     const createCount = ticketList.filter(
-      (ticket) => ticket.ticketCreator === 4,
+      (ticket) => ticket.ticketCreator === user?.id,
     ).length; // change to cur user's id
     setTicketCreatedCount(createCount);
 
     const assignCount = ticketList.reduce((count, ticket) => {
       const isAssignedToEmployee = ticket.assigns.some(
-        (assign) => assign.employeeId === 4, // replace to cur user's id
+        (assign) => assign.employeeId === user?.id,
       );
 
       return count + (isAssignedToEmployee ? 1 : 0);
