@@ -13,9 +13,10 @@ export default function DefaultLayout() {
   useEffect(() => {
     if (user) {
       navigate("/user/dashboard");
-    } else {
-      navigate("/login");
-    }
+    } 
+    // else {
+    //   navigate("/login");
+    // }
   }, [navigate, user]);
   return (
     <div className="flex flex-col">

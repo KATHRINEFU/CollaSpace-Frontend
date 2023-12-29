@@ -1,4 +1,4 @@
-import { GoogleAuthButton } from "../../components/common/GoogleAuth";
+// import { GoogleAuthButton } from "../../components/common/GoogleAuth";
 import { Alert, Button, Form, Input, notification } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -88,12 +88,12 @@ export const Login = () => {
                 </a>
             </div> */}
 
-              <GoogleAuthButton />
+              {/* <GoogleAuthButton /> */}
             </div>
             <div className="flex-auto p-12 pt-0 pb-6 text-center">
-              <div className="mb-6 text-center text-slate-500">
+              {/* <div className="mb-6 text-center text-slate-500">
                 <small>Or sign in with credentials</small>
-              </div>
+              </div> */}
 
               <div className="mb-4">
                 <Form.Item
@@ -127,7 +127,7 @@ export const Login = () => {
                   <Input.Password
                     size="small"
                     placeholder="Password"
-                    className="h-8 text-sm focus:shadow-primary-outline leading-5.6 ease w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 font-normal text-gray-700 transition-all focus:bg-white focus:text-gray-700 focus:outline-none focus:transition-shadow"
+                    className="h-9 text-sm focus:shadow-primary-outline leading-5.6 ease w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 font-normal text-gray-700 transition-all focus:bg-white focus:text-gray-700 focus:outline-none focus:transition-shadow"
                     visibilityToggle
                   />
                 </Form.Item>
@@ -186,6 +186,13 @@ export const Login = () => {
                     className="font-medium text-primary-purple hover:underline"
                   >
                     Forgot password?
+                  </Link>
+
+                  <Link
+                    to="/reset-password"
+                    className="font-medium text-primary-purple hover:underline"
+                  >
+                    Reset password?
                   </Link>
                 </p>
               </div>
