@@ -102,6 +102,26 @@ export function mapDataToTickets(data: any) {
   };
 }
 
+export function mapDataInTicketAssignList(data: any){
+  return {
+    ticketId: data.ticketId,
+    ticketCreator: data.ticketCreator,
+    ticketCreatorName: data.ticketCreatorName,
+    ticketCreationdate: data.ticketCreationdate,
+    ticketLastUpdatedate: data.ticketLastUpdatedate,
+    ticketTitle: data.ticketTitle,
+    ticketDescription: data.ticketDescription,
+    ticketStatus: data.ticketStatus,
+    priority: data.priority,
+    fromTeamId: data.fromTeamId,
+    fromTeamName: data.fromTeamName,
+    dueDate: data.dueDate,
+    assigns: data.assigns,
+    ticketLogs: data.ticketLogs,
+    files: data.files,
+  };
+}
+
 export function mapDataToEmployee(data: any) {
   return {
     id: data.employeeId,

@@ -91,3 +91,18 @@ export const clientStatusByDepartment = [
     ],
   },
 ];
+
+export const TicketStatus = {
+  NEW: 'new',
+  PENDING: 'pending',
+  IN_PROGRESS: 'in progress',
+  UNDER_REVIEW: 'under review',
+  RESOLVED: 'resolved',
+};
+
+export const TicketRole = {
+  CREATOR: 'creator',
+  ASSIGNEE: 'assignee',
+  VIEWER: 'viewer',
+  SUPERVISOR: 'supervisor',
+};

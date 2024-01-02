@@ -10,14 +10,22 @@ import {
   List,
   Row,
   Col,
+  DatePicker,
+  Divider
 } from "antd";
 
-import { UserOutlined, AntDesignOutlined } from "@ant-design/icons";
-
 import MessageList from "./MessageList";
-import { ITicket } from "../../types";
+import { ITicket, ITicketAssign } from "../../types";
 import { getStatusColor } from "../../utils/functions";
 import { useUser } from "../../hooks/useUser";
+import { useEffect, useState } from "react";
+import { TicketRole, TicketStatus } from "../../utils/constants";
+import axios from 'axios';
+import { useGetAllEmployeesQuery } from "../../redux/user/userApiSlice";
+import UploadUserFile from "./UploadUserFile";
+import moment from 'moment';
+
+
 interface TicketDetailProps {
   selectedTicket: ITicket;
   initialValue: any;
@@ -28,6 +36,22 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
   initialValue,
 }) => {
   const user = useUser();
+  const {data: employees, isLoading: isEmployeesLoading} = useGetAllEmployeesQuery({});
+
+  const [isEditting, setIsEditting] = useState<boolean>(false);
+  const [viewerProfiles, setViewerProfiles] = useState<any[]>([]);
+  const [supervisorProfiles, setSupervisorProfiles] = useState<any[]>([]);
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  // const [ticketCreatorName, setTicketCreatorName] = useState('');
+  // const [assignToName, setAssignToName] = useState('');
+
+  const isCreator = user?.id === selectedTicket.ticketCreator;
+
+  const [ticketForm] = Form.useForm();
+  ticketForm.setFieldsValue({selectedTicket, dueDate: moment(initialValue.dueDate)});
+
+  const { Option } = Select;
+
   const priorityTexts = [
     "casual",
     "not in hurry",
@@ -43,22 +67,105 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
     "Maintenance Team",
   ];
 
+  const currentUserAssignments = selectedTicket.assigns.filter(
+    (assign: ITicketAssign) => assign.employeeId === user?.id
+  );
+
+  const isAssignee = currentUserAssignments.some(
+    (assign: ITicketAssign) => assign.role === TicketRole.ASSIGNEE
+  );
+
+  const isSupervisor = currentUserAssignments.some(
+    (assign: ITicketAssign) => assign.role === TicketRole.SUPERVISOR
+  );
+
+  const viewers =  selectedTicket.assigns.filter(
+    (assign: ITicketAssign) => assign.role === TicketRole.VIEWER
+  );
+
+  const supervisors =  selectedTicket.assigns.filter(
+    (assign: ITicketAssign) => assign.role === TicketRole.SUPERVISOR
+  );
+
+  const isShowAcceptBtn =
+    selectedTicket?.ticketStatus === TicketStatus.PENDING &&
+    selectedTicket?.assigns.some(
+      (assign: ITicketAssign) => assign.employeeId === user?.id
+    );
+  
+  const isAllowEdit = isEditting && isCreator;
+
+  const isAllowChangeStatus = isEditting && (isAssignee || isCreator || isSupervisor);
+
+  const handleEditBtnClicked = () => {
+    setIsEditting(true);
+  };
+
+  const handleCancelBtnClicked = () => {
+    setIsEditting(false);
+  };
+
   const getPriorityText = (priority: number) => {
     return priorityTexts[priority - 1];
   };
 
-  const [ticketForm] = Form.useForm();
-  ticketForm.setFieldsValue(selectedTicket);
-
-  const { Option } = Select;
-
   const handleAcceptClicked = () => {
-    ticketForm.setFieldsValue({ status: "in progress" });
+    ticketForm.setFieldsValue({ status: TicketStatus.IN_PROGRESS });
   };
+
+  const handleFileUploadComplete = (urls: string[]) => {
+    setUploadedUrls(urls);
+  };
+
+  const handleSaveTicket = (values: any) => {
+    console.log(uploadedUrls);
+    console.log(values);
+  }
+
+  useEffect(() => {
+    const fetchEmployeeProfiles = async () => {
+      const profiles = [];
+
+      for (const viewer of viewers) {
+        try {
+          const response = await axios.get(`/api/employee/${viewer.employeeId}`);
+          profiles.push(response.data);
+        } catch (error) {
+          console.error('Error fetching employee info: ', error);
+          profiles.push(null); // Push null if there's an error fetching profile
+        }
+      }
+
+      setViewerProfiles(profiles);
+    };
+
+    fetchEmployeeProfiles();
+  }, []);
+
+  useEffect(() => {
+    const fetchEmployeeProfiles = async () => {
+      const profiles = [];
+
+      for (const supervisor of supervisors) {
+        try {
+          const response = await axios.get(`/api/employee/${supervisor.employeeId}`);
+          profiles.push(response.data);
+        } catch (error) {
+          console.error('Error fetching employee info: ', error);
+          profiles.push(null); // Push null if there's an error fetching profile
+        }
+      }
+
+      setSupervisorProfiles(profiles);
+    };
+
+    fetchEmployeeProfiles();
+  }, []);
 
   return (
     <div>
       <Form
+        onFinish={handleSaveTicket}
         form={ticketForm}
         initialValues={initialValue}
         key={selectedTicket.ticketId}
@@ -69,18 +176,35 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
               <Input disabled />
             </Form.Item>
             <Form.Item name="ticketDescription" label="Description">
-              <Input.TextArea rows={4} disabled />
+              <Input.TextArea rows={4} disabled = {!isAllowEdit} />
             </Form.Item>
 
             <div className="flex gap-3">
               <Form.Item name="ticketStatus" label="Status">
-                <Tag color={getStatusColor(selectedTicket.ticketStatus)}>
-                  {selectedTicket.ticketStatus}
-                </Tag>
+                {isAllowChangeStatus ? (
+                  <div>
+                    <Select
+                      style={{width: 200}}
+                      defaultValue={selectedTicket.ticketStatus}
+                      options={
+                        [
+                          {value: TicketStatus.PENDING, label: 'PENDING'},
+                          {value: TicketStatus.IN_PROGRESS, label: 'IN PROGRESS'},
+                          {value: TicketStatus.UNDER_REVIEW, label: 'UNDER REVIEW'},
+                          {value: TicketStatus.RESOLVED, label: 'RESOLVED'},
+                        ]
+                      }
+                    />
+                  </div>
+                ) : (
+                  <Tag color={getStatusColor(selectedTicket.ticketStatus)}>
+                    {selectedTicket.ticketStatus}
+                  </Tag>
+                )}
+
               </Form.Item>
 
-              {selectedTicket.ticketStatus === "pending" && (
-                // todo: check if cur user is the assignee
+              {isShowAcceptBtn && (
                 <Form.Item>
                   <Button
                     type="primary"
@@ -109,6 +233,16 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
               )}
             </Form.Item>
 
+            <Form.Item name="dueDate" label="Due Date">
+              {isAllowEdit ? (
+                <DatePicker className="w-full" />
+                // <Input disabled={true}/>
+              ) : (
+                <Input disabled={true}/>
+              )}
+            </Form.Item>
+
+
             <div className="flex gap-3 w-full justify-between">
               <Form.Item
                 name="fromTeamName"
@@ -133,7 +267,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
               >
                 <Input disabled />
               </Form.Item>
-
+              
               <Form.Item
                 name="assignToName"
                 label="Assigned To"
@@ -143,37 +277,35 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
               </Form.Item>
             </div>
 
-            <div className="flex gap-3 w-full justify-between">
-              <div className="flex gap-3 items-center">
-                <p>Viewers: </p>
+            <div className="flex gap-3 w-full">
+                <div className="flex gap-3 items-center">
+                  <p>Viewers: </p>
 
-                {/*TODO: get viewer's profile photo, popover to show fullname */}
-                <Avatar.Group
-                  maxCount={5}
-                  size="large"
-                  maxStyle={{
-                    color: "#f56a00",
-                    backgroundColor: "#fde3cf",
-                  }}
-                >
-                  <Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=3" />
-                  <Avatar style={{ backgroundColor: "#f56a00" }}>K</Avatar>
-                  <Tooltip title="Ant User" placement="top">
-                    <Avatar
-                      style={{ backgroundColor: "#87d068" }}
-                      icon={<UserOutlined />}
-                    />
-                  </Tooltip>
-                  <Avatar
-                    style={{ backgroundColor: "#1677ff" }}
-                    icon={<AntDesignOutlined />}
-                  />
-                </Avatar.Group>
-              </div>
+                  {/*TODO: get viewer's profile photo, popover to show fullname */}
+                  <Avatar.Group
+                    maxCount={5}
+                    size="large"
+                    maxStyle={{
+                      color: "#f56a00",
+                      backgroundColor: "#fde3cf",
+                    }}
+                    style={{width: "200"}}
+                  >
+                    {viewerProfiles.map((profile, index) => (
+                      <Tooltip key={index} title={profile ? `${profile.employeeFirstname} ${profile.employeeLastname}` : 'No Data'} placement="top">
+                        <Avatar src={profile ? profile.employeeProfileUrl : ''} style={{ backgroundColor: '#bae0ff' }}>
+                          {profile ? `${profile.employeeFirstname.charAt(0)}${profile.employeeLastname.charAt(0)}` : 'N/A'}
+                        </Avatar>
+                      </Tooltip>
+                    ))}
+                  </Avatar.Group>
+                </div>
 
               <div className="flex gap-3 items-center">
                 <p>Supervisors: </p>
 
+                {supervisorProfiles.length===0 ?? (<p>No Supervisors</p>)}
+
                 {/*TODO: get viewer's profile photo, popover to show fullname */}
                 <Avatar.Group
                   maxCount={5}
@@ -182,19 +314,16 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
                     color: "#f56a00",
                     backgroundColor: "#fde3cf",
                   }}
+                  style={{width: "200"}}
                 >
-                  <Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=3" />
-                  <Avatar style={{ backgroundColor: "#f56a00" }}>K</Avatar>
-                  <Tooltip title="Ant User" placement="top">
-                    <Avatar
-                      style={{ backgroundColor: "#87d068" }}
-                      icon={<UserOutlined />}
-                    />
-                  </Tooltip>
-                  <Avatar
-                    style={{ backgroundColor: "#1677ff" }}
-                    icon={<AntDesignOutlined />}
-                  />
+          
+                  {supervisorProfiles.map((profile, index) => (
+                    <Tooltip key={index} title={profile ? `${profile.employeeFirstname} ${profile.employeeLastname}` : 'No Data'} placement="top">
+                      <Avatar src={profile ? profile.employeeProfileUrl : ''} style={{ backgroundColor: '#bae0ff' }}>
+                        {profile ? `${profile.employeeFirstname.charAt(0)}${profile.employeeLastname.charAt(0)}` : 'N/A'}
+                      </Avatar>
+                    </Tooltip>
+                  ))}
                 </Avatar.Group>
               </div>
             </div>
@@ -220,6 +349,72 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
                 )}
               />
             </div>
+
+            <Divider/>
+
+            <div>
+                <p className="inline-block mb-1 font-semibold text-slate-700">
+                  Invite Viewers
+                </p>
+                <Form.Item name="viewers">
+                  <Select 
+                    mode="multiple"
+                    loading = {isEmployeesLoading}
+                    disabled = {!isAllowEdit}
+                    placeholder="Select viewers">
+                      {employees && employees.map((employee: any) => (
+                        <Option key={employee.employeeId} value={employee.employeeId}>
+                          {employee.employeeFirstname} {employee.employeeLastname}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+            </div>
+
+            <div>
+                <p className="inline-block mb-1 font-semibold text-slate-700">
+                  Invite Supervisors
+                </p>
+                <Form.Item name="supervisors">
+                  <Select 
+                    mode="multiple"
+                    loading = {isEmployeesLoading}
+                    disabled = {!isAllowEdit}
+                    placeholder="Select viewers">
+                      {employees && employees.map((employee: any) => (
+                        <Option key={employee.employeeId} value={employee.employeeId}>
+                          {employee.employeeFirstname} {employee.employeeLastname}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+            </div>
+
+            <div>
+              <p className="inline-block mb-1 font-semibold text-slate-700">
+                Add Supporting Files
+              </p>
+              <UploadUserFile onUploadComplete={handleFileUploadComplete}/>
+            </div>
+
+            <div className="flex mt-3 gap-3 items-center justify-center">
+              {isEditting ? (
+                <Button type="primary" onClick={handleCancelBtnClicked}>
+                Cancel
+                </Button>
+              ) : (
+
+              <Button type="primary" onClick={handleEditBtnClicked}>
+              Edit
+              </Button>
+                
+              )}
+              
+              <Button htmlType="submit" type="primary" disabled={!isEditting}>
+                Save
+              </Button>
+            </div>
+
           </Col>
           <Col span={12}>
             <div className="ml-3 bg-blue-100 w-full h-full rounded-xl">

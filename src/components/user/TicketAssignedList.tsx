@@ -3,6 +3,9 @@ import { ITicket } from "../../types";
 import { useState, useEffect } from "react";
 import TicketDetail from "./TicketDetail";
 import { useUser } from "../../hooks/useUser";
+import axios from "axios";
+import { mapDataInTicketAssignList } from "../../utils/functions";
+import { TicketRole } from "../../utils/constants";
 
 interface FilterOptions {
   status: string[];
@@ -42,6 +45,8 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
   const user = useUser();
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [isTicketDetailModalVisible, setIsTicketDetailModalVisible] = useState(false);
+  const [allTickets, setAllTickets] = useState<ITicket[]>([]);
+  const [filteredTickets, setFilteredTickets]= useState<ITicket[]>([]);
  
   const [ticketInitialValue, setTicketInitialValue] = useState<{
     ticketTitle: string;
@@ -59,51 +64,6 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
     setIsTicketDetailModalVisible(true);
   };
 
-  const filteredTickets = tickets.filter((ticket) => {
-    // Check if the ticket's status is in the selected status filter options
-    const statusFilterMatch =
-      filterOptions.status.length === 0 ||
-      filterOptions.status.includes(ticket.ticketStatus);
-
-    // Check if the ticket's priority is in the selected priority filter options
-    const priorityFilterMatch =
-      filterOptions.priority.length === 0 ||
-      filterOptions.priority.includes(ticket.priority.toString()); // Convert priority to string for comparison
-
-    if ( user?.id === ticket.ticketCreator && filterOptions.role?.includes("creator")) {
-      return statusFilterMatch && priorityFilterMatch;
-    }
-
-    if (filterOptions.role) {
-      const hasSelectedRole =
-        filterOptions.role?.length === 0 || // No role selected (matches all roles)
-        ticket.assigns.some((assign) => {
-          // Check if the user's ID is found in the assigns
-          if (filterOptions.role?.includes(assign.role)) {
-            return user?.id === assign.employeeId;
-          }
-          return false;
-        });
-      return statusFilterMatch && priorityFilterMatch && hasSelectedRole;
-    }
-
-    if (filterOptions.teamMember) {
-      const hasSelectedTeamMember =
-        filterOptions.teamMember.length === 0 ||
-        filterOptions.teamMember.some((teamMemberId) => {
-          const isCreator = ticket.ticketCreator === Number(teamMemberId);
-          const isAssigned = ticket.assigns.some(
-            (assign) => assign.employeeId === Number(teamMemberId),
-          );
-          return isCreator || isAssigned;
-        });
-
-      return statusFilterMatch && priorityFilterMatch && hasSelectedTeamMember;
-    }
-
-    return statusFilterMatch && priorityFilterMatch;
-  });
-
   const priorityTexts = [
     "casual",
     "not in hurry",
@@ -114,8 +74,6 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
 
   useEffect(() => {
     if (selectedTicket) {
-      console.log(selectedTicket);
-      // todo: query for employee name and team name
       setTicketInitialValue({
         ticketTitle: selectedTicket.ticketTitle,
         ticketDescription: selectedTicket.ticketDescription,
@@ -134,9 +92,115 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
   }, [selectedTicket]);
 
   useEffect(() => {
-    // console.log(ticketInitialValue);
-    // console.log(selectedTicket);
-  }, [ticketInitialValue])
+    if (tickets) {
+      const fetchAdditionalData = async (ticket: any) => {
+        let ticketWithAdditionalData = { ...ticket };
+
+        // Fetch ticket creator's name
+        if (ticketWithAdditionalData.ticketCreator) {
+          const employeeResponse = await axios.get(
+            `/api/employee/${ticketWithAdditionalData.ticketCreator}`,
+          );
+          if (employeeResponse.data) {
+            ticketWithAdditionalData.ticketCreatorName =
+              employeeResponse.data.employeeFirstname +
+              " " +
+              employeeResponse.data.employeeLastname;
+          }
+        }
+
+        if (ticketWithAdditionalData.assigns) {
+          const assignsWithAdditionalData = [];
+          for (const assign of ticketWithAdditionalData.assigns) {
+            if (assign.role === TicketRole.ASSIGNEE) {
+              const assignWithAdditionalData = { ...assign };
+
+              if (assignWithAdditionalData.employeeId) {
+                const employeeResponse = await axios.get(
+                  `/api/employee/${assignWithAdditionalData.employeeId}`,
+                );
+                if (employeeResponse.data) {
+                  assignWithAdditionalData.employeeName = `${employeeResponse.data.employeeFirstname} ${employeeResponse.data.employeeLastname}`;
+                }
+              }
+              assignsWithAdditionalData.push(assignWithAdditionalData);
+            } else {
+              assignsWithAdditionalData.push(assign);
+            }
+          }
+
+          ticketWithAdditionalData.assigns = assignsWithAdditionalData;
+        }
+
+        return ticketWithAdditionalData;
+      };
+
+      const fetchAndSetTickets = async () => {
+        const mappedTickets = await Promise.all(
+          tickets.map((data: any) => fetchAdditionalData(data)),
+        );
+
+        const convertedTicket = mappedTickets.map((ticket) =>
+          mapDataInTicketAssignList(ticket),
+        );
+        setAllTickets(convertedTicket);
+      };
+
+      fetchAndSetTickets();
+    }
+  }, [tickets]);
+
+  useEffect(() => {
+    if(allTickets){
+      setFilteredTickets(
+        allTickets.filter((ticket) => {
+          // Check if the ticket's status is in the selected status filter options
+          const statusFilterMatch =
+            filterOptions.status.length === 0 ||
+            filterOptions.status.includes(ticket.ticketStatus);
+      
+          // Check if the ticket's priority is in the selected priority filter options
+          const priorityFilterMatch =
+            filterOptions.priority.length === 0 ||
+            filterOptions.priority.includes(ticket.priority.toString()); // Convert priority to string for comparison
+      
+          if ( user?.id === ticket.ticketCreator && filterOptions.role?.includes("creator")) {
+            return statusFilterMatch && priorityFilterMatch;
+          }
+      
+          if (filterOptions.role) {
+            const hasSelectedRole =
+              filterOptions.role?.length === 0 || // No role selected (matches all roles)
+              ticket.assigns.some((assign) => {
+                // Check if the user's ID is found in the assigns
+                if (filterOptions.role?.includes(assign.role)) {
+                  return user?.id === assign.employeeId;
+                }
+                return false;
+              });
+            return statusFilterMatch && priorityFilterMatch && hasSelectedRole;
+          }
+      
+          if (filterOptions.teamMember) {
+            const hasSelectedTeamMember =
+              filterOptions.teamMember.length === 0 ||
+              filterOptions.teamMember.some((teamMemberId) => {
+                const isCreator = ticket.ticketCreator === Number(teamMemberId);
+                const isAssigned = ticket.assigns.some(
+                  (assign) => assign.employeeId === Number(teamMemberId),
+                );
+                return isCreator || isAssigned;
+              });
+      
+            return statusFilterMatch && priorityFilterMatch && hasSelectedTeamMember;
+          }
+      
+          return statusFilterMatch && priorityFilterMatch;
+        })
+      )
+    }
+  }, [allTickets])
+
 
   return (
     <>
