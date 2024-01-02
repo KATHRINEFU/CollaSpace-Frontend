@@ -17,7 +17,7 @@ import { UserOutlined, AntDesignOutlined } from "@ant-design/icons";
 import MessageList from "./MessageList";
 import { ITicket } from "../../types";
 import { getStatusColor } from "../../utils/functions";
-
+import { useUser } from "../../hooks/useUser";
 interface TicketDetailProps {
   selectedTicket: ITicket;
   initialValue: any;
@@ -27,6 +27,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
   selectedTicket,
   initialValue,
 }) => {
+  const user = useUser();
   const priorityTexts = [
     "casual",
     "not in hurry",
@@ -221,9 +222,9 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
             </div>
           </Col>
           <Col span={12}>
-            <div className="ml-3 bg-lime-100 w-full h-full rounded-xl">
+            <div className="ml-3 bg-blue-100 w-full h-full rounded-xl">
               <p className="ml-3 text-base mb-3">Ticket Logs</p>
-              <MessageList logs={selectedTicket.ticketLogs} currentUserId={4} />
+                {user?.id && (<MessageList logs={selectedTicket.ticketLogs} currentUserId={user?.id} ticketId={selectedTicket.ticketId}/>)}
             </div>
           </Col>
         </Row>

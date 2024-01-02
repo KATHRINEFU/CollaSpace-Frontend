@@ -15,6 +15,7 @@ import {
   getStatusColor,
 } from "../../utils/functions";
 import TicketDetail from "../../components/user/TicketDetail";
+import { useUser } from "../../hooks/useUser";
 
 const getPriorityText = (priority: number) => {
   return priorityTexts[priority - 1];
@@ -29,6 +30,7 @@ const priorityTexts = [
 ];
 
 export function Component() {
+  const user = useUser();
   const maxRows = 10;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -38,12 +40,12 @@ export function Component() {
   const [fromTeamNameFilterArray, setFromTeamNameFilterArray] = useState<
     { text: string; value: string }[]
   >([]);
-  const [toTeamNameFilterArray, setToTeamNameFilterArray] = useState<
+  const [, setToTeamNameFilterArray] = useState<
     { text: string; value: string }[]
   >([]);
 
   const { data: tickets, isLoading: isTicketsLoading } =
-    useGetTicketsByEmployeeQuery(4);
+    useGetTicketsByEmployeeQuery(user?.id);
   const [allTickets, setAllTickets] = useState<ITicket[]>([]);
   const [initialValue, setInitialValue] = useState<{
     ticketTitle: string;
@@ -340,7 +342,7 @@ export function Component() {
       title: "Status",
       dataIndex: "ticketStatus",
       key: "ticketStatus",
-      width: 120,
+      width: 180,
       filters: [
         {
           text: "pending",
@@ -373,7 +375,7 @@ export function Component() {
       title: "Priority",
       dataIndex: "priority",
       key: "priority",
-      width: 120,
+      width: 180,
       filters: [
         { text: "Low", value: 1 },
         { text: "Medium Low", value: 2 },
@@ -456,38 +458,39 @@ export function Component() {
     {
       title: "From Team",
       dataIndex: "fromTeamName",
+      width: 180,
       filters: fromTeamNameFilterArray,
       onFilter: (value, record) =>
         record.fromTeamName?.indexOf(value as string) === 0,
       key: "fromTeamName",
     },
-    {
-      title: "To Team",
-      dataIndex: "assigns",
-      key: "toTeamName",
-      filters: toTeamNameFilterArray,
-      onFilter: (value, record) => {
-        if (record.assigns && record.assigns.length > 0) {
-          for (const assign of record.assigns) {
-            if (assign.role === "assignee" && assign.teamName === value) {
-              return true;
-            }
-          }
-        }
-        return false;
-      },
-      render: (assigns) => {
-        if (assigns && assigns.length > 0) {
-          for (const assign of assigns) {
-            if (assign.role === "assignee") {
-              return assign.teamName;
-            }
-          }
-        } else {
-          return null;
-        }
-      },
-    },
+    // {
+    //   title: "To Team",
+    //   dataIndex: "assigns",
+    //   key: "toTeamName",
+    //   filters: toTeamNameFilterArray,
+    //   onFilter: (value, record) => {
+    //     if (record.assigns && record.assigns.length > 0) {
+    //       for (const assign of record.assigns) {
+    //         if (assign.role === "assignee" && assign.teamName === value) {
+    //           return true;
+    //         }
+    //       }
+    //     }
+    //     return false;
+    //   },
+    //   render: (assigns) => {
+    //     if (assigns && assigns.length > 0) {
+    //       for (const assign of assigns) {
+    //         if (assign.role === "assignee") {
+    //           return assign.teamName;
+    //         }
+    //       }
+    //     } else {
+    //       return null;
+    //     }
+    //   },
+    // },
     {
       title: "Assignee",
       dataIndex: "assigns",
@@ -550,7 +553,7 @@ export function Component() {
       <div className="mx-3 my-6 flex flex-col gap-3">
         <h2 className="text-xl font-bold m-auto">All Tickets Involved</h2>
         {/* TODO: add buttons for choosing: ticket assigned to me*/}
-        <Table columns={columns} dataSource={allTickets} scroll={{ x: 2000 }} />
+        <Table columns={columns} dataSource={allTickets} scroll={{ x: 1000 }} />
 
         <Modal
           width={1000}

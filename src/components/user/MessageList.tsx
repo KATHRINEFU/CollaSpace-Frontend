@@ -1,14 +1,17 @@
 import { ITicketLog } from "../../types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SendOutlined } from "@ant-design/icons";
-import { Button, Input } from "antd";
+import { Button, Input, notification } from "antd";
+import axios from 'axios';
+import { useUser } from "../../hooks/useUser";
 
 interface MessageListProps {
   logs: ITicketLog[];
   currentUserId: number;
+  ticketId: number;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId }) => {
+const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId, ticketId }) => {
   function getFormattedDate(date: Date) {
     var month = ("0" + (date.getMonth() + 1)).slice(-2);
     var day = ("0" + date.getDate()).slice(-2);
@@ -18,19 +21,43 @@ const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId }) => {
     var seg = ("0" + date.getSeconds()).slice(-2);
     return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + seg;
   }
-  const sortedLogs = [...logs].sort(
-    (a, b) =>
-      a.ticketLogCreationdate.getTime() - b.ticketLogCreationdate.getTime(),
-  );
+
+
+  const user = useUser();
   const [newMessage, setNewMessage] = useState("");
+  const [, setError] = useState("");
+  const [sortedLogs, setSortedLogs] = useState<ITicketLog[]>([]);
   const [allLogs, setAllLogs] = useState(sortedLogs);
+
   const { TextArea } = Input;
+  
 
   const handleSendMessage = () => {
-    // Handle sending the new message here (e.g., sending it to the server).
-    // You can implement this based on your application's logic.
     if (newMessage) {
-      // Add the new message to your logs.
+      // Add the new message to dababase and logs.
+
+      const payload = {
+        ticketId: ticketId,
+        ticketLogCreator: user?.id,
+        ticketLogContent: newMessage,
+      }
+
+      axios
+      .post("/api/ticket/log/create", payload)
+      .then((r) => {
+        if(!r.data){
+          setError("Error: Ticket creation failed");
+          return;
+        }
+        notification.success({
+          type: "success",
+          message: "Ticket Created successfully",
+        });
+      })
+      .catch(() => {
+        setError("Error: Ticket creation failed");
+      });
+
       const newLog = {
         ticketLogId: logs.length + 1, // Replace with the appropriate ID.
         ticketLogCreator: currentUserId,
@@ -42,6 +69,17 @@ const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId }) => {
       setNewMessage("");
     }
   };
+
+  useEffect(() => {
+    setSortedLogs([...logs].sort(
+      (a, b) =>
+        new Date(a.ticketLogCreationdate).getTime() - new Date(b.ticketLogCreationdate).getTime(),
+    ))
+  }, [logs])
+
+  useEffect(() => {
+    setAllLogs(sortedLogs);
+  }, [sortedLogs])
 
   return (
     <div className="message-list relative h-full">
