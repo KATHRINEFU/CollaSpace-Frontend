@@ -246,6 +246,10 @@ export function Component() {
   }, [isTicketsLoading, tickets]);
 
   useEffect(() => {
+    console.log(ticketList);
+  }, [ticketList])
+
+  useEffect(() => {
     const createCount = ticketList.filter(
       (ticket) => ticket.ticketCreator === user?.id,
     ).length; // change to cur user's id

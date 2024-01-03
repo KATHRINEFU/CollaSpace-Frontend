@@ -11,7 +11,8 @@ import {
   Row,
   Col,
   DatePicker,
-  Divider
+  Divider,
+  notification
 } from "antd";
 
 import MessageList from "./MessageList";
@@ -42,6 +43,8 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
   const [viewerProfiles, setViewerProfiles] = useState<any[]>([]);
   const [supervisorProfiles, setSupervisorProfiles] = useState<any[]>([]);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  const [, setError] = useState("");
+  const [curState, setCurState] = useState<string>(selectedTicket.ticketStatus);
   // const [ticketCreatorName, setTicketCreatorName] = useState('');
   // const [assignToName, setAssignToName] = useState('');
 
@@ -97,6 +100,10 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
 
   const isAllowChangeStatus = isEditting && (isAssignee || isCreator || isSupervisor);
 
+  const handleStatusChange = (value: any) => {
+    setCurState(value);
+  };
+  
   const handleEditBtnClicked = () => {
     setIsEditting(true);
   };
@@ -119,7 +126,33 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
 
   const handleSaveTicket = (values: any) => {
     console.log(uploadedUrls);
-    console.log(values);
+
+    const payload = {
+      ticketId: selectedTicket.ticketId,
+      ticketDescription: values.ticketDescription,
+      ticketStatus:curState,
+      addViewerIds: values.viewers,
+      addSupervisorIds: values.supervisors,
+    }
+
+    axios
+    .put("/api/ticket/edit", payload)
+    .then((r) => {
+      if(!r.data){
+        setError("Error: Ticket edit failed");
+        return;
+      }
+      notification.success({
+        type: "success",
+        message: "Ticket edit success",
+      });
+
+      setIsEditting(false);
+
+    })
+    .catch(() => {
+      setError("Error: Ticket edition failed");
+    });
   }
 
   useEffect(() => {
@@ -185,7 +218,9 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
                   <div>
                     <Select
                       style={{width: 200}}
-                      defaultValue={selectedTicket.ticketStatus}
+                      // value={ticketForm.getFieldValue('ticketStatus')}
+                      value={curState}
+                      onChange={handleStatusChange}
                       options={
                         [
                           {value: TicketStatus.PENDING, label: 'PENDING'},
