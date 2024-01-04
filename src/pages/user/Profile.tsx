@@ -64,7 +64,7 @@ export function Component() {
   const handleUpdateProfile = (values: any) => {
     setIsEditting(false);
     console.log(values);
-    axios.put("api/employee/edit" + user?.id,values)
+    axios.put("/api/employee/edit" + user?.id,values)
     .then((response) => {
       if(response.status >= 200 && response.status < 300) {
         notification.success({
@@ -301,7 +301,7 @@ export function Component() {
                       </p>
                       <Input
                         disabled={!isEditting}
-                        value={initialValue.firstName}
+                        defaultValue={initialValue.firstName}
                       />
                       {/* <p>{employee.firstName}</p> */}
                     </Form.Item>
@@ -313,7 +313,7 @@ export function Component() {
                         Last Name
                       </p>
                       <Input
-                        value={initialValue.lastName}
+                        defaultValue={initialValue.lastName}
                         className="focus:shadow-primary-outline text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
                         disabled={!isEditting}
                       />

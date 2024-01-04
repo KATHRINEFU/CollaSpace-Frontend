@@ -5,7 +5,7 @@ import {
   Layout,
   Menu,
   Button,
-  Badge,
+  // Badge,
   ConfigProvider,
   Spin,
   Avatar,
@@ -14,7 +14,7 @@ import {
 import {
   HomeOutlined,
   TeamOutlined,
-  BellOutlined,
+  // BellOutlined,
   LogoutOutlined,
   EllipsisOutlined,
 } from "@ant-design/icons";
@@ -116,11 +116,10 @@ export default function UserLayout() {
 
   const sideBarMenuItem: MenuItem[] = [
     getItem("My Space", "sub1", <HomeOutlined />, [
-      getItem("My Dashboard", "1"),
+      getItem("Dashboard", "1"),
       getItem("Events", "2"),
       getItem("Tickets", "3"),
       getItem("Calendar", "4"),
-      getItem("Report", "5"),
     ]),
     getItem("My Teams", "sub2", <TeamOutlined />, teamItems),
   ];
@@ -224,7 +223,7 @@ export default function UserLayout() {
                     <span className="text-black">{curEmployee?.firstName} {curEmployee?.lastName}</span>
                   </div>
 
-                  <Badge count={5}>
+                  {/* <Badge count={5}>
                     <Button
                       type="primary"
                       shape="circle"
@@ -233,7 +232,7 @@ export default function UserLayout() {
                       style={{ width: "42px" }}
                       className="mr-3"
                     />
-                  </Badge>
+                  </Badge> */}
 
                   <Button
                     type="primary"
@@ -281,9 +280,6 @@ export default function UserLayout() {
                   style={{ width: "140px" }}
                 >
                   My Calendar
-                </Button>
-                <Button type="primary" style={{ width: "140px" }}>
-                  My Report
                 </Button>
               </div>
             </Header>

@@ -20,13 +20,13 @@ const UploadUserFile: React.FC<UploadFileProps> = ({onUploadComplete}) => {
   const [, setUploadedFileUrls] = useState<string[]>([])
 
   // S3 Configuration
-  const S3_BUCKET = "collaspace-bucket";
-  const REGION = "us-east-2";
+  const S3_BUCKET = import.meta.env.VITE_AWS_S3_BUCKET;
+  const REGION = import.meta.env.VITE_AWS_REGION;
   const s3BaseUrl = `https://${S3_BUCKET}.s3.${REGION}.amazonaws.com`;
 
   AWS.config.update({
-    accessKeyId: "id",
-    secretAccessKey: "new_key",
+    accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY,
+    secretAccessKey: import.meta.env.VITE_AWS_SECRET_KEY,
   });
   const s3 = new AWS.S3({
     region: REGION,

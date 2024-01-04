@@ -68,7 +68,6 @@ export function Component() {
   };
 
   const onFinish = (values: any) => {
-    console.log("Received uploaded file urls", uploadedUrls);
     const payload = {
       ticketCreator: user?.id,
       ticketTitle: values.title,
@@ -78,8 +77,9 @@ export function Component() {
       ticketDueDate: values.dueDate,
       assigneeId: values.assignTo,
       viewerIds: values.viewers,
+      supervisorIds: values.supervisors,
+      files: uploadedUrls,
     }
-    console.log(payload)
 
     axios
     .post("/api/ticket/create", payload)
@@ -300,6 +300,24 @@ export function Component() {
                   </div> */}
                 </Form.Item>
               </div>
+
+              <div>
+                <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
+                  Invite Supervisors
+                </p>
+                <Form.Item name="supervisors">
+                  <Select 
+                    mode="multiple"
+                    loading = {isEmployeesLoading}
+                    placeholder="Select viewers">
+                      {employees && employees.map((employee: any) => (
+                        <Option key={employee.employeeId} value={employee.employeeId}>
+                          {employee.employeeFirstname} {employee.employeeLastname}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+            </div>
 
               <div>
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
