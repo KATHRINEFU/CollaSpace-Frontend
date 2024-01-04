@@ -63,7 +63,7 @@ export const clientStatusByDepartment = [
       "Requirement Review",
       "Solution Overview",
       "Pricing",
-      "Contracting",
+      "Contract Signing",
       "Contract Review",
       "Contract Confirmed",
     ],

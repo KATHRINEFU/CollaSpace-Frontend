@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { IAccount } from "../../types";
-import { Card, Image, Row, Col, Divider, List, Form, Select, Button, ConfigProvider } from "antd";
+import { Card, Image, Row, Col, Divider, List, Form, Select, Button, ConfigProvider, notification } from "antd";
 import ClientTimeline from "./ClientTimeline";
 import UploadUserFile from "./UploadUserFile";
 import { getFormattedDate } from "../../utils/functions";
 import { clientStatusByDepartment } from "../../utils/constants";
+import axios from "axios";
 
 interface ClientDetailProps {
   selectedAccount: IAccount;
@@ -20,32 +21,89 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
   const {Option} = Select;
 
   const [documents, setDocuments] = useState([
-    "www.googledoc.com/clientfile/1",
-    "ClientFile-Version1.doc",
-    "ClientFile-Version2.doc",
-    "ClientFile-Version3.doc",
-    "ClientFile-Version4.doc",
-    "ClientFile-Final.pdf",
+    selectedAccount.files
   ]);
+
+  const fakeDocuments = [    
+  "www.googledoc.com/clientfile/1",
+  "ClientFile-Version1.doc",
+  "ClientFile-Version2.doc",
+  "ClientFile-Version3.doc",
+  "ClientFile-Version4.doc",
+  "ClientFile-Final.pdf",]
 
   const currentDepartmentId = departmentId;
   const currentDepartmentProcesses = currentDepartmentId ? clientStatusByDepartment.find(
     (department) => department.departmentId === Number(currentDepartmentId)
   )?.processes : [];
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  const [, setError] = useState("");
 
   const onUpdateClientStatus = (values: any) => {
-    console.log(values);
+    axios
+      .put("/api/account/updatestatus/"+ selectedAccount.accountId, values)
+      .then((r) => {
+        if(!r.data){
+          setError("Error: Update status failed");
+          return;
+        }
+        notification.success({
+          type: "success",
+          message: "Update status success",
+        });
+
+      })
+      .catch(() => {
+        setError("Error: Update status failed");
+      });
+
   }
 
   const handlePushToNextDepartment = () => {
+    axios
+      .put("/api/account/push/"+ selectedAccount.accountId, selectedAccount.accountCurrentResponsibleDepartmentId)
+      .then((r) => {
+        if(!r.data){
+          setError("Error: Push to next department failed");
+          return;
+        }
+        notification.success({
+          type: "success",
+          message: "Push to next department success",
+        });
 
+      })
+      .catch(() => {
+        setError("Error: Push to next department failed");
+      });
   }
 
   const handleFileUploadComplete = (urls: string[]) => {
     setUploadedUrls(urls);
-    // You can now use 'uploadedUrls' for further processing or sending to backend
+
   };
+
+  const handleSaveDocuments = () => {
+    const payload = {
+      files: uploadedUrls
+    }
+    axios
+    .put("/api/account/adddocuments/"+ selectedAccount.accountId, payload)
+    .then((r) => {
+      if(!r.data){
+        setError("Error: Add documents failed");
+        return;
+      }
+      notification.success({
+        type: "success",
+        message: "Add documents success",
+      });
+
+    })
+    .catch(() => {
+      setError("Error: Add documents failed");
+    });
+  }
 
   return (
     <div>
@@ -195,7 +253,8 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
 
         <Col span={8}>
           <Divider orientation="right">Documents</Divider>
-          <List
+          {(documents && documents.length>0) ? (
+            <List
             dataSource={documents}
             renderItem={(item) => (
               <List.Item>
@@ -203,10 +262,18 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
               </List.Item>
             )}
           />
+          ) : (
+            <p className="text-base">
+              No Documents
+            </p>
+          )}
+          
 
           <div className="h-30">
             <UploadUserFile onUploadComplete={handleFileUploadComplete} />
           </div>
+
+          <Button type="primary" className="mt-3" onClick={handleSaveDocuments}>Save Documents</Button>
         </Col>
       </Row>
     </div>

@@ -22,6 +22,7 @@ import {
 } from "antd";
 import {
   useGetDepartmentAccountsQuery,
+  useGetEmployeeDetailQuery,
   useGetTeamAnnouncementInSevenDaysQuery,
   useGetTeamMembersQuery,
 } from "../../redux/user/userApiSlice";
@@ -58,6 +59,7 @@ import { useUser } from "../../hooks/useUser";
 function TeamDashboard() {
   const user = useUser();
   const { teamId } = useParams();
+  const {data: curEmployee, } = useGetEmployeeDetailQuery(user?.id);
   const {data: team, isLoading: isTeamLoading} = useGetTeamQuery(teamId);
   const { data: accounts, isLoading: isAccountsLoading } = Number(teamId) <= 4 ?  useGetDepartmentAccountsQuery(teamId) : useGetTeamAccountsQuery(teamId);
   const { data: announcements, isLoading: isAnnouncementsLoading } =
@@ -731,7 +733,7 @@ function TeamDashboard() {
             <>
               <ClientDetail
                 selectedAccount={selectedAccount}
-                departmentId={teamId}
+                departmentId={curEmployee.departmentId}
               />
             </>
           )}

@@ -30,6 +30,7 @@ export interface IAccount {
   customerSuccessPersonnel: number;
   customerSuccessPersonnelEmployee?: IEmployee;
   accountCompany?: ICompany;
+  files: [];
 }
 
 export interface ICompany {
