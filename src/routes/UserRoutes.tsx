@@ -19,6 +19,10 @@ export const UserRoutes: RouteObject[] = [
     lazy: () => import("../pages/user/CreateTeam"),
   },
   {
+    path: "/user/create-account",
+    lazy: () => import("../pages/user/CreateAccount"),
+  },
+  {
     path: "/user/events",
     lazy: () => import("../pages/user/AllEvents"),
   },

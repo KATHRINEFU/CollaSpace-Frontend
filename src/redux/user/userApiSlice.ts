@@ -7,6 +7,9 @@ export const userApiSlice = apiSlice.injectEndpoints({
         getAllEmployees: builder.query({
           query: () => `/employee/all`,
         }),
+        getEmployeeByDepartment: builder.query({
+          query: (departmentId) => `/employee/bydepartment/${departmentId}`,
+        }),
         getEmployeeTeams: builder.query({
           query: (employeeId) => `/employee/teams/${employeeId}`,
         }),
@@ -45,7 +48,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         }),
         getTeamAnnouncementInSevenDays: builder.query({
           query: (teamId) => `/team/announcement/sevendays/byteam/${teamId}`,
-          providesTags: (result, error, teamId) => [{ type: 'Announcement', id: teamId }],
+          providesTags: (teamId) => [{ type: 'Announcement', id: teamId }],
         }),
         getTeamMembers: builder.query({
           query: (teamId) => `/team/members/${teamId}`,
@@ -64,6 +67,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
   // 为 `getPosts` Query endpoint 导出自动生成的 hooks
   export const {
     useGetAllEmployeesQuery,
+    useGetEmployeeByDepartmentQuery,
     useGetEmployeeTeamsQuery,
     useGetClientQuery,
     useGetEventsQuery,

@@ -41,7 +41,7 @@ export default function UserLayout() {
   const navigate = useNavigate();
   // console.log("current user id: ", user?.id);
   const { data: teams, isLoading } = useGetEmployeeTeamsQuery(user?.id);
-  // console.log(teams);
+  console.log(teams);
   // const [myDepartment, setMyDepartment] = useState<ITeam>();
   // const [myTeams, setMyTeams] = useState<ITeam[]>([]);
 
@@ -62,6 +62,10 @@ export default function UserLayout() {
   const handleCreateTeamBtnClicked = () => {
     navigate("/user/create-team");
   };
+
+  const handleCreateAccountBtnClicked = () => {
+    navigate("/user/create-account");
+  }
 
   const handleMyCalendarBtnClicked = () => {
     navigate("/user/calendar");
@@ -274,6 +278,14 @@ export default function UserLayout() {
                 >
                   Create Team
                 </Button>
+                <Button
+                  type="primary"
+                  onClick={handleCreateAccountBtnClicked}
+                  style={{ width: "140px" }}
+                >
+                  Create Account
+                </Button>
+
                 <Button
                   type="primary"
                   onClick={handleMyCalendarBtnClicked}

@@ -20,17 +20,17 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
   const [clientStatusForm] = Form.useForm();
   const {Option} = Select;
 
-  const [documents, setDocuments] = useState([
+  const [documents, ] = useState([
     selectedAccount.files
   ]);
 
-  const fakeDocuments = [    
-  "www.googledoc.com/clientfile/1",
-  "ClientFile-Version1.doc",
-  "ClientFile-Version2.doc",
-  "ClientFile-Version3.doc",
-  "ClientFile-Version4.doc",
-  "ClientFile-Final.pdf",]
+  // const fakeDocuments = [    
+  // "www.googledoc.com/clientfile/1",
+  // "ClientFile-Version1.doc",
+  // "ClientFile-Version2.doc",
+  // "ClientFile-Version3.doc",
+  // "ClientFile-Version4.doc",
+  // "ClientFile-Final.pdf",]
 
   const currentDepartmentId = departmentId;
   const currentDepartmentProcesses = currentDepartmentId ? clientStatusByDepartment.find(
