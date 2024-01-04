@@ -14,8 +14,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadUserFile from "../../components/user/UploadUserFile";
 import { useUser } from "../../hooks/useUser";
-import { useGetEmployeeTeamsQuery, useGetAllEmployeesQuery } from "../../redux/user/userApiSlice";
-import axios from 'axios';
+import {
+  useGetEmployeeTeamsQuery,
+  useGetAllEmployeesQuery,
+} from "../../redux/user/userApiSlice";
+import axios from "axios";
 
 const formItemLayout = {
   labelCol: {
@@ -49,7 +52,8 @@ export function Component() {
   const [, setError] = useState("");
 
   const { data: teams, isLoading } = useGetEmployeeTeamsQuery(user?.id);
-  const {data: employees, isLoading: isEmployeesLoading} = useGetAllEmployeesQuery({});
+  const { data: employees, isLoading: isEmployeesLoading } =
+    useGetAllEmployeesQuery({});
 
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
@@ -79,25 +83,24 @@ export function Component() {
       viewerIds: values.viewers,
       supervisorIds: values.supervisors,
       files: uploadedUrls,
-    }
+    };
 
     axios
-    .post("/api/ticket/create", payload)
-    .then((r) => {
-      if(!r.data){
+      .post("/api/ticket/create", payload)
+      .then((r) => {
+        if (!r.data) {
+          setError("Error: Ticket creation failed");
+          return;
+        }
+        notification.success({
+          type: "success",
+          message: "Ticket Created successfully",
+        });
+        navigate("/user/dashboard");
+      })
+      .catch(() => {
         setError("Error: Ticket creation failed");
-        return;
-      }
-      notification.success({
-        type: "success",
-        message: "Ticket Created successfully",
       });
-      navigate("/user/dashboard");
-    })
-    .catch(() => {
-      setError("Error: Ticket creation failed");
-    });
-
   };
 
   const handleFileUploadComplete = (urls: string[]) => {
@@ -165,10 +168,9 @@ export function Component() {
                     },
                   ]}
                 >
-                  <Select 
-                    loading = {isLoading}
-                    placeholder="Select a team">
-                      {teams && teams.map((team: any) => (
+                  <Select loading={isLoading} placeholder="Select a team">
+                    {teams &&
+                      teams.map((team: any) => (
                         <Option key={team.teamId} value={team.teamId}>
                           {team.teamName}
                         </Option>
@@ -212,14 +214,10 @@ export function Component() {
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Ticket Due Date
                 </p>
-                <Form.Item
-                  name="dueDate"
-                >
+                <Form.Item name="dueDate">
                   <DatePicker className="w-full" />
                 </Form.Item>
               </div>
-
-
             </Col>
 
             <Col span={10}>
@@ -236,12 +234,18 @@ export function Component() {
                     },
                   ]}
                 >
-                  <Select 
-                    loading = {isEmployeesLoading}
-                    placeholder="Select an assignee">
-                      {employees && employees.map((employee: any) => (
-                        <Option key={employee.employeeId} value={employee.employeeId}>
-                          {employee.employeeFirstname} {employee.employeeLastname}
+                  <Select
+                    loading={isEmployeesLoading}
+                    placeholder="Select an assignee"
+                  >
+                    {employees &&
+                      employees.map((employee: any) => (
+                        <Option
+                          key={employee.employeeId}
+                          value={employee.employeeId}
+                        >
+                          {employee.employeeFirstname}{" "}
+                          {employee.employeeLastname}
                         </Option>
                       ))}
                   </Select>
@@ -268,13 +272,19 @@ export function Component() {
                   Invite Viewers
                 </p>
                 <Form.Item name="viewers">
-                  <Select 
+                  <Select
                     mode="multiple"
-                    loading = {isEmployeesLoading}
-                    placeholder="Select viewers">
-                      {employees && employees.map((employee: any) => (
-                        <Option key={employee.employeeId} value={employee.employeeId}>
-                          {employee.employeeFirstname} {employee.employeeLastname}
+                    loading={isEmployeesLoading}
+                    placeholder="Select viewers"
+                  >
+                    {employees &&
+                      employees.map((employee: any) => (
+                        <Option
+                          key={employee.employeeId}
+                          value={employee.employeeId}
+                        >
+                          {employee.employeeFirstname}{" "}
+                          {employee.employeeLastname}
                         </Option>
                       ))}
                   </Select>
@@ -306,24 +316,30 @@ export function Component() {
                   Invite Supervisors
                 </p>
                 <Form.Item name="supervisors">
-                  <Select 
+                  <Select
                     mode="multiple"
-                    loading = {isEmployeesLoading}
-                    placeholder="Select viewers">
-                      {employees && employees.map((employee: any) => (
-                        <Option key={employee.employeeId} value={employee.employeeId}>
-                          {employee.employeeFirstname} {employee.employeeLastname}
+                    loading={isEmployeesLoading}
+                    placeholder="Select viewers"
+                  >
+                    {employees &&
+                      employees.map((employee: any) => (
+                        <Option
+                          key={employee.employeeId}
+                          value={employee.employeeId}
+                        >
+                          {employee.employeeFirstname}{" "}
+                          {employee.employeeLastname}
                         </Option>
                       ))}
                   </Select>
                 </Form.Item>
-            </div>
+              </div>
 
               <div>
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Add Supporting Files
                 </p>
-                <UploadUserFile onUploadComplete={handleFileUploadComplete}/>
+                <UploadUserFile onUploadComplete={handleFileUploadComplete} />
               </div>
             </Col>
 

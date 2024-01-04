@@ -16,7 +16,7 @@ import {
   Avatar,
   Form,
   Input,
-  notification
+  notification,
   // Skeleton,
   // Divider
 } from "antd";
@@ -52,16 +52,23 @@ import InviteTeamMember from "../../components/user/InviteMember";
 import ClientDetail from "../../components/user/ClientDetail";
 import EventList from "../../components/user/EventList";
 import TicketAssignedList from "../../components/user/TicketAssignedList";
-import { useGetTicketsByTeamQuery, useGetTeamQuery, useGetTeamAccountsQuery } from "../../redux/user/userApiSlice";
+import {
+  useGetTicketsByTeamQuery,
+  useGetTeamQuery,
+  useGetTeamAccountsQuery,
+} from "../../redux/user/userApiSlice";
 import InviteClient from "../../components/user/InviteClient";
 import { useUser } from "../../hooks/useUser";
 
 function TeamDashboard() {
   const user = useUser();
   const { teamId } = useParams();
-  const {data: curEmployee, } = useGetEmployeeDetailQuery(user?.id);
-  const {data: team, isLoading: isTeamLoading} = useGetTeamQuery(teamId);
-  const { data: accounts, isLoading: isAccountsLoading } = Number(teamId) <= 4 ?  useGetDepartmentAccountsQuery(teamId) : useGetTeamAccountsQuery(teamId);
+  const { data: curEmployee } = useGetEmployeeDetailQuery(user?.id);
+  const { data: team, isLoading: isTeamLoading } = useGetTeamQuery(teamId);
+  const { data: accounts, isLoading: isAccountsLoading } =
+    Number(teamId) <= 4
+      ? useGetDepartmentAccountsQuery(teamId)
+      : useGetTeamAccountsQuery(teamId);
   const { data: announcements, isLoading: isAnnouncementsLoading } =
     useGetTeamAnnouncementInSevenDaysQuery(teamId);
   const { data: teamMembers, isLoading: isTeamMembersLoading } =
@@ -92,13 +99,13 @@ function TeamDashboard() {
     useState(false);
   const [isClientFilterModalVisible, setIsClientFilterModalVisible] =
     useState(false);
-  const [isAddClientModalVisible, setIsAddClientModalVisible] =
-    useState(false);
+  const [isAddClientModalVisible, setIsAddClientModalVisible] = useState(false);
   const [
     isAnnouncementHistoryModalVisible,
     setIsAnnouncementHistoryModalVisible,
   ] = useState(false);
-  const [isAnnouncementPostModalVisible, setIsAnnouncementPostModalVisible] = useState(false);
+  const [isAnnouncementPostModalVisible, setIsAnnouncementPostModalVisible] =
+    useState(false);
   const [isTeamMemberModalVisible, setIsTeamMemberModalVisible] =
     useState(false);
   const [isEventFilterModalVisible, setIsEventFilterModalVisible] =
@@ -157,7 +164,7 @@ function TeamDashboard() {
 
   const handleAddClientBtnClicked = () => {
     setIsAddClientModalVisible(true);
-  }
+  };
   const handleAddClientModalOk = () => {
     setIsAddClientModalVisible(false);
   };
@@ -166,18 +173,17 @@ function TeamDashboard() {
     setIsAddClientModalVisible(false);
   };
 
-  
   const onPostNewAnnouncement = (values: any) => {
     const payload = {
       teamId: teamId,
       announcementCreator: user?.id,
-      announcementContent: values.content
-    }
+      announcementContent: values.content,
+    };
 
     axios
       .post("/api/team/announcement/create", payload)
       .then((r) => {
-        if(!r.data){
+        if (!r.data) {
           setError("Failed to post announcement, please try again");
           return;
         }
@@ -193,11 +199,11 @@ function TeamDashboard() {
       .catch(() => {
         setError("Failed to post announcement, please try again");
       });
-  }
+  };
 
   const handlePostBtnClicked = () => {
     setIsAnnouncementPostModalVisible(true);
-  }
+  };
   const handleAnnouncementPostModalOk = () => {
     setIsAnnouncementPostModalVisible(false);
   };
@@ -321,17 +327,17 @@ function TeamDashboard() {
   // };
 
   useEffect(() => {
-    if(!isTeamLoading && team){
-        setCurTeam(mapDataToTeam(team));
+    if (!isTeamLoading && team) {
+      setCurTeam(mapDataToTeam(team));
     }
-  }, [team, isTeamLoading])
+  }, [team, isTeamLoading]);
 
   useEffect(() => {
     if (accounts && !isAccountsLoading) {
       // setAccountList(accounts)
       const fetchCompanyInfo = async (companyId: number) => {
         try {
-          const response = await axios.get('/api/client/'+companyId);
+          const response = await axios.get("/api/client/" + companyId);
           return response.data;
         } catch (error) {
           console.error("Error fetching company info: ", error);
@@ -341,9 +347,7 @@ function TeamDashboard() {
 
       const fetchPersonnelInfo = async (personnelId: number) => {
         try {
-          const response = await axios.get(
-            '/api/employee/'+personnelId,
-          );
+          const response = await axios.get("/api/employee/" + personnelId);
           return response.data;
         } catch (error) {
           console.error("Error fetching personnel info: ", error);
@@ -596,15 +600,15 @@ function TeamDashboard() {
             className="flex flex-col justify-center"
           >
             <Form.Item
-            name="content"
-            rules={[
-              {
-                required: true,
-                message: "Please input your content",
-              },
-            ]}
+              name="content"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your content",
+                },
+              ]}
             >
-                <Input.TextArea rows={4}/>
+              <Input.TextArea rows={4} />
             </Form.Item>
 
             <Button type="primary" htmlType="submit" className="w-30 m-auto">
@@ -619,7 +623,9 @@ function TeamDashboard() {
           onOk={handleAddClientModalOk}
           onCancel={handleAddClientModalCancel}
         >
-          {teamId && (<InviteClient existingTeamAccounts={accountList} teamId={teamId}/>)}
+          {teamId && (
+            <InviteClient existingTeamAccounts={accountList} teamId={teamId} />
+          )}
         </Modal>
 
         <Modal
@@ -642,12 +648,12 @@ function TeamDashboard() {
                     </p>
                   }
                 />
-                {Number(item.joindate.getFullYear())>=2023 ? (
+                {Number(item.joindate.getFullYear()) >= 2023 ? (
                   <div>Joined at {getFormattedDate(item.joindate)}</div>
                 ) : (
                   <div>Pending Acceptance</div>
                 )}
-                
+
                 <Divider type="vertical" />
                 <div>{item.role}</div>
 
@@ -662,7 +668,12 @@ function TeamDashboard() {
             )}
           />
           <div className="mt-3 flex items-center justify-center w-full">
-            {teamId && <InviteTeamMember existingTeamMembers={teamMemberList} teamId={teamId}/>}
+            {teamId && (
+              <InviteTeamMember
+                existingTeamMembers={teamMemberList}
+                teamId={teamId}
+              />
+            )}
           </div>
         </Modal>
 
@@ -734,7 +745,7 @@ function TeamDashboard() {
               <ClientDetail
                 selectedAccount={selectedAccount}
                 departmentId={curEmployee.departmentId}
-                teamId = {teamId}
+                teamId={teamId}
               />
             </>
           )}
@@ -856,9 +867,15 @@ function TeamDashboard() {
         >
           <div className="flex flex-wrap mt-6 -mx-3">
             <div className="w-full max-w-full px-3 mb-3 shrink-0 lg:flex-0 lg:w-12/12">
-                <Card className="relative flex flex-col justify-center h-10 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                    {curTeam ? (<h2 className="text-lg">{curTeam?.teamName} for {curTeam?.teamType} use</h2> ) : (<Spin/>)}
-                </Card>
+              <Card className="relative flex flex-col justify-center h-10 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                {curTeam ? (
+                  <h2 className="text-lg">
+                    {curTeam?.teamName} for {curTeam?.teamType} use
+                  </h2>
+                ) : (
+                  <Spin />
+                )}
+              </Card>
             </div>
             <div className="w-full max-w-full px-3 shrink-0 lg:flex-0 lg:w-6/12">
               <Card className="relative flex flex-col h-60 min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
@@ -876,7 +893,7 @@ function TeamDashboard() {
                     </Button>
                   </div>
                   <div className="ml-3 mr-3 mt-3">
-                    { announcementList && announcementList.length>0 ? (
+                    {announcementList && announcementList.length > 0 ? (
                       <div>
                         <Text mark>{announcementList.at(0)?.content}</Text>
                         <p className="text-right text-sm">
@@ -894,18 +911,24 @@ function TeamDashboard() {
                         )}
                       </div>
                     ) : (
-                        <div>
-                            {announcementList ? (
-                            <Text mark> No Annoucements</Text>
-                            ) : (
-                            <Spin size="large" />
-                            )}
-                        </div>
+                      <div>
+                        {announcementList ? (
+                          <Text mark> No Annoucements</Text>
+                        ) : (
+                          <Spin size="large" />
+                        )}
+                      </div>
                     )}
                   </div>
 
                   <div className="mt-8 text-right">
-                    <Button shape="round" type="primary" onClick={handlePostBtnClicked}>Post</Button>
+                    <Button
+                      shape="round"
+                      type="primary"
+                      onClick={handlePostBtnClicked}
+                    >
+                      Post
+                    </Button>
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0"></div>
@@ -927,7 +950,10 @@ function TeamDashboard() {
                   <div className="flex flex-auto p-3">
                     {teamMemberList ? (
                       teamMemberList.map((member) => (
-                        <div key={member.employee.id} className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12">
+                        <div
+                          key={member.employee.id}
+                          className="w-4/12 text-center flex-0 sm:w-3/12 md:w-2/12 lg:w-3/12"
+                        >
                           <a className="inline-flex items-center justify-center text-sm text-white transition-all duration-200 ease-in-out border border-blue-500 border-solid w-14 h-14 rounded-circle">
                             <Image
                               src={member.employee.profileUrl}
@@ -975,37 +1001,44 @@ function TeamDashboard() {
                     </div>
                   ) : (
                     <div>
-                      {accountList.length===0 ? (
-                        <Text mark className="text-center ml-6"> No Clients</Text>
-                        ) : (
-
-                          <div>
-                            <div className="flex items-center justify-center gap-6">
-                              <div className="w-16 h-4 rounded text-center text-sm bg-teal-100">
-                                Standard
-                              </div>
-
-                              <div className="w-16 h-4 rounded text-center text-sm bg-pink-100">
-                                Premium
-                              </div>
+                      {accountList.length === 0 ? (
+                        <Text mark className="text-center ml-6">
+                          {" "}
+                          No Clients
+                        </Text>
+                      ) : (
+                        <div>
+                          <div className="flex items-center justify-center gap-6">
+                            <div className="w-16 h-4 rounded text-center text-sm bg-teal-100">
+                              Standard
                             </div>
 
-                            <ClientList
-                              accountList={accountList}
-                              filterOptions={clientFilterOptions}
-                              onOpenClientDetailModal={handleOpenClientDetailModal}
-                            />
+                            <div className="w-16 h-4 rounded text-center text-sm bg-pink-100">
+                              Premium
+                            </div>
                           </div>
+
+                          <ClientList
+                            accountList={accountList}
+                            filterOptions={clientFilterOptions}
+                            onOpenClientDetailModal={
+                              handleOpenClientDetailModal
+                            }
+                          />
+                        </div>
                       )}
-                      
+
                       {!curTeam?.teamDepartmentId && (
                         <div className="mt-3 text-right">
-                          <Button shape="round" type="primary" onClick={handleAddClientBtnClicked}>Add</Button>
+                          <Button
+                            shape="round"
+                            type="primary"
+                            onClick={handleAddClientBtnClicked}
+                          >
+                            Add
+                          </Button>
                         </div>
-                        )
-                      }
-                      
-                      
+                      )}
                     </div>
                     // <InfiniteScroll
                     //     dataLength={accountList.length}
@@ -1017,7 +1050,6 @@ function TeamDashboard() {
                     // >
 
                     // </InfiniteScroll>
-                    
                   )}
                 </div>
               </Card>

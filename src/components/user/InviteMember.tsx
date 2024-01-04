@@ -1,24 +1,33 @@
 import { useState, useMemo } from "react";
-import { Button, Select, List, AutoComplete, notification} from "antd";
+import { Button, Select, List, AutoComplete, notification } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useGetAllEmployeesQuery } from "../../redux/user/userApiSlice";
 import { IEmployee, ITeamMember } from "../../types";
 import { mapDataToEmployee } from "../../utils/functions";
-import { message } from 'antd';
-import axios from 'axios';
+import { message } from "antd";
+import axios from "axios";
 interface Member {
-  employeeId: number,
-  employeeName: string,
+  employeeId: number;
+  employeeName: string;
   authority: "viewer" | "supervisor" | "editor" | "leader";
 }
 
-function InviteTeamMember({ existingTeamMembers, teamId }: { existingTeamMembers: ITeamMember[], teamId: string }) {
-  const {data: employees, isLoading: isEmployeesLoading} = useGetAllEmployeesQuery({});
+function InviteTeamMember({
+  existingTeamMembers,
+  teamId,
+}: {
+  existingTeamMembers: ITeamMember[];
+  teamId: string;
+}) {
+  const { data: employees, isLoading: isEmployeesLoading } =
+    useGetAllEmployeesQuery({});
   const [authority, setAuthority] = useState<Member["authority"]>("viewer");
   const [membersList, setMembersList] = useState<Member[]>([]);
-  const [selectedOption, setSelectedOption] = useState<{label: string, value: number}>({label: '', value: 0});
-  const [inputValue, setInputValue] = useState('');
-
+  const [selectedOption, setSelectedOption] = useState<{
+    label: string;
+    value: number;
+  }>({ label: "", value: 0 });
+  const [inputValue, setInputValue] = useState("");
 
   const { Option } = Select;
 
@@ -26,7 +35,7 @@ function InviteTeamMember({ existingTeamMembers, teamId }: { existingTeamMembers
     if (!employees || isEmployeesLoading) return [];
 
     const employeeList: IEmployee[] = employees.map((employeeData: any) =>
-      mapDataToEmployee(employeeData)
+      mapDataToEmployee(employeeData),
     );
 
     return employeeList.map((employee: IEmployee) => ({
@@ -45,25 +54,25 @@ function InviteTeamMember({ existingTeamMembers, teamId }: { existingTeamMembers
     setSelectedOption(option);
   };
 
-
   const handleAddMember = () => {
     if (selectedOption) {
       const isExistingTeamAccount = existingTeamMembers.find(
-        (teamMember: ITeamMember) => teamMember.employee.id === Number(selectedOption.value)
+        (teamMember: ITeamMember) =>
+          teamMember.employee.id === Number(selectedOption.value),
       );
 
       if (isExistingTeamAccount) {
-        message.error('Employee already exists in the team.');
+        message.error("Employee already exists in the team.");
         return;
       }
 
       // Check if the selected option is not already in the membersList
       const exists = membersList.find(
-        (member) => member.employeeId === selectedOption.value
+        (member) => member.employeeId === selectedOption.value,
       );
 
-      if(exists){
-        message.error('Employee already added.');
+      if (exists) {
+        message.error("Employee already added.");
         return;
       }
 
@@ -75,17 +84,16 @@ function InviteTeamMember({ existingTeamMembers, teamId }: { existingTeamMembers
         };
 
         setMembersList([...membersList, newMember]);
-        setSelectedOption({label: '', value: 0});
-        setInputValue('');
+        setSelectedOption({ label: "", value: 0 });
+        setInputValue("");
       } else {
-        // <Alert 
+        // <Alert
         //   type="warning"
         //   closable
         //   message="This person is already added"/>;
       }
     }
   };
-
 
   const handleRemoveMember = (index: number) => {
     // Remove a member from the list.
@@ -97,14 +105,14 @@ function InviteTeamMember({ existingTeamMembers, teamId }: { existingTeamMembers
   const handleSendInivitation = () => {
     axios
       .put("/api/team/invitemembers/" + teamId, {
-        members: membersList.map(member => ({
+        members: membersList.map((member) => ({
           employeeId: member.employeeId,
           authority: member.authority,
-          employeeName: member.employeeName
-        }))
+          employeeName: member.employeeName,
+        })),
       })
       .then((r) => {
-        if(!r.data){
+        if (!r.data) {
           notification.error({
             type: "error",
             message: "Invite member failed",
@@ -132,17 +140,17 @@ function InviteTeamMember({ existingTeamMembers, teamId }: { existingTeamMembers
         Invite Team Member
       </h2>
       <div className="flex gap-3">
-      <AutoComplete
-        value={inputValue}
-        options={employeeOptions}
-        autoFocus={true}
-        style={{ width: 200, height: "40px" }}
-        filterOption={(inputValue, option) =>
-          option?.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-        }
-        onSelect={onSelect}
-        onChange={onChange}
-      />
+        <AutoComplete
+          value={inputValue}
+          options={employeeOptions}
+          autoFocus={true}
+          style={{ width: 200, height: "40px" }}
+          filterOption={(inputValue, option) =>
+            option?.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+          }
+          onSelect={onSelect}
+          onChange={onChange}
+        />
 
         <Select
           value={authority}

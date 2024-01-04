@@ -1,14 +1,28 @@
-import { Button, Col, Form, Input, Row, Select, Modal, notification, Upload, message } from "antd";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Modal,
+  notification,
+  Upload,
+  message,
+} from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import { useUser } from "../../hooks/useUser";
 import { clientStatusByDepartment } from "../../utils/constants";
-import { useGetEmployeeByDepartmentQuery, useGetEmployeeDetailQuery } from "../../redux/user/userApiSlice";
-import type { RcFile, UploadFile, UploadProps } from 'antd/es/upload/interface';
-import type { UploadChangeParam } from 'antd/es/upload';
+import {
+  useGetEmployeeByDepartmentQuery,
+  useGetEmployeeDetailQuery,
+} from "../../redux/user/userApiSlice";
+import type { RcFile, UploadFile, UploadProps } from "antd/es/upload/interface";
+import type { UploadChangeParam } from "antd/es/upload";
 import AWS from "aws-sdk";
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 // import InviteTeamMember from "../../components/user/InviteMember";
 // import InviteClient from "../../components/user/InviteClient";
 // import { IAccount, ITeamMember } from "../../types";
@@ -45,19 +59,20 @@ export function Component() {
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | undefined>('');
+  const [imageUrl, setImageUrl] = useState<string | undefined>("");
 
-  const {data: curEmployee, } = useGetEmployeeDetailQuery(user?.id);
-  const {data: biddingEmployees, } = useGetEmployeeByDepartmentQuery(1);
-  const {data: salesEmployees, } = useGetEmployeeByDepartmentQuery(2);
-  const {data: solutionEmployees, } = useGetEmployeeByDepartmentQuery(3);
-  const {data: customerEmployees, } = useGetEmployeeByDepartmentQuery(4);
+  const { data: curEmployee } = useGetEmployeeDetailQuery(user?.id);
+  const { data: biddingEmployees } = useGetEmployeeByDepartmentQuery(1);
+  const { data: salesEmployees } = useGetEmployeeByDepartmentQuery(2);
+  const { data: solutionEmployees } = useGetEmployeeByDepartmentQuery(3);
+  const { data: customerEmployees } = useGetEmployeeByDepartmentQuery(4);
 
   const currentDepartmentId = curEmployee.departmentId;
-  const currentDepartmentProcesses = currentDepartmentId ? clientStatusByDepartment.find(
-    (department) => department.departmentId === Number(currentDepartmentId)
-  )?.processes : [];
-
+  const currentDepartmentProcesses = currentDepartmentId
+    ? clientStatusByDepartment.find(
+        (department) => department.departmentId === Number(currentDepartmentId),
+      )?.processes
+    : [];
 
   const uploadButton = (
     <div>
@@ -99,7 +114,6 @@ export function Component() {
         message.success(`${file.name} file uploaded successfully to cloud.`);
       }
     });
-  
   };
 
   const handleCancelCreateEvent = () => {
@@ -116,24 +130,25 @@ export function Component() {
   };
 
   const beforeUpload = (file: RcFile) => {
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
     if (!isJpgOrPng) {
-      message.error('You can only upload JPG/PNG file!');
+      message.error("You can only upload JPG/PNG file!");
     }
     const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
-      message.error('Image must smaller than 2MB!');
+      message.error("Image must smaller than 2MB!");
     }
     return isJpgOrPng && isLt2M;
   };
 
-  const handleChange: UploadProps['onChange'] = (info: UploadChangeParam<UploadFile>) => {
-    if (info.file.status === 'uploading') {
+  const handleChange: UploadProps["onChange"] = (
+    info: UploadChangeParam<UploadFile>,
+  ) => {
+    if (info.file.status === "uploading") {
       setLoading(true);
       return;
     }
-    if (info.file.status === 'done') {
-
+    if (info.file.status === "done") {
       setLoading(false);
 
       // Upload file to S3
@@ -146,9 +161,10 @@ export function Component() {
           newImageUrl: url,
         };
 
-        axios.post("/api/employee/updateprofile", payload)
+        axios
+          .post("/api/employee/updateprofile", payload)
           .then((response) => {
-            if(response.status >= 200 && response.status < 300) {
+            if (response.status >= 200 && response.status < 300) {
               notification.success({
                 type: "success",
                 message: "Update Company Logo Success",
@@ -169,26 +185,24 @@ export function Component() {
           .finally(() => {
             setLoading(false);
           });
-      })
+      });
     }
   };
 
-
   const onFinish = (values: any) => {
-
     console.log(values);
     console.log(imageUrl);
 
     const companyPayload = {
-        companyName: values.companyName,
-        companyWebsite: values.companyWebsite,
-        companyLogoUrl: imageUrl
-    }
+      companyName: values.companyName,
+      companyWebsite: values.companyWebsite,
+      companyLogoUrl: imageUrl,
+    };
 
     axios
       .post("/api/client/create", companyPayload)
       .then((r) => {
-        if(!r.data){
+        if (!r.data) {
           setError("Error: Account creation failed");
           return;
         }
@@ -196,30 +210,33 @@ export function Component() {
         const companyId = r.data.companyId;
 
         const accountPayload = {
-            companyId: companyId,
-            accountStatus: values.accountStatus,
-            accountType: values.accountType,
-            accountCreator: user?.id,
-            biddingPersonnel: values.accountBiddingPersonnel,
-            salesPersonnel: values.accountSalesPersonnel,
-            solutionArchitectPersonnel: values.accountSolutionPersonnel,
-            customerSuccessPersonnel: values.accountCustomerPersonnel,
-        }
+          companyId: companyId,
+          accountStatus: values.accountStatus,
+          accountType: values.accountType,
+          accountCreator: user?.id,
+          biddingPersonnel: values.accountBiddingPersonnel,
+          salesPersonnel: values.accountSalesPersonnel,
+          solutionArchitectPersonnel: values.accountSolutionPersonnel,
+          customerSuccessPersonnel: values.accountCustomerPersonnel,
+        };
 
         console.log(accountPayload);
 
-        axios.post("/api/account/create", accountPayload).then((r) => {
-            if(!r.data){
-                setError("Error: Account creation failed");
-                return;
+        axios
+          .post("/api/account/create", accountPayload)
+          .then((r) => {
+            if (!r.data) {
+              setError("Error: Account creation failed");
+              return;
             }
 
             notification.success({
-                type: "success",
-                message: "Account created successfully",
-              });
-              navigate("/user/dashboard");
-        }).catch(() => {
+              type: "success",
+              message: "Account created successfully",
+            });
+            navigate("/user/dashboard");
+          })
+          .catch(() => {
             setError("Error: Account creation failed");
           });
       })
@@ -233,8 +250,6 @@ export function Component() {
     //   teamDescription: values.description,
     //   teamTypes: values.type,
     // };
-
-
   };
 
   return (
@@ -269,8 +284,8 @@ export function Component() {
                 </Form.Item>
               </div>
 
-            <div>
-              <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
+              <div>
+                <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Company Website
                 </p>
 
@@ -287,23 +302,24 @@ export function Component() {
               </div>
 
               <div>
-              <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
+                <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Account Status
                 </p>
-              <Form.Item
-                 name="accountStatus"
-                 rules={[
-                   {
-                     required: true,
-                     message: "Please select status",
-                   },
-                 ]}
+                <Form.Item
+                  name="accountStatus"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select status",
+                    },
+                  ]}
                 >
-
                   <Select
                     placeholder="Select Client Status"
                     // style={{ width: 250 }}
-                    onChange={(value) => form.setFieldsValue({ accountStatus: value })}
+                    onChange={(value) =>
+                      form.setFieldsValue({ accountStatus: value })
+                    }
                   >
                     {currentDepartmentProcesses &&
                       currentDepartmentProcesses.map((process, index) => (
@@ -313,7 +329,6 @@ export function Component() {
                       ))}
                   </Select>
                 </Form.Item>
-
               </div>
 
               <div>
@@ -342,37 +357,44 @@ export function Component() {
                 </p>
 
                 <Upload
-                    name="avatar"
-                    listType="picture-circle"
-                    className="avatar-uploader"
-                    showUploadList={false}
-                    action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
-                    beforeUpload={beforeUpload}
-                    onChange={handleChange}
+                  name="avatar"
+                  listType="picture-circle"
+                  className="avatar-uploader"
+                  showUploadList={false}
+                  action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                  beforeUpload={beforeUpload}
+                  onChange={handleChange}
                 >
-                    {imageUrl ? 
-                    <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> 
-                    : uploadButton}
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt="avatar"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    uploadButton
+                  )}
                 </Upload>
               </div>
             </Col>
 
             <Col span={2} />
             <Col span={10}>
-            <div>
+              <div>
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Bidding Personnel
                 </p>
-                <Form.Item
-                  name="accountBiddingPersonnel"
-                >
+                <Form.Item name="accountBiddingPersonnel">
                   <Select placeholder="Select a bidding personnel">
-                  {biddingEmployees &&
-                    biddingEmployees.map((employee: any) => (
-                    <Option key={employee.employeeId} value={employee.employeeId}>
-                        {`${employee.employeeFirstname} ${employee.employeeLastname}`}
-                    </Option>
-                    ))}
+                    {biddingEmployees &&
+                      biddingEmployees.map((employee: any) => (
+                        <Option
+                          key={employee.employeeId}
+                          value={employee.employeeId}
+                        >
+                          {`${employee.employeeFirstname} ${employee.employeeLastname}`}
+                        </Option>
+                      ))}
                   </Select>
                 </Form.Item>
               </div>
@@ -381,16 +403,17 @@ export function Component() {
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Sales Personnel
                 </p>
-                <Form.Item
-                  name="accountSalesPersonnel"
-                >
+                <Form.Item name="accountSalesPersonnel">
                   <Select placeholder="Select a sales personnel">
-                  {salesEmployees &&
-                    salesEmployees.map((employee: any) => (
-                    <Option key={employee.employeeId} value={employee.employeeId}>
-                        {`${employee.employeeFirstname} ${employee.employeeLastname}`}
-                    </Option>
-                    ))}
+                    {salesEmployees &&
+                      salesEmployees.map((employee: any) => (
+                        <Option
+                          key={employee.employeeId}
+                          value={employee.employeeId}
+                        >
+                          {`${employee.employeeFirstname} ${employee.employeeLastname}`}
+                        </Option>
+                      ))}
                   </Select>
                 </Form.Item>
               </div>
@@ -399,16 +422,17 @@ export function Component() {
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Solution Architect Personnel
                 </p>
-                <Form.Item
-                  name="accountSolutionPersonnel"
-                >
+                <Form.Item name="accountSolutionPersonnel">
                   <Select placeholder="Select a solution architect personnel">
-                  {solutionEmployees &&
-                    solutionEmployees.map((employee: any) => (
-                    <Option key={employee.employeeId} value={employee.employeeId}>
-                        {`${employee.employeeFirstname} ${employee.employeeLastname}`}
-                    </Option>
-                    ))}
+                    {solutionEmployees &&
+                      solutionEmployees.map((employee: any) => (
+                        <Option
+                          key={employee.employeeId}
+                          value={employee.employeeId}
+                        >
+                          {`${employee.employeeFirstname} ${employee.employeeLastname}`}
+                        </Option>
+                      ))}
                   </Select>
                 </Form.Item>
               </div>
@@ -417,16 +441,17 @@ export function Component() {
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Customer Success Personnel
                 </p>
-                <Form.Item
-                  name="accountCustomerPersonnel"
-                >
+                <Form.Item name="accountCustomerPersonnel">
                   <Select placeholder="Select a customer success personnel">
-                  {customerEmployees &&
-                    customerEmployees.map((employee: any) => (
-                    <Option key={employee.employeeId} value={employee.employeeId}>
-                        {`${employee.employeeFirstname} ${employee.employeeLastname}`}
-                    </Option>
-                    ))}
+                    {customerEmployees &&
+                      customerEmployees.map((employee: any) => (
+                        <Option
+                          key={employee.employeeId}
+                          value={employee.employeeId}
+                        >
+                          {`${employee.employeeFirstname} ${employee.employeeLastname}`}
+                        </Option>
+                      ))}
                   </Select>
                 </Form.Item>
               </div>

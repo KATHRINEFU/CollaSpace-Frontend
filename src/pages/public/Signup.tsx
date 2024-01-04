@@ -8,7 +8,7 @@ import { setCredentials } from "../../redux/auth/authSlice";
 // import { useSignUpMutation } from "../../redux/auth/authApiSlice";
 // import { useGetAllAccountsQuery } from "../../redux/user/userApiSlice";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 
 export const SignUp = () => {
   const [error, setError] = useState("");
@@ -76,17 +76,19 @@ export const SignUp = () => {
     //   message: "Sign up successful",
     // });
 
-  //  const tokenData = {
-  //   "username": "hh@impact.com",
-  //   "password": "testpwd"
-  // }
-  //   axios.post("/auth/token", tokenData);
+    //  const tokenData = {
+    //   "username": "hh@impact.com",
+    //   "password": "testpwd"
+    // }
+    //   axios.post("/auth/token", tokenData);
 
     axios
       .post("/api/auth/register", payload)
       .then((r) => {
-        if(!r.data){
-          setError("Error: Signup failed, email already exist, please try another email or login");
+        if (!r.data) {
+          setError(
+            "Error: Signup failed, email already exist, please try another email or login",
+          );
           return;
         }
         dispatch(
@@ -104,7 +106,9 @@ export const SignUp = () => {
         navigate("/user/dashboard");
       })
       .catch(() => {
-        setError("Signup failed, email already exist, please try another email or login");
+        setError(
+          "Signup failed, email already exist, please try another email or login",
+        );
       });
   };
 

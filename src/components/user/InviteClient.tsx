@@ -1,19 +1,28 @@
 import { useState, useMemo, useEffect } from "react";
-import { Button, List, AutoComplete, notification} from "antd";
+import { Button, List, AutoComplete, notification } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useGetAllAccountsQuery } from "../../redux/user/userApiSlice";
 import { IAccount } from "../../types";
 import { mapDataToEmployee } from "../../utils/functions";
-import axios from 'axios'
-import { message } from 'antd';
+import axios from "axios";
+import { message } from "antd";
 
-function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: IAccount[], teamId: string }) {
-  const {data: accounts, isLoading: isAccountsLoading} = useGetAllAccountsQuery({});
+function InviteClient({
+  existingTeamAccounts,
+  teamId,
+}: {
+  existingTeamAccounts: IAccount[];
+  teamId: string;
+}) {
+  const { data: accounts, isLoading: isAccountsLoading } =
+    useGetAllAccountsQuery({});
   const [accountList, setAccountList] = useState<IAccount[]>([]);
   const [membersList, setMembersList] = useState<IAccount[]>([]);
-  const [selectedOption, setSelectedOption] = useState<{label: string, value: number}>({label: '', value: 0});
-  const [inputValue, setInputValue] = useState('');
-
+  const [selectedOption, setSelectedOption] = useState<{
+    label: string;
+    value: number;
+  }>({ label: "", value: 0 });
+  const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
     if (accounts && !isAccountsLoading) {
@@ -103,7 +112,7 @@ function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: 
   }, [accounts, isAccountsLoading]);
 
   const accountOptions = useMemo(() => {
-    if (!accountList || accountList.length===0) return [];
+    if (!accountList || accountList.length === 0) return [];
 
     return accountList.map((account: IAccount) => ({
       label: `${account.accountCompany?.companyName}`,
@@ -121,37 +130,37 @@ function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: 
     setSelectedOption(option);
   };
 
-
   const handleAddMember = () => {
     if (selectedOption) {
       const isExistingTeamAccount = existingTeamAccounts.find(
-        (account: IAccount) => account.accountId === Number(selectedOption.value)
+        (account: IAccount) =>
+          account.accountId === Number(selectedOption.value),
       );
 
       if (isExistingTeamAccount) {
-        message.error('Account already exists in the team.');
+        message.error("Account already exists in the team.");
         return;
       }
 
       // Check if the selected option is not already in the membersList
       const exists = membersList.find(
-        (member) => member.accountId === Number(selectedOption.value)
+        (member) => member.accountId === Number(selectedOption.value),
       );
 
       if (exists) {
-        message.error('Account already added.');
+        message.error("Account already added.");
         return;
       }
 
       if (!exists) {
         const selectedAccount = accountList.find(
-          (account) => account.accountId === Number(selectedOption.value)
+          (account) => account.accountId === Number(selectedOption.value),
         );
 
         if (selectedAccount) {
           setMembersList([...membersList, selectedAccount]);
-          setSelectedOption({ label: '', value: 0 });
-          setInputValue('');
+          setSelectedOption({ label: "", value: 0 });
+          setInputValue("");
         }
       } else {
       }
@@ -162,10 +171,10 @@ function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: 
     // console.log(membersList);
     axios
       .put("/api/team/inviteclients/" + teamId, {
-        accountIds: membersList.map(account => account.accountId),
+        accountIds: membersList.map((account) => account.accountId),
       })
       .then((r) => {
-        if(!r.data){
+        if (!r.data) {
           notification.error({
             type: "error",
             message: "Add client failed",
@@ -185,8 +194,7 @@ function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: 
           message: "Add client failed",
         });
       });
-  }
-
+  };
 
   const handleRemoveMember = (index: number) => {
     // Remove a member from the list.
@@ -201,17 +209,17 @@ function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: 
         Add Client
       </h2>
       <div className="flex gap-3">
-      <AutoComplete
-        value={inputValue}
-        options={accountOptions}
-        autoFocus={true}
-        style={{ width: 200, height: "40px" }}
-        filterOption={(inputValue, option) =>
-          option?.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-        }
-        onSelect={onSelect}
-        onChange={onChange}
-      />
+        <AutoComplete
+          value={inputValue}
+          options={accountOptions}
+          autoFocus={true}
+          style={{ width: 200, height: "40px" }}
+          filterOption={(inputValue, option) =>
+            option?.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+          }
+          onSelect={onSelect}
+          onChange={onChange}
+        />
 
         <Button
           type="primary"
@@ -239,7 +247,7 @@ function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: 
 
       <Button type="primary" onClick={handleSendClientInvitation}>
         Add to Team
-      </Button> 
+      </Button>
     </div>
   );
 }

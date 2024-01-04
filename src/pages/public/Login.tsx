@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../redux/hooks";
 import { useIsCookieDisabled } from "../../hooks/useIsCookieDisabled";
 import { setCredentials } from "../../redux/auth/authSlice";
-import axios from 'axios';
+import axios from "axios";
 // const [signIn, { isLoading }] = useSignInMutation();
 
 export const Login = () => {
@@ -32,15 +32,14 @@ export const Login = () => {
 
     const payload = {
       username: values.email,
-      password: values.password
-    }
+      password: values.password,
+    };
 
     axios
       .post("/api/auth/token", payload)
       .then((r) => {
-
         console.log(r.data);
-    
+
         dispatch(
           setCredentials({
             user: {
@@ -56,7 +55,9 @@ export const Login = () => {
         navigate("/user/dashboard");
       })
       .catch(() => {
-        setError("Login Failed, The email address and/or password are not correct. ");
+        setError(
+          "Login Failed, The email address and/or password are not correct. ",
+        );
       });
   };
 

@@ -13,7 +13,7 @@ export default function DefaultLayout() {
   useEffect(() => {
     if (user) {
       navigate("/user/dashboard");
-    } 
+    }
     // else {
     //   navigate("/login");
     // }

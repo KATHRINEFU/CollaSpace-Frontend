@@ -2,7 +2,7 @@ import { ITicketLog } from "../../types";
 import { useEffect, useState } from "react";
 import { SendOutlined } from "@ant-design/icons";
 import { Button, Input, notification } from "antd";
-import axios from 'axios';
+import axios from "axios";
 import { useUser } from "../../hooks/useUser";
 
 interface MessageListProps {
@@ -11,7 +11,11 @@ interface MessageListProps {
   ticketId: number;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId, ticketId }) => {
+const MessageList: React.FC<MessageListProps> = ({
+  logs,
+  currentUserId,
+  ticketId,
+}) => {
   function getFormattedDate(date: Date) {
     var month = ("0" + (date.getMonth() + 1)).slice(-2);
     var day = ("0" + date.getDate()).slice(-2);
@@ -22,7 +26,6 @@ const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId, ticketId
     return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + seg;
   }
 
-
   const user = useUser();
   const [newMessage, setNewMessage] = useState("");
   const [, setError] = useState("");
@@ -30,7 +33,6 @@ const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId, ticketId
   const [allLogs, setAllLogs] = useState(sortedLogs);
 
   const { TextArea } = Input;
-  
 
   const handleSendMessage = () => {
     if (newMessage) {
@@ -40,23 +42,23 @@ const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId, ticketId
         ticketId: ticketId,
         ticketLogCreator: user?.id,
         ticketLogContent: newMessage,
-      }
+      };
 
       axios
-      .post("/api/ticket/log/create", payload)
-      .then((r) => {
-        if(!r.data){
+        .post("/api/ticket/log/create", payload)
+        .then((r) => {
+          if (!r.data) {
+            setError("Error: Ticket creation failed");
+            return;
+          }
+          notification.success({
+            type: "success",
+            message: "Ticket Created successfully",
+          });
+        })
+        .catch(() => {
           setError("Error: Ticket creation failed");
-          return;
-        }
-        notification.success({
-          type: "success",
-          message: "Ticket Created successfully",
         });
-      })
-      .catch(() => {
-        setError("Error: Ticket creation failed");
-      });
 
       const newLog = {
         ticketLogId: logs.length + 1, // Replace with the appropriate ID.
@@ -71,15 +73,18 @@ const MessageList: React.FC<MessageListProps> = ({ logs, currentUserId, ticketId
   };
 
   useEffect(() => {
-    setSortedLogs([...logs].sort(
-      (a, b) =>
-        new Date(a.ticketLogCreationdate).getTime() - new Date(b.ticketLogCreationdate).getTime(),
-    ))
-  }, [logs])
+    setSortedLogs(
+      [...logs].sort(
+        (a, b) =>
+          new Date(a.ticketLogCreationdate).getTime() -
+          new Date(b.ticketLogCreationdate).getTime(),
+      ),
+    );
+  }, [logs]);
 
   useEffect(() => {
     setAllLogs(sortedLogs);
-  }, [sortedLogs])
+  }, [sortedLogs]);
 
   return (
     <div className="message-list relative h-full">

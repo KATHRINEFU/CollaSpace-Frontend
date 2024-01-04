@@ -1,6 +1,6 @@
 import { IAccount } from "../../types";
 import { Spin } from "antd";
-import { Fragment } from 'react';
+import { Fragment } from "react";
 
 interface ClientLogoListProps {
   accountList: IAccount[];
@@ -33,17 +33,17 @@ const ClientLogoList: React.FC<ClientLogoListProps> = ({ accountList }) => {
   return (
     <div className="flex flex-auto p-6 gap-9">
       {accountList.map((account) => (
-      <Fragment key={account.accountId}>
-      {account.accountCompany ? (
-        <ClientLogo
-          name={account.accountCompany?.companyName}
-          logoUrl={account.accountCompany?.companyLogoUrl}
-        />
-      ) : (
-        <Spin />
-      )}
-    </Fragment>
-  ))}
+        <Fragment key={account.accountId}>
+          {account.accountCompany ? (
+            <ClientLogo
+              name={account.accountCompany?.companyName}
+              logoUrl={account.accountCompany?.companyLogoUrl}
+            />
+          ) : (
+            <Spin />
+          )}
+        </Fragment>
+      ))}
     </div>
   );
 };

@@ -21,7 +21,8 @@ import {
 export function Component() {
   const { data: teams, isLoading: isTeamsLoading } =
     useGetEmployeeTeamsQuery(4);
-  const { data: tickets, isLoading: isTicketsLoading } = useGetTicketsByEmployeeQuery(4);
+  const { data: tickets, isLoading: isTicketsLoading } =
+    useGetTicketsByEmployeeQuery(4);
 
   const [eventList, setEventList] = useState<
     (IDocumentEvent | IMeetingEvent | IActivityEvent)[]

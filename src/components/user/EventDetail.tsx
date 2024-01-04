@@ -8,10 +8,15 @@ import {
   Select,
   List,
   Button,
-  notification
+  notification,
 } from "antd";
 import { useState, useEffect } from "react";
-import { IActivityEvent, IDocumentEvent, IEventCollaboration, IMeetingEvent } from "../../types";
+import {
+  IActivityEvent,
+  IDocumentEvent,
+  IEventCollaboration,
+  IMeetingEvent,
+} from "../../types";
 import { getEventTypeColor } from "../../utils/functions";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -24,108 +29,110 @@ interface EventDetailProps {
   selectedEvent: IDocumentEvent | IActivityEvent | IMeetingEvent;
 }
 
-const EventDetail: React.FC<EventDetailProps> = ({
-  selectedEvent,
-}) => {
+const EventDetail: React.FC<EventDetailProps> = ({ selectedEvent }) => {
   const user = useUser();
-    const [allTeamIdAndNames, setAllTeamIdAndNames] = useState<
+  const [allTeamIdAndNames, setAllTeamIdAndNames] = useState<
     { id: number; name: string }[]
   >([]);
   const [, setError] = useState("");
-  const [creatorAndSupervisorIds, setCreatorAndSupervisorIds] = useState<{teamId: number, ids: number[]}[]>([]);
+  const [creatorAndSupervisorIds, setCreatorAndSupervisorIds] = useState<
+    { teamId: number; ids: number[] }[]
+  >([]);
   const [isEditting, setIsEditting] = useState<boolean>(false);
 
-   const { data: allTeams, isLoading: isAllTeamsLoading } = useGetAllTeamsQuery(
-        {},
-      );
+  const { data: allTeams, isLoading: isAllTeamsLoading } = useGetAllTeamsQuery(
+    {},
+  );
 
   const isUserCreatorOrSupervisor = (collaboration: IEventCollaboration) => {
     const teamId = collaboration.team.teamId;
     // Find the object that matches the teamId in the state array
-    const teamObj = creatorAndSupervisorIds.find(item => item.teamId === teamId);
+    const teamObj = creatorAndSupervisorIds.find(
+      (item) => item.teamId === teamId,
+    );
     // If the teamObj exists, check if user ID is in the ids array for that team
-    if(user?.id){
+    if (user?.id) {
       return teamObj?.ids.includes(user?.id) ?? false;
     }
     return false;
   };
 
-    const handleAcceptEventCollaboration = (collaboration: IEventCollaboration) => {
-      console.log(collaboration);
-    } 
+  const handleAcceptEventCollaboration = (
+    collaboration: IEventCollaboration,
+  ) => {
+    console.log(collaboration);
+  };
 
-    const handleEditBtnClicked = () => {
-      setIsEditting(true);
+  const handleEditBtnClicked = () => {
+    setIsEditting(true);
+  };
+
+  const handleCancelBtnClicked = () => {
+    setIsEditting(false);
+  };
+
+  const handleEditEvent = (values: any) => {
+    console.log(values);
+
+    const {
+      eventDescription,
+      documentLink,
+      deadline,
+      meetingVirtual,
+      location,
+      meetingLink,
+      meetingNoteLink,
+      meetingAgendaLink,
+      meetingType,
+      activityVirtual,
+      activityLocation,
+    } = values;
+
+    let payload: any = {
+      eventDescription,
+      eventType: selectedEvent.eventType,
+      documentLink: "",
+      deadline: null,
+      meetingVirtual: false,
+      meetingLocation: "",
+      startTime: null,
+      endTime: null,
+      meetingLink: "",
+      meetingNoteLink: "",
+      meetingAgendaLink: "",
+      meetingType: "",
+      activityVirtual: false,
+      activityLocation: "",
     };
-  
-    const handleCancelBtnClicked = () => {
-      setIsEditting(false);
-    };
 
-    const handleEditEvent = (values: any) => {
-      console.log(values);
-
-      const {
-        eventDescription,
+    if (selectedEvent?.eventType === "document") {
+      payload = {
+        ...payload,
         documentLink,
         deadline,
+      };
+    } else if (selectedEvent?.eventType === "meeting") {
+      payload = {
+        ...payload,
         meetingVirtual,
-        location,
+        meetingLocation: location,
         meetingLink,
         meetingNoteLink,
         meetingAgendaLink,
         meetingType,
+      };
+    } else if (selectedEvent?.eventType === "activity") {
+      payload = {
+        ...payload,
         activityVirtual,
         activityLocation,
-      } = values;
-
-
-      let payload: any = {
-        eventDescription,
-        eventType: selectedEvent.eventType,
-        documentLink: '',
-        deadline: null,
-        meetingVirtual: false,
-        meetingLocation: '',
-        startTime: null,
-        endTime: null,
-        meetingLink: '',
-        meetingNoteLink: '',
-        meetingAgendaLink: '',
-        meetingType: '',
-        activityVirtual: false,
-        activityLocation: '',
       };
+    }
 
-      if(selectedEvent?.eventType === 'document'){
-        payload = {
-          ...payload,
-          documentLink,
-          deadline,
-        }
-      }
-      else if (selectedEvent?.eventType === 'meeting') {
-        payload = {
-          ...payload,
-          meetingVirtual,
-          meetingLocation: location,
-          meetingLink,
-          meetingNoteLink,
-          meetingAgendaLink,
-          meetingType,
-        };
-      } else if (selectedEvent?.eventType === 'activity') {
-        payload = {
-          ...payload,
-          activityVirtual,
-          activityLocation,
-        };
-      }
-
-      axios
-      .put("/api/event/edit/"+ selectedEvent.eventId, payload)
+    axios
+      .put("/api/event/edit/" + selectedEvent.eventId, payload)
       .then((r) => {
-        if(!r.data){
+        if (!r.data) {
           setError("Error: Event edit failed");
           return;
         }
@@ -135,60 +142,65 @@ const EventDetail: React.FC<EventDetailProps> = ({
         });
 
         setIsEditting(false);
-
       })
       .catch(() => {
         setError("Error: Event edit failed");
       });
+  };
 
-    }
-
-    useEffect(() => {
-      const fetchCreatorAndSupervisors = async () => {
-        try {
-          const collaborationPromises = selectedEvent.collaborations.map(async (collaboration) => {
+  useEffect(() => {
+    const fetchCreatorAndSupervisors = async () => {
+      try {
+        const collaborationPromises = selectedEvent.collaborations.map(
+          async (collaboration) => {
             const teamId = collaboration.team.teamId;
             try {
-              const response = await axios.get(`/api/team/getCreatorandSupervisor/${teamId}`);
+              const response = await axios.get(
+                `/api/team/getCreatorandSupervisor/${teamId}`,
+              );
               return { teamId: teamId, ids: response.data?.ids ?? [] };
             } catch (error) {
-              console.error('Error fetching creator and supervisor IDs for team:', teamId, error);
+              console.error(
+                "Error fetching creator and supervisor IDs for team:",
+                teamId,
+                error,
+              );
               return { teamId: teamId, ids: [] };
             }
-          });
-    
-          const collaborationIds = await Promise.all(collaborationPromises);
-          setCreatorAndSupervisorIds(collaborationIds);
-        } catch (error) {
-          console.error('Error fetching creator and supervisor IDs:', error);
-        }
-      };
-    
-      fetchCreatorAndSupervisors();
-    }, [selectedEvent.collaborations]);
+          },
+        );
 
+        const collaborationIds = await Promise.all(collaborationPromises);
+        setCreatorAndSupervisorIds(collaborationIds);
+      } catch (error) {
+        console.error("Error fetching creator and supervisor IDs:", error);
+      }
+    };
 
-    useEffect(() => {
-        if (!isAllTeamsLoading && allTeams) {
-          allTeams.map((team: any) => {
-            setAllTeamIdAndNames((prevList) => [
-              ...prevList,
-              { id: team.teamId, name: team.teamName },
-            ]);
-          });
-        }
-      }, [allTeams, isAllTeamsLoading]);
+    fetchCreatorAndSupervisors();
+  }, [selectedEvent.collaborations]);
+
+  useEffect(() => {
+    if (!isAllTeamsLoading && allTeams) {
+      allTeams.map((team: any) => {
+        setAllTeamIdAndNames((prevList) => [
+          ...prevList,
+          { id: team.teamId, name: team.teamName },
+        ]);
+      });
+    }
+  }, [allTeams, isAllTeamsLoading]);
 
   const [eventForm] = Form.useForm();
   eventForm.setFieldsValue(selectedEvent);
 
   dayjs.extend(customParseFormat);
-  const dateFormat = 'YYYY-MM-DD';
-  const timeFormat = 'HH:mm:ss';
+  const dateFormat = "YYYY-MM-DD";
+  const timeFormat = "HH:mm:ss";
 
   const { Option } = Select;
 
-  const isAllowEdit = (selectedEvent.eventCreator === user?.id) && isEditting;
+  const isAllowEdit = selectedEvent.eventCreator === user?.id && isEditting;
 
   return (
     <div>
@@ -200,17 +212,14 @@ const EventDetail: React.FC<EventDetailProps> = ({
             : "white",
         }}
       />
-      <Form 
-        form={eventForm}
-        onFinish={handleEditEvent}
-        >
+      <Form form={eventForm} onFinish={handleEditEvent}>
         {selectedEvent && (
           <div>
             <Form.Item name="eventTitle" label="Title">
               <Input disabled />
             </Form.Item>
             <Form.Item name="eventDescription" label="Description">
-              <Input.TextArea rows={4} disabled = {!isAllowEdit} />
+              <Input.TextArea rows={4} disabled={!isAllowEdit} />
             </Form.Item>
             <p className="">Created By Team: {selectedEvent.team?.teamName}</p>
 
@@ -233,7 +242,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
           <div>
             {/* Display Document Event specific information */}
             <Form.Item name="documentLink" label="Link">
-              <Input disabled = {!isAllowEdit} />
+              <Input disabled={!isAllowEdit} />
             </Form.Item>
 
             <span>Deadline: </span>
@@ -244,7 +253,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
                 ).deadlineDate?.toLocaleString(),
                 dateFormat,
               )}
-              disabled = {!isAllowEdit}
+              disabled={!isAllowEdit}
             />
             <span> </span>
             <TimePicker
@@ -254,22 +263,20 @@ const EventDetail: React.FC<EventDetailProps> = ({
                 ).deadlineDate?.toLocaleString(),
                 timeFormat,
               )}
-              disabled = {!isAllowEdit}
+              disabled={!isAllowEdit}
             />
 
             <div className="flex mt-3 gap-3 items-center justify-center">
               {isEditting ? (
                 <Button type="primary" onClick={handleCancelBtnClicked}>
-                Cancel
+                  Cancel
                 </Button>
               ) : (
-
-              <Button type="primary" onClick={handleEditBtnClicked}>
-              Edit
-              </Button>
-                
+                <Button type="primary" onClick={handleEditBtnClicked}>
+                  Edit
+                </Button>
               )}
-              
+
               <Button htmlType="submit" type="primary" disabled={!isEditting}>
                 Save
               </Button>
@@ -294,43 +301,35 @@ const EventDetail: React.FC<EventDetailProps> = ({
             </div>
 
             <Form.Item name="location" label="location">
-              <Input disabled = {!isAllowEdit} />
+              <Input disabled={!isAllowEdit} />
             </Form.Item>
 
             {/*TODO: timeformat */}
 
             <Form.Item name={"startTime"} label="Start Time">
               <DatePicker
-                defaultValue={dayjs(
-                  (selectedEvent as IMeetingEvent).startTime,
-                )}
+                defaultValue={dayjs((selectedEvent as IMeetingEvent).startTime)}
                 format={dateFormat}
-                disabled = {!isAllowEdit}
+                disabled={!isAllowEdit}
               />
               <span> </span>
               <TimePicker
-                defaultValue={dayjs(
-                  (selectedEvent as IMeetingEvent).startTime
-                )}
+                defaultValue={dayjs((selectedEvent as IMeetingEvent).startTime)}
                 format={timeFormat}
-                disabled = {!isAllowEdit}
+                disabled={!isAllowEdit}
               />
             </Form.Item>
 
             <Form.Item name={"endTime"} label="End Time">
               <DatePicker
-                defaultValue={dayjs(
-                  (selectedEvent as IMeetingEvent).endTime,
-                )}
+                defaultValue={dayjs((selectedEvent as IMeetingEvent).endTime)}
                 format={dateFormat}
-                disabled = {!isAllowEdit}
+                disabled={!isAllowEdit}
               />
               <span> </span>
               <TimePicker
-                defaultValue={dayjs(
-                  (selectedEvent as IMeetingEvent).endTime,
-                )}
-                disabled = {!isAllowEdit}
+                defaultValue={dayjs((selectedEvent as IMeetingEvent).endTime)}
+                disabled={!isAllowEdit}
                 format={timeFormat}
               />
             </Form.Item>
@@ -353,7 +352,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
             </Form.Item> */}
 
             <Form.Item name="meetingType" label="Meeting Type">
-              <Select disabled = {!isAllowEdit}>
+              <Select disabled={!isAllowEdit}>
                 <Option value="business">Business</Option>
                 <Option value="internal">Internal</Option>
                 <Option value="casual">Casual</Option>
@@ -363,21 +362,18 @@ const EventDetail: React.FC<EventDetailProps> = ({
             <div className="flex mt-3 gap-3 items-center justify-center">
               {isEditting ? (
                 <Button type="primary" onClick={handleCancelBtnClicked}>
-                Cancel
+                  Cancel
                 </Button>
               ) : (
-
-              <Button type="primary" onClick={handleEditBtnClicked}>
-              Edit
-              </Button>
-                
+                <Button type="primary" onClick={handleEditBtnClicked}>
+                  Edit
+                </Button>
               )}
-              
+
               <Button htmlType="submit" type="primary" disabled={!isEditting}>
                 Save
               </Button>
             </div>
-
           </div>
         )}
 
@@ -392,13 +388,13 @@ const EventDetail: React.FC<EventDetailProps> = ({
               <Form.Item name="activityVirtual" valuePropName="checked">
                 <Switch
                   defaultChecked={(selectedEvent as IActivityEvent).virtual}
-                  disabled = {!isAllowEdit}
+                  disabled={!isAllowEdit}
                 />
               </Form.Item>
             </div>
 
             <Form.Item name="activityLocation" label="location">
-              <Input disabled = {!isAllowEdit} />
+              <Input disabled={!isAllowEdit} />
             </Form.Item>
 
             {/*TODO: timeformat */}
@@ -408,7 +404,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
                   (selectedEvent as IActivityEvent).startTime,
                 )}
                 format={dateFormat}
-                disabled = {!isAllowEdit}
+                disabled={!isAllowEdit}
               />
               <span> </span>
               <TimePicker
@@ -416,25 +412,21 @@ const EventDetail: React.FC<EventDetailProps> = ({
                   (selectedEvent as IActivityEvent).startTime,
                 )}
                 format={timeFormat}
-                disabled = {!isAllowEdit}
+                disabled={!isAllowEdit}
               />
             </Form.Item>
 
             <Form.Item name={"endTime"} label="End Time">
               <DatePicker
-                defaultValue={dayjs(
-                  (selectedEvent as IActivityEvent).endTime,
-                )}
+                defaultValue={dayjs((selectedEvent as IActivityEvent).endTime)}
                 format={dateFormat}
-                disabled = {!isAllowEdit}
+                disabled={!isAllowEdit}
               />
               <span> </span>
               <TimePicker
-                defaultValue={dayjs(
-                  (selectedEvent as IActivityEvent).endTime,
-                )}
+                defaultValue={dayjs((selectedEvent as IActivityEvent).endTime)}
                 format={timeFormat}
-                disabled = {!isAllowEdit}
+                disabled={!isAllowEdit}
               />
             </Form.Item>
 
@@ -450,23 +442,19 @@ const EventDetail: React.FC<EventDetailProps> = ({
             <div className="flex mt-3 gap-3 items-center justify-center">
               {isEditting ? (
                 <Button type="primary" onClick={handleCancelBtnClicked}>
-                Cancel
+                  Cancel
                 </Button>
               ) : (
-
-              <Button type="primary" onClick={handleEditBtnClicked}>
-              Edit
-              </Button>
-                
+                <Button type="primary" onClick={handleEditBtnClicked}>
+                  Edit
+                </Button>
               )}
-              
+
               <Button htmlType="submit" type="primary" disabled={!isEditting}>
                 Save
               </Button>
             </div>
-
           </div>
-          
         )}
 
         <Divider>Collaboration Specific Info</Divider>
@@ -495,16 +483,18 @@ const EventDetail: React.FC<EventDetailProps> = ({
                     Joined
                   </div>
                 ) : isUserCreatorOrSupervisor(collaboration) ? ( // Check if the user is creator or supervisor
-                <button
-                  className="w-24 h-6 mb-3 rounded text-center text-sm bg-blue-200"
-                  onClick={() => handleAcceptEventCollaboration(collaboration)} // handleAccept function for the Accept action
-                >
-                  Accept
-                </button>
-              ) : (
-                <div className="w-24 h-6 mb-3 rounded text-center text-sm bg-lime-100">
-                  Pending Acceptance
-                </div>
+                  <button
+                    className="w-24 h-6 mb-3 rounded text-center text-sm bg-blue-200"
+                    onClick={() =>
+                      handleAcceptEventCollaboration(collaboration)
+                    } // handleAccept function for the Accept action
+                  >
+                    Accept
+                  </button>
+                ) : (
+                  <div className="w-24 h-6 mb-3 rounded text-center text-sm bg-lime-100">
+                    Pending Acceptance
+                  </div>
                 )}
               </List.Item>
             )}

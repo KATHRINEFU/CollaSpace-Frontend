@@ -44,10 +44,11 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
 }) => {
   const user = useUser();
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
-  const [isTicketDetailModalVisible, setIsTicketDetailModalVisible] = useState(false);
+  const [isTicketDetailModalVisible, setIsTicketDetailModalVisible] =
+    useState(false);
   const [allTickets, setAllTickets] = useState<ITicket[]>([]);
-  const [filteredTickets, setFilteredTickets]= useState<ITicket[]>([]);
- 
+  const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
+
   const [ticketInitialValue, setTicketInitialValue] = useState<{
     ticketTitle: string;
     ticketDescription: string;
@@ -151,23 +152,26 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
   }, [tickets]);
 
   useEffect(() => {
-    if(allTickets){
+    if (allTickets) {
       setFilteredTickets(
         allTickets.filter((ticket) => {
           // Check if the ticket's status is in the selected status filter options
           const statusFilterMatch =
             filterOptions.status.length === 0 ||
             filterOptions.status.includes(ticket.ticketStatus.toLowerCase());
-      
+
           // Check if the ticket's priority is in the selected priority filter options
           const priorityFilterMatch =
             filterOptions.priority.length === 0 ||
             filterOptions.priority.includes(ticket.priority.toString()); // Convert priority to string for comparison
 
-          if ( user?.id === ticket.ticketCreator && filterOptions.role?.includes("creator")) {
+          if (
+            user?.id === ticket.ticketCreator &&
+            filterOptions.role?.includes("creator")
+          ) {
             return statusFilterMatch && priorityFilterMatch;
           }
-      
+
           if (filterOptions.role) {
             const hasSelectedRole =
               filterOptions.role?.length === 0 || // No role selected (matches all roles)
@@ -179,10 +183,10 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
                 return false;
               });
 
-              // console.log("ticket " + ticket.ticketId + " has match: " + statusFilterMatch && priorityFilterMatch && hasSelectedRole);
+            // console.log("ticket " + ticket.ticketId + " has match: " + statusFilterMatch && priorityFilterMatch && hasSelectedRole);
             return statusFilterMatch && priorityFilterMatch && hasSelectedRole;
           }
-      
+
           if (filterOptions.teamMember) {
             const hasSelectedTeamMember =
               filterOptions.teamMember.length === 0 ||
@@ -193,37 +197,41 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
                 );
                 return isCreator || isAssigned;
               });
-      
-            return statusFilterMatch && priorityFilterMatch && hasSelectedTeamMember;
-          }
-      
-          return statusFilterMatch && priorityFilterMatch;
-        })
-      )
-    }
-  }, [allTickets])
 
+            return (
+              statusFilterMatch && priorityFilterMatch && hasSelectedTeamMember
+            );
+          }
+
+          return statusFilterMatch && priorityFilterMatch;
+        }),
+      );
+    }
+  }, [allTickets]);
 
   return (
     <>
-        <Modal
-          width={1000}
-          title="Ticket Information"
-          open={isTicketDetailModalVisible}
-          onCancel={() => setIsTicketDetailModalVisible(false)}
-          footer={[
-            <Button key="back" onClick={() => setIsTicketDetailModalVisible(false)}>
-              Close
-            </Button>,
-          ]}
-        >
-          {ticketInitialValue && selectedTicket && (
-            <TicketDetail
-              selectedTicket={selectedTicket}
-              initialValue={ticketInitialValue}
-            />
-          )}
-        </Modal>
+      <Modal
+        width={1000}
+        title="Ticket Information"
+        open={isTicketDetailModalVisible}
+        onCancel={() => setIsTicketDetailModalVisible(false)}
+        footer={[
+          <Button
+            key="back"
+            onClick={() => setIsTicketDetailModalVisible(false)}
+          >
+            Close
+          </Button>,
+        ]}
+      >
+        {ticketInitialValue && selectedTicket && (
+          <TicketDetail
+            selectedTicket={selectedTicket}
+            initialValue={ticketInitialValue}
+          />
+        )}
+      </Modal>
 
       <div className="flex items-center justify-center gap-3">
         <div className="w-20 h-10 rounded text-center text-sm bg-teal-100">

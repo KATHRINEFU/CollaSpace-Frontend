@@ -24,7 +24,7 @@ const authSlice = createSlice({
       saveUser(action.payload.user!);
     },
     logOut: (state) => {
-      console.log("Logging out")
+      console.log("Logging out");
       state.user = null;
       clearState();
       Cookies.remove(CS_TOKEN);

@@ -1,6 +1,18 @@
 import { useState } from "react";
 import { IAccount } from "../../types";
-import { Card, Image, Row, Col, Divider, List, Form, Select, Button, ConfigProvider, notification } from "antd";
+import {
+  Card,
+  Image,
+  Row,
+  Col,
+  Divider,
+  List,
+  Form,
+  Select,
+  Button,
+  ConfigProvider,
+  notification,
+} from "antd";
 import ClientTimeline from "./ClientTimeline";
 import UploadUserFile from "./UploadUserFile";
 import { getFormattedDate } from "../../utils/functions";
@@ -18,15 +30,12 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
   departmentId,
   teamId,
 }) => {
-
   const [clientStatusForm] = Form.useForm();
-  const {Option} = Select;
+  const { Option } = Select;
 
-  const [documents, ] = useState([
-    selectedAccount.files
-  ]);
+  const [documents] = useState([selectedAccount.files]);
 
-  // const fakeDocuments = [    
+  // const fakeDocuments = [
   // "www.googledoc.com/clientfile/1",
   // "ClientFile-Version1.doc",
   // "ClientFile-Version2.doc",
@@ -35,17 +44,19 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
   // "ClientFile-Final.pdf",]
 
   const currentDepartmentId = departmentId;
-  const currentDepartmentProcesses = currentDepartmentId ? clientStatusByDepartment.find(
-    (department) => department.departmentId === Number(currentDepartmentId)
-  )?.processes : [];
+  const currentDepartmentProcesses = currentDepartmentId
+    ? clientStatusByDepartment.find(
+        (department) => department.departmentId === Number(currentDepartmentId),
+      )?.processes
+    : [];
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [, setError] = useState("");
 
   const onUpdateClientStatus = (values: any) => {
     axios
-      .put("/api/account/updatestatus/"+ selectedAccount.accountId, values)
+      .put("/api/account/updatestatus/" + selectedAccount.accountId, values)
       .then((r) => {
-        if(!r.data){
+        if (!r.data) {
           setError("Error: Update status failed");
           return;
         }
@@ -53,19 +64,20 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
           type: "success",
           message: "Update status success",
         });
-
       })
       .catch(() => {
         setError("Error: Update status failed");
       });
-
-  }
+  };
 
   const handlePushToNextDepartment = () => {
     axios
-      .put("/api/account/push/"+ selectedAccount.accountId, selectedAccount.accountCurrentResponsibleDepartmentId)
+      .put(
+        "/api/account/push/" + selectedAccount.accountId,
+        selectedAccount.accountCurrentResponsibleDepartmentId,
+      )
       .then((r) => {
-        if(!r.data){
+        if (!r.data) {
           setError("Error: Push to next department failed");
           return;
         }
@@ -73,39 +85,36 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
           type: "success",
           message: "Push to next department success",
         });
-
       })
       .catch(() => {
         setError("Error: Push to next department failed");
       });
-  }
+  };
 
   const handleFileUploadComplete = (urls: string[]) => {
     setUploadedUrls(urls);
-
   };
 
   const handleSaveDocuments = () => {
     const payload = {
-      files: uploadedUrls
-    }
+      files: uploadedUrls,
+    };
     axios
-    .put("/api/account/adddocuments/"+ selectedAccount.accountId, payload)
-    .then((r) => {
-      if(!r.data){
+      .put("/api/account/adddocuments/" + selectedAccount.accountId, payload)
+      .then((r) => {
+        if (!r.data) {
+          setError("Error: Add documents failed");
+          return;
+        }
+        notification.success({
+          type: "success",
+          message: "Add documents success",
+        });
+      })
+      .catch(() => {
         setError("Error: Add documents failed");
-        return;
-      }
-      notification.success({
-        type: "success",
-        message: "Add documents success",
       });
-
-    })
-    .catch(() => {
-      setError("Error: Add documents failed");
-    });
-  }
+  };
 
   return (
     <div>
@@ -205,81 +214,87 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
           {Number(teamId) === Number(departmentId) && (
             <div>
               <Divider orientation="right">Status Update</Divider>
-            <div className="flex flex-col justify-center">
-              <Form
-                form={clientStatusForm}
-                onFinish={onUpdateClientStatus}
-                scrollToFirstError
-                className="flex flex-col justify-center"
-              >
-                <Form.Item
-                 name="status"
-                 rules={[
-                   {
-                     required: true,
-                     message: "Please select status",
-                   },
-                 ]}
+              <div className="flex flex-col justify-center">
+                <Form
+                  form={clientStatusForm}
+                  onFinish={onUpdateClientStatus}
+                  scrollToFirstError
+                  className="flex flex-col justify-center"
                 >
-
-                  <span className="mr-3">New Status: </span>
-                  <Select
-                    placeholder="Select Client Status"
-                    style={{ width: 250 }}
-                    onChange={(value) => clientStatusForm.setFieldsValue({ status: value })}
+                  <Form.Item
+                    name="status"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please select status",
+                      },
+                    ]}
                   >
-                    {currentDepartmentProcesses &&
-                      currentDepartmentProcesses.map((process, index) => (
-                        <Option key={index} value={process}>
-                          {process}
-                        </Option>
-                      ))}
-                  </Select>
-                </Form.Item>
+                    <span className="mr-3">New Status: </span>
+                    <Select
+                      placeholder="Select Client Status"
+                      style={{ width: 250 }}
+                      onChange={(value) =>
+                        clientStatusForm.setFieldsValue({ status: value })
+                      }
+                    >
+                      {currentDepartmentProcesses &&
+                        currentDepartmentProcesses.map((process, index) => (
+                          <Option key={index} value={process}>
+                            {process}
+                          </Option>
+                        ))}
+                    </Select>
+                  </Form.Item>
 
-                <Button className="" htmlType="submit"> Update</Button>
-              </Form>
+                  <Button className="" htmlType="submit">
+                    {" "}
+                    Update
+                  </Button>
+                </Form>
 
-
-              <ConfigProvider
-                theme={{
-                  token: {
-                    colorPrimary: '#D2DE32',
-                  },
-                }}
-              >
-                <Button className = "w-full mt-3" type="primary" onClick={handlePushToNextDepartment} >Push to next department</Button>
-              </ConfigProvider>
-            </div>
+                <ConfigProvider
+                  theme={{
+                    token: {
+                      colorPrimary: "#D2DE32",
+                    },
+                  }}
+                >
+                  <Button
+                    className="w-full mt-3"
+                    type="primary"
+                    onClick={handlePushToNextDepartment}
+                  >
+                    Push to next department
+                  </Button>
+                </ConfigProvider>
+              </div>
             </div>
           )}
-              
-
         </Col>
 
         <Col span={8}>
           <Divider orientation="right">Documents</Divider>
-          {(documents && documents.length>0) ? (
+          {documents && documents.length > 0 ? (
             <List
-            dataSource={documents}
-            renderItem={(item) => (
-              <List.Item>
-                <p className="text-sky-600">{item}</p>
-              </List.Item>
-            )}
-          />
+              dataSource={documents}
+              renderItem={(item) => (
+                <List.Item>
+                  <p className="text-sky-600">{item}</p>
+                </List.Item>
+              )}
+            />
           ) : (
-            <p className="text-base">
-              No Documents
-            </p>
+            <p className="text-base">No Documents</p>
           )}
-          
 
           <div className="h-30">
             <UploadUserFile onUploadComplete={handleFileUploadComplete} />
           </div>
 
-          <Button type="primary" className="mt-3" onClick={handleSaveDocuments}>Save Documents</Button>
+          <Button type="primary" className="mt-3" onClick={handleSaveDocuments}>
+            Save Documents
+          </Button>
         </Col>
       </Row>
     </div>

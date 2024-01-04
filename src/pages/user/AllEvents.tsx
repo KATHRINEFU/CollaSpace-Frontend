@@ -2,9 +2,7 @@ import { Table, Modal, Button, Tag, Tooltip, Form } from "antd";
 import { useEffect, useState } from "react";
 import { ColumnsType } from "antd/es/table";
 import { IDocumentEvent, IMeetingEvent, IActivityEvent } from "../../types";
-import {
-  useGetEmployeeTeamsQuery,
-} from "../../redux/user/userApiSlice";
+import { useGetEmployeeTeamsQuery } from "../../redux/user/userApiSlice";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { mapEventDataToEvent, getEventTypeColor } from "../../utils/functions";
@@ -18,8 +16,9 @@ export function Component() {
   const [selectedEvent, setSelectedEvent] = useState<
     IDocumentEvent | IMeetingEvent | IActivityEvent | null
   >(null);
-  const { data: teams, isLoading: isTeamsLoading } =
-    useGetEmployeeTeamsQuery(user?.id);
+  const { data: teams, isLoading: isTeamsLoading } = useGetEmployeeTeamsQuery(
+    user?.id,
+  );
   const [eventList, setEventList] = useState<
     (IDocumentEvent | IMeetingEvent | IActivityEvent)[]
   >([]);
@@ -257,11 +256,7 @@ export function Component() {
             </Button>,
           ]}
         >
-          {selectedEvent && (
-            <EventDetail
-              selectedEvent={selectedEvent}
-            />
-          )}
+          {selectedEvent && <EventDetail selectedEvent={selectedEvent} />}
         </Modal>
       </div>
     </>

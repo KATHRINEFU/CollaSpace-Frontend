@@ -1,7 +1,16 @@
-import { Button, Col, Form, Input, Row, Select, Modal, notification } from "antd";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Modal,
+  notification,
+} from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import { useUser } from "../../hooks/useUser";
 // import InviteTeamMember from "../../components/user/InviteMember";
 // import InviteClient from "../../components/user/InviteClient";
@@ -63,7 +72,7 @@ export function Component() {
     axios
       .post("/api/team/create", payload)
       .then((r) => {
-        if(!r.data){
+        if (!r.data) {
           setError("Error: Team creation failed");
           return;
         }
@@ -76,7 +85,6 @@ export function Component() {
       .catch(() => {
         setError("Error: Team creation failed");
       });
-
   };
 
   return (

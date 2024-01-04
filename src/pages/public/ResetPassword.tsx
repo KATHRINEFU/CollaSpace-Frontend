@@ -1,48 +1,44 @@
 import { useState } from "react";
 import { Alert, Button, Form, Input, notification } from "antd";
 import { Link } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import CollaSpaceLogo from "/logoIcon.png"
+import CollaSpaceLogo from "/logoIcon.png";
 
 export const ResetPassword = () => {
-
   const [error, setError] = useState("");
-	const navigate = useNavigate();
-	const [resetPasswordFormRef] = Form.useForm();
-	const queryParameters = new URLSearchParams(window.location.search);
-	const userToken = queryParameters.get("token") ?? "";
+  const navigate = useNavigate();
+  const [resetPasswordFormRef] = Form.useForm();
+  const queryParameters = new URLSearchParams(window.location.search);
+  const userToken = queryParameters.get("token") ?? "";
 
   const handleResetPassword = (values: any) => {
     const payload = {
       email: values.email,
       token: userToken,
       newPassword: values.password,
-    }
+    };
 
     axios
       .post("/api/auth/reset", payload)
       .then((r) => {
-        if(r.status>=200 && r.status<300){
+        if (r.status >= 200 && r.status < 300) {
           notification.success({
             type: "success",
             message: "Reset password success",
           });
           navigate("/login");
-        }
-        else{
+        } else {
           notification.error({
             type: "error",
             message: "Failed to reset password",
           });
         }
-        
       })
       .catch(() => {
         setError("Failed to reset password");
       });
-
-  }
+  };
   return (
     <div className="m-0 font-sans text-base antialiased font-normal text-left leading-default text-slate-500 bg-cover bg-[url('/src/assets/img/oceanBackground.jpg')]">
       <main className="mt-0 transition-all duration-200 ease-in-out">

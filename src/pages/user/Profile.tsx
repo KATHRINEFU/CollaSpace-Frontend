@@ -1,13 +1,23 @@
-import { Avatar, Button, Form, Input, Spin, message, Upload, notification, Select } from "antd";
+import {
+  Avatar,
+  Button,
+  Form,
+  Input,
+  Spin,
+  message,
+  Upload,
+  notification,
+  Select,
+} from "antd";
 import { useGetEmployeeDetailQuery } from "../../redux/user/userApiSlice";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { IEmployee } from "../../types";
 import { mapDataToEmployee, getFormattedDate } from "../../utils/functions";
 import { useUser } from "../../hooks/useUser";
-import type { UploadChangeParam } from 'antd/es/upload';
-import type { RcFile, UploadFile, UploadProps } from 'antd/es/upload/interface';
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import type { UploadChangeParam } from "antd/es/upload";
+import type { RcFile, UploadFile, UploadProps } from "antd/es/upload/interface";
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import AWS from "aws-sdk";
 import { roleOptions } from "../../utils/constants";
 
@@ -15,7 +25,7 @@ export function Component() {
   const user = useUser();
   const [profileForm] = Form.useForm();
   const { data: employeeData, isLoading: isEmployeeLoading } =
-    useGetEmployeeDetailQuery(user?.id); 
+    useGetEmployeeDetailQuery(user?.id);
 
   const [employee, setEmployee] = useState<IEmployee>();
   const [isEditting, setIsEditting] = useState<boolean>(false);
@@ -30,11 +40,12 @@ export function Component() {
     role: string;
   }>();
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | undefined>(employee?.profileUrl);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(
+    employee?.profileUrl,
+  );
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState({});
   let refreshPage = false;
-
 
   // S3 Configuration
   const S3_BUCKET = import.meta.env.VITE_AWS_S3_BUCKET as string;
@@ -51,7 +62,6 @@ export function Component() {
     region: REGION,
   });
 
-
   const handleEditBtnClicked = () => {
     setIsEditting(true);
   };
@@ -64,36 +74,37 @@ export function Component() {
   const handleUpdateProfile = (values: any) => {
     setIsEditting(false);
     console.log(values);
-    axios.put("/api/employee/edit" + user?.id,values)
-    .then((response) => {
-      if(response.status >= 200 && response.status < 300) {
-        notification.success({
-          type: "success",
-          message: "Update Profile Success",
-        });
-      } else {
+    axios
+      .put("/api/employee/edit" + user?.id, values)
+      .then((response) => {
+        if (response.status >= 200 && response.status < 300) {
+          notification.success({
+            type: "success",
+            message: "Update Profile Success",
+          });
+        } else {
+          notification.error({
+            type: "error",
+            message: "Failed to Update Profile",
+          });
+        }
+      })
+      .catch(() => {
         notification.error({
           type: "error",
           message: "Failed to Update Profile",
         });
-      }
-    })
-    .catch(() => {
-      notification.error({
-        type: "error",
-        message: "Failed to Update Profile",
       });
-    })
-  }
-  
+  };
+
   const beforeUpload = (file: RcFile) => {
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
     if (!isJpgOrPng) {
-      message.error('You can only upload JPG/PNG file!');
+      message.error("You can only upload JPG/PNG file!");
     }
     const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
-      message.error('Image must smaller than 2MB!');
+      message.error("Image must smaller than 2MB!");
     }
     return isJpgOrPng && isLt2M;
   };
@@ -116,16 +127,16 @@ export function Component() {
         message.success(`${file.name} file uploaded successfully to cloud.`);
       }
     });
-  
   };
 
-  const handleChange: UploadProps['onChange'] = (info: UploadChangeParam<UploadFile>) => {
-    if (info.file.status === 'uploading') {
+  const handleChange: UploadProps["onChange"] = (
+    info: UploadChangeParam<UploadFile>,
+  ) => {
+    if (info.file.status === "uploading") {
       setLoading(true);
       return;
     }
-    if (info.file.status === 'done') {
-
+    if (info.file.status === "done") {
       setLoading(false);
 
       // Upload file to S3
@@ -138,9 +149,10 @@ export function Component() {
           newImageUrl: url,
         };
 
-        axios.post("/api/employee/updateprofile", payload)
+        axios
+          .post("/api/employee/updateprofile", payload)
           .then((response) => {
-            if(response.status >= 200 && response.status < 300) {
+            if (response.status >= 200 && response.status < 300) {
               notification.success({
                 type: "success",
                 message: "Update Profile Image Success",
@@ -161,7 +173,7 @@ export function Component() {
           .finally(() => {
             setLoading(false);
           });
-      })
+      });
     }
   };
 
@@ -183,9 +195,7 @@ export function Component() {
       });
   }, []);
 
-  useEffect(() => {
-    
-  }, [refreshPage])
+  useEffect(() => {}, [refreshPage]);
 
   useEffect(() => {
     const baseUrl = "http://localhost:8080";
@@ -204,7 +214,8 @@ export function Component() {
     };
 
     const fetchAndSetEmployee = async () => {
-      const employeeWithAdditionalData = await fetchDepartmentName(employeeData);
+      const employeeWithAdditionalData =
+        await fetchDepartmentName(employeeData);
       setEmployee(mapDataToEmployee(employeeWithAdditionalData));
     };
 
@@ -215,7 +226,7 @@ export function Component() {
 
   useEffect(() => {
     if (employee) {
-      setImageUrl(employee.profileUrl)
+      setImageUrl(employee.profileUrl);
       profileForm.setFieldsValue(employee);
       // console.log("Setting initial values:", employee);
       setInitialValue({
@@ -248,23 +259,27 @@ export function Component() {
                 }
               />
 
-          <div className="mt-4 px-3">
-            
-          <Upload
-            name="avatar"
-            listType="picture-circle"
-            className="avatar-uploader"
-            showUploadList={false}
-            action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
-            beforeUpload={beforeUpload}
-            onChange={handleChange}
-          >
-            {imageUrl ? 
-              <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> 
-              : uploadButton}
-          </Upload>
-
-        </div>
+              <div className="mt-4 px-3">
+                <Upload
+                  name="avatar"
+                  listType="picture-circle"
+                  className="avatar-uploader"
+                  showUploadList={false}
+                  action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                  beforeUpload={beforeUpload}
+                  onChange={handleChange}
+                >
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt="avatar"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    uploadButton
+                  )}
+                </Upload>
+              </div>
             </div>
             {employee ? (
               <div className="flex-none w-auto max-w-full px-3 my-auto">
@@ -423,17 +438,19 @@ export function Component() {
                 <div className="flex gap-3 items-center justify-center">
                   {isEditting ? (
                     <Button type="primary" onClick={handleCancelBtnClicked}>
-                    Cancel
+                      Cancel
                     </Button>
                   ) : (
-
-                  <Button type="primary" onClick={handleEditBtnClicked}>
-                  Edit
-                  </Button>
-                    
+                    <Button type="primary" onClick={handleEditBtnClicked}>
+                      Edit
+                    </Button>
                   )}
-                  
-                  <Button htmlType="submit" type="primary" disabled={!isEditting}>
+
+                  <Button
+                    htmlType="submit"
+                    type="primary"
+                    disabled={!isEditting}
+                  >
                     Save
                   </Button>
                 </div>

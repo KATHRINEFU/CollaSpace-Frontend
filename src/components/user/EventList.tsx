@@ -60,7 +60,9 @@ const EventFetcher: React.FC<EventFetcherProps> = ({
         filterOptions.team.includes(event.team!.teamName)),
   );
 
-  const handleEventClick = (event: IDocumentEvent | IActivityEvent | IMeetingEvent) => {
+  const handleEventClick = (
+    event: IDocumentEvent | IActivityEvent | IMeetingEvent,
+  ) => {
     setSelectedEvent(event);
     setIsModalVisible(true);
   };
@@ -69,50 +71,45 @@ const EventFetcher: React.FC<EventFetcherProps> = ({
   return (
     <div>
       <Modal
-          title="Event Information"
-          open={isModalVisible}
-          onCancel={() => setIsModalVisible(false)}
-          footer={[
-            <Button key="back" onClick={() => setIsModalVisible(false)}>
-              Close
-            </Button>,
-          ]}
-        >
-          {selectedEvent && (
-            <EventDetail
-              selectedEvent={selectedEvent}
-            />
-          )}
-        </Modal>
+        title="Event Information"
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setIsModalVisible(false)}>
+            Close
+          </Button>,
+        ]}
+      >
+        {selectedEvent && <EventDetail selectedEvent={selectedEvent} />}
+      </Modal>
 
-        <List
-      itemLayout="horizontal"
-      dataSource={filteredEvents.slice(0, 5)}
-      renderItem={(item: IEvent) => (
-        <List.Item
-          className={`relative flex flex-col my-3 h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border cursor-pointer ${getBackgroundColor(
-            item.eventType,
-          )}`}
-          onClick={() => handleEventClick(item)}
-        >
-          <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
-            <div className="w-full flex justify-between">
-              <p className="text-lg font-bold">{item.eventTitle}</p>
-              <div className="">
-                <span className="py-1.5 px-2.5 text-xs w-40 rounded-1.8 inline-block bg-blue-100 text-center align-baseline font-bold uppercase leading-none text-blue-600">
-                  {item.team?.teamName}
-                </span>
+      <List
+        itemLayout="horizontal"
+        dataSource={filteredEvents.slice(0, 5)}
+        renderItem={(item: IEvent) => (
+          <List.Item
+            className={`relative flex flex-col my-3 h-full min-w-0 break-words border-0 shadow-xl dark:shadow-dark-xl rounded-2xl bg-clip-border cursor-pointer ${getBackgroundColor(
+              item.eventType,
+            )}`}
+            onClick={() => handleEventClick(item)}
+          >
+            <div className="w-full pb-0 border-black/12.5 rounded-t-2xl border-b-0 border-solid p-6">
+              <div className="w-full flex justify-between">
+                <p className="text-lg font-bold">{item.eventTitle}</p>
+                <div className="">
+                  <span className="py-1.5 px-2.5 text-xs w-40 rounded-1.8 inline-block bg-blue-100 text-center align-baseline font-bold uppercase leading-none text-blue-600">
+                    {item.team?.teamName}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className=" p-6 pt-0 text-left">
-            <p className="mb-0 text-sm">{item.eventDescription}</p>
-          </div>
-        </List.Item>
-      )}
-    />
+            <div className=" p-6 pt-0 text-left">
+              <p className="mb-0 text-sm">{item.eventDescription}</p>
+            </div>
+          </List.Item>
+        )}
+      />
     </div>
-    
   );
 };
 

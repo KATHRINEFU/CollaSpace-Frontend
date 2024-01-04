@@ -9,7 +9,7 @@ import {
   ConfigProvider,
   Spin,
   Avatar,
-  notification
+  notification,
 } from "antd";
 import {
   HomeOutlined,
@@ -22,9 +22,12 @@ import ErrorBoundary from "../ErrorBoundary";
 import { Outlet } from "react-router-dom";
 import LogoIcon from "/logoIcon.png";
 import type { MenuProps } from "antd";
-import { useGetEmployeeTeamsQuery, useGetEmployeeDetailQuery } from "../../redux/user/userApiSlice";
+import {
+  useGetEmployeeTeamsQuery,
+  useGetEmployeeDetailQuery,
+} from "../../redux/user/userApiSlice";
 import { logOut } from "../../redux/auth/authSlice";
-import {useUser} from "../../hooks/useUser"
+import { useUser } from "../../hooks/useUser";
 import { useEffect, useState } from "react";
 import { mapDataToEmployee } from "../../utils/functions";
 import { IEmployee } from "../../types";
@@ -32,7 +35,8 @@ import { useAppDispatch } from "../../redux/hooks";
 
 export default function UserLayout() {
   const user = useUser();
-  const {data:employeeData, isLoading: isEmployeeDataLoading} = useGetEmployeeDetailQuery(user?.id);
+  const { data: employeeData, isLoading: isEmployeeDataLoading } =
+    useGetEmployeeDetailQuery(user?.id);
   const [curEmployee, setCurEmployee] = useState<IEmployee>();
 
   const dispatch = useAppDispatch();
@@ -63,7 +67,7 @@ export default function UserLayout() {
 
   const handleCreateAccountBtnClicked = () => {
     navigate("/user/create-account");
-  }
+  };
 
   const handleMyCalendarBtnClicked = () => {
     navigate("/user/calendar");
@@ -127,10 +131,10 @@ export default function UserLayout() {
   ];
 
   useEffect(() => {
-    if(!isEmployeeDataLoading && employeeData){
+    if (!isEmployeeDataLoading && employeeData) {
       setCurEmployee(mapDataToEmployee(employeeData));
     }
-  }, [employeeData, isEmployeeDataLoading])
+  }, [employeeData, isEmployeeDataLoading]);
 
   return (
     <>
@@ -184,15 +188,15 @@ export default function UserLayout() {
               }}
             >
               <div className="flex items-center justify-between mr-24 w-full">
-                  {isEmployeeDataLoading ? (
-                    <div className="spinner-container">
+                {isEmployeeDataLoading ? (
+                  <div className="spinner-container">
                     <Spin size="large" />
                   </div>
-                  ): (
-                    <h2 className="text-xl font-bold ml-6 ">
-                      Good Day! {curEmployee?.firstName} {curEmployee?.lastName}
-                    </h2>
-                  )}
+                ) : (
+                  <h2 className="text-xl font-bold ml-6 ">
+                    Good Day! {curEmployee?.firstName} {curEmployee?.lastName}
+                  </h2>
+                )}
                 <div className="w-50 flex items-center gap-1">
                   <div
                     className="flex items-center justify-center gap-2 mr-6 cursor-pointer"
@@ -200,29 +204,24 @@ export default function UserLayout() {
                   >
                     {curEmployee?.profileUrl ? (
                       <Avatar
-                      src={
-                        <img
-                          src={
-                            curEmployee.profileUrl
-                          }
-                          alt="Profile"
-                        />
-                      }
-                    />
+                        src={<img src={curEmployee.profileUrl} alt="Profile" />}
+                      />
                     ) : (
                       <Avatar
-                      src={
-                        <img
-                          src={
-                            "https://cdn-icons-png.flaticon.com/512/188/188987.png"
-                          }
-                          alt="Profile"
-                        />
-                      }
-                    />
+                        src={
+                          <img
+                            src={
+                              "https://cdn-icons-png.flaticon.com/512/188/188987.png"
+                            }
+                            alt="Profile"
+                          />
+                        }
+                      />
                     )}
-                    
-                    <span className="text-black">{curEmployee?.firstName} {curEmployee?.lastName}</span>
+
+                    <span className="text-black">
+                      {curEmployee?.firstName} {curEmployee?.lastName}
+                    </span>
                   </div>
 
                   {/* <Badge count={5}>

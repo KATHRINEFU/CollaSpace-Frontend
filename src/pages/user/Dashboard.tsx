@@ -26,7 +26,7 @@ import {
   ITicketAssign,
   ITicketLog,
   IAccount,
-  ITeam
+  ITeam,
 } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { mapDataToEmployee } from "../../utils/functions";
@@ -35,10 +35,11 @@ import { useUser } from "../../hooks/useUser";
 
 export function Component() {
   const user = useUser();
-  const { data: teams, isLoading: isTeamsLoading } =
-  useGetEmployeeTeamsQuery(user?.id);
+  const { data: teams, isLoading: isTeamsLoading } = useGetEmployeeTeamsQuery(
+    user?.id,
+  );
   const { data: tickets, isLoading: isTicketsLoading } =
-  useGetTicketsByEmployeeQuery(user?.id);
+    useGetTicketsByEmployeeQuery(user?.id);
   // const { data: accounts, isLoading: isAccountsLoading } =
   //   useGetEmployeeAccountsQuery(user?.id);
 
@@ -72,7 +73,6 @@ export function Component() {
     IAnnouncement[]
   >([]);
   const [accountList, setAccountList] = useState<IAccount[]>([]);
-
 
   const [uniqueEventIds, setUniqueEventIds] = useState(new Set());
 
@@ -247,7 +247,7 @@ export function Component() {
 
   useEffect(() => {
     console.log(ticketList);
-  }, [ticketList])
+  }, [ticketList]);
 
   useEffect(() => {
     const createCount = ticketList.filter(
@@ -284,10 +284,13 @@ export function Component() {
 
       const fetchTeamAccounts = async () => {
         try {
-          const response = await axios.post('/api/team/accounts/teamlist', Array.from(teamIds));
+          const response = await axios.post(
+            "/api/team/accounts/teamlist",
+            Array.from(teamIds),
+          );
           setAccounts(response.data); // Set the accounts data
         } catch (error) {
-          console.error('Error fetching team accounts:', error);
+          console.error("Error fetching team accounts:", error);
         }
       };
 
@@ -320,7 +323,7 @@ export function Component() {
       }
       try {
         const eventPromises = teams.map(async (team: ITeam) => {
-          const response = await axios.get('/api/event/byteam/' + team.teamId);
+          const response = await axios.get("/api/event/byteam/" + team.teamId);
           const eventData = response.data;
 
           eventData.forEach((event: IEvent) => {
@@ -575,18 +578,17 @@ export function Component() {
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
-                      
-                        {isTeamsLoading ? (
-                          <div className="spinner-container">
-                            <Spin size="large" />
-                          </div>
-                        ) : (
-                          <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
-                            <p className="text-xl text-white">
-                              {uniqueAccountIds.length}
-                            </p>
-                          </div>
-                        )}
+                      {isTeamsLoading ? (
+                        <div className="spinner-container">
+                          <Spin size="large" />
+                        </div>
+                      ) : (
+                        <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
+                          <p className="text-xl text-white">
+                            {uniqueAccountIds.length}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -634,12 +636,11 @@ export function Component() {
                       </div>
                     </div>
                     <div className="px-3 text-right basis-1/3">
-
                       {isTicketsLoading ? (
                         <div className="spinner-container">
                           <Spin size="large" />
                         </div>
-                      ): (
+                      ) : (
                         <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
                           <p className="text-xl text-white">
                             {ticketAssignedCount}
@@ -668,12 +669,12 @@ export function Component() {
                         <div className="spinner-container">
                           <Spin size="large" />
                         </div>
-                      ): (
+                      ) : (
                         <div className="inline-block w-12 h-12 text-center rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
                           <p className="text-xl text-white">
                             {ticketCreatedCount}
                           </p>
-                      </div>
+                        </div>
                       )}
                     </div>
                   </div>

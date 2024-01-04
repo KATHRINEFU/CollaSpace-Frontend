@@ -15,9 +15,12 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
-import { useGetEmployeeTeamsQuery, useGetAllTeamsQuery } from "../../redux/user/userApiSlice";
-import moment from 'moment';
-import axios from 'axios';
+import {
+  useGetEmployeeTeamsQuery,
+  useGetAllTeamsQuery,
+} from "../../redux/user/userApiSlice";
+import moment from "moment";
+import axios from "axios";
 
 const formItemLayout = {
   labelCol: {
@@ -50,7 +53,9 @@ export function Component() {
   const navigate = useNavigate();
 
   const { data: teams, isLoading } = useGetEmployeeTeamsQuery(user?.id);
-  const { data: allTeams, isLoading: isAllTeamsLoading} = useGetAllTeamsQuery({});
+  const { data: allTeams, isLoading: isAllTeamsLoading } = useGetAllTeamsQuery(
+    {},
+  );
 
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [eventType, setEventType] = useState("");
@@ -78,28 +83,31 @@ export function Component() {
   const onFinish = (values: any) => {
     console.log("Received values of form: ", values);
 
-    const collaborations = values.inviteTeams ? values.inviteTeams.map((teamId:number) => ({
-      teamId: teamId,
-      teamRole: "collaborator",
-      acceptStatus: 0
-    })) : [];
-  
+    const collaborations = values.inviteTeams
+      ? values.inviteTeams.map((teamId: number) => ({
+          teamId: teamId,
+          teamRole: "collaborator",
+          acceptStatus: 0,
+        }))
+      : [];
 
-    const combineDateAndTime = (date: moment.Moment | null, time: moment.Moment | null) => {
+    const combineDateAndTime = (
+      date: moment.Moment | null,
+      time: moment.Moment | null,
+    ) => {
       if (date && time) {
         return date.clone().set({
-          hour: time.get('hour'),
-          minute: time.get('minute'),
-          second: time.get('second'),
+          hour: time.get("hour"),
+          minute: time.get("minute"),
+          second: time.get("second"),
         });
       }
       return null;
     };
-  
+
     // Combine the date with start and end times
     const combinedStartTime = combineDateAndTime(values.date, values.startTime);
     const combinedEndTime = combineDateAndTime(values.date, values.endTime);
-  
 
     const commonPayload = {
       eventCreationTeamId: values.creationTeam,
@@ -112,52 +120,62 @@ export function Component() {
     };
 
     let payload = {};
-    switch(values.type){
+    switch (values.type) {
       case "document":
-        payload = {...commonPayload, 
+        payload = {
+          ...commonPayload,
           documentLink: values.link,
           deadline: values.deadlineDate,
         };
         break;
       case "meeting":
-        payload = {...commonPayload, 
+        payload = {
+          ...commonPayload,
           meetingVirtual: values.virtual,
           meetingLocation: values.location,
           meetingLink: values.link,
-          meetingStarttime: combinedStartTime ? combinedStartTime.toISOString() : null,
-          meetingEndtime: combinedEndTime ? combinedEndTime.toISOString() : null,
+          meetingStarttime: combinedStartTime
+            ? combinedStartTime.toISOString()
+            : null,
+          meetingEndtime: combinedEndTime
+            ? combinedEndTime.toISOString()
+            : null,
           meetingNoteLink: values.noteLink,
           meetingAgendaLink: values.agendaLink,
           meetingType: values.meetingType,
         };
         break;
       case "activity":
-        payload = {...commonPayload,
+        payload = {
+          ...commonPayload,
           activityVirtual: values.virtual,
           activityLocation: values.location,
-          activityStarttime: combinedStartTime ? combinedStartTime.toISOString() : null,
-          activityEndtime: combinedEndTime ? combinedEndTime.toISOString() : null,
-        }
+          activityStarttime: combinedStartTime
+            ? combinedStartTime.toISOString()
+            : null,
+          activityEndtime: combinedEndTime
+            ? combinedEndTime.toISOString()
+            : null,
+        };
     }
 
     console.log("payload:", payload);
     axios
-    .post("/api/event/add", payload)
-    .then((r) => {
-      if(!r.data){
+      .post("/api/event/add", payload)
+      .then((r) => {
+        if (!r.data) {
+          setError("Error: Event creation failed");
+          return;
+        }
+        notification.success({
+          type: "success",
+          message: "Event Created successfully",
+        });
+        navigate("/user/dashboard");
+      })
+      .catch(() => {
         setError("Error: Event creation failed");
-        return;
-      }
-      notification.success({
-        type: "success",
-        message: "Event Created successfully",
       });
-      navigate("/user/dashboard");
-    })
-    .catch(() => {
-      setError("Error: Event creation failed");
-    });
-
   };
 
   const handleEventScopeChange = (e: any) => {
@@ -231,7 +249,7 @@ export function Component() {
                   </Radio.Group>
                 </Form.Item>
               </div>
-                
+
               <div>
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
                   Within Team
@@ -245,10 +263,9 @@ export function Component() {
                     },
                   ]}
                 >
-                  <Select 
-                    loading = {isLoading}
-                    placeholder="Select a team">
-                      {teams && teams.map((team: any) => (
+                  <Select loading={isLoading} placeholder="Select a team">
+                    {teams &&
+                      teams.map((team: any) => (
                         <Option key={team.teamId} value={team.teamId}>
                           {team.teamName}
                         </Option>
@@ -258,33 +275,34 @@ export function Component() {
               </div>
 
               {eventScope === 2 && (
-                  <div>
-                    <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
-                      Invite Team
-                    </p>
-                    <Form.Item
-                      name="inviteTeams"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select the creation team",
-                        },
-                      ]}
+                <div>
+                  <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">
+                    Invite Team
+                  </p>
+                  <Form.Item
+                    name="inviteTeams"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please select the creation team",
+                      },
+                    ]}
+                  >
+                    <Select
+                      mode="multiple"
+                      loading={isAllTeamsLoading}
+                      placeholder="Select a team"
                     >
-                      <Select 
-                        mode="multiple"
-                        loading = {isAllTeamsLoading}
-                        placeholder="Select a team">
-                          {allTeams && allTeams.map((team: any) => (
-                            <Option key={team.teamId} value={team.teamId}>
-                              {team.teamName}
-                            </Option>
-                          ))}
-                      </Select>
-                    </Form.Item>
+                      {allTeams &&
+                        allTeams.map((team: any) => (
+                          <Option key={team.teamId} value={team.teamId}>
+                            {team.teamName}
+                          </Option>
+                        ))}
+                    </Select>
+                  </Form.Item>
                 </div>
               )}
-              
 
               <div>
                 <p className="inline-block mb-1 ml-1 text-base font-semibold text-slate-700">

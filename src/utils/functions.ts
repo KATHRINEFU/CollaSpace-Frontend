@@ -102,7 +102,7 @@ export function mapDataToTickets(data: any) {
   };
 }
 
-export function mapDataInTicketAssignList(data: any){
+export function mapDataInTicketAssignList(data: any) {
   return {
     ticketId: data.ticketId,
     ticketCreator: data.ticketCreator,
@@ -185,7 +185,7 @@ export function mapTicketToCalendarItem(data: ITicket) {
   };
 }
 
-export function mapDataToTeam(data: any){
+export function mapDataToTeam(data: any) {
   return {
     teamId: data.teamId,
     teamName: data.teamName,
@@ -193,7 +193,7 @@ export function mapDataToTeam(data: any){
     teamCreationdate: data.teamCreationdate,
     teamType: data.teamType,
     teamDepartmentId: data.teamDepartmentId,
-  }
+  };
 }
 
 export const getEventTypeColor = (eventType: string) => {

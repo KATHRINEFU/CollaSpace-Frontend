@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Alert, Button, Form, Input, notification } from "antd";
 import { Link } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import CollaSpaceLogo from "/logoIcon.png"
+import CollaSpaceLogo from "/logoIcon.png";
 
 export const ForgotPassword = () => {
   const [error, setError] = useState("");
@@ -14,26 +14,26 @@ export const ForgotPassword = () => {
     axios
       .post("/api/auth/forgot", values)
       .then((r) => {
-        if(r.status>=200 && r.status<300){
+        if (r.status >= 200 && r.status < 300) {
           notification.success({
             type: "success",
             message: "Sent reset password link success",
           });
           navigate("/login");
-        }
-        else{
+        } else {
           notification.error({
             type: "error",
-            message: "Failed to send reset password link, please make sure right email",
+            message:
+              "Failed to send reset password link, please make sure right email",
           });
         }
-        
       })
       .catch(() => {
-        setError("Failed to send reset password link, please make sure right email");
+        setError(
+          "Failed to send reset password link, please make sure right email",
+        );
       });
   };
-
 
   return (
     <div className="m-0 font-sans text-base antialiased font-normal text-left leading-default text-slate-500 bg-cover bg-[url('/src/assets/img/oceanBackground.jpg')]">
