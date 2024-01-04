@@ -10,11 +10,13 @@ import axios from "axios";
 interface ClientDetailProps {
   selectedAccount: IAccount;
   departmentId: string | undefined;
+  teamId: string | undefined;
 }
 
 const ClientDetail: React.FC<ClientDetailProps> = ({
   selectedAccount,
   departmentId,
+  teamId,
 }) => {
 
   const [clientStatusForm] = Form.useForm();
@@ -200,7 +202,9 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
             </Col>
           </Row>
 
-          <Divider orientation="right">Status Update</Divider>
+          {Number(teamId) === Number(departmentId) && (
+            <div>
+              <Divider orientation="right">Status Update</Divider>
             <div className="flex flex-col justify-center">
               <Form
                 form={clientStatusForm}
@@ -247,6 +251,8 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
                 <Button className = "w-full mt-3" type="primary" onClick={handlePushToNextDepartment} >Push to next department</Button>
               </ConfigProvider>
             </div>
+            </div>
+          )}
               
 
         </Col>

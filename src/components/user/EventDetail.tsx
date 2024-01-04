@@ -70,7 +70,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
         documentLink,
         deadline,
         meetingVirtual,
-        meetingLocation,
+        location,
         meetingLink,
         meetingNoteLink,
         meetingAgendaLink,
@@ -108,7 +108,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
         payload = {
           ...payload,
           meetingVirtual,
-          meetingLocation,
+          meetingLocation: location,
           meetingLink,
           meetingNoteLink,
           meetingAgendaLink,
@@ -283,7 +283,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
             <div className="flex gap-3 items-center">
               <p className="">
                 Virtual:{" "}
-                {(selectedEvent as IActivityEvent).virtual ? "Yes" : "No"}
+                {(selectedEvent as IActivityEvent).virtual ? "No" : "Yes"}
               </p>
               <Form.Item name="meetingVirtual" valuePropName="checked">
                 <Switch
@@ -293,7 +293,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
               </Form.Item>
             </div>
 
-            <Form.Item name="meetingLocation" label="location">
+            <Form.Item name="location" label="location">
               <Input disabled = {!isAllowEdit} />
             </Form.Item>
 
@@ -344,13 +344,13 @@ const EventDetail: React.FC<EventDetailProps> = ({
                   {(selectedEvent as IMeetingEvent).endTime.toLocaleString()}
                 </p> */}
 
-            <Form.Item name="meetingNoteLink" label="Note Link">
+            {/* <Form.Item name="meetingNoteLink" label="Note Link">
               <Input disabled = {!isAllowEdit} />
             </Form.Item>
 
             <Form.Item name="meetingAgendaLink" label="Agenda Link">
               <Input disabled = {!isAllowEdit} />
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item name="meetingType" label="Meeting Type">
               <Select disabled = {!isAllowEdit}>
@@ -387,7 +387,7 @@ const EventDetail: React.FC<EventDetailProps> = ({
             <div className="flex gap-3 items-center">
               <p className="">
                 Virtual:{" "}
-                {(selectedEvent as IActivityEvent).virtual ? "Yes" : "No"}
+                {(selectedEvent as IActivityEvent).virtual ? "No" : "Yes"}
               </p>
               <Form.Item name="activityVirtual" valuePropName="checked">
                 <Switch

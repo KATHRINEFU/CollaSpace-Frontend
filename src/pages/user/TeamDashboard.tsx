@@ -734,6 +734,7 @@ function TeamDashboard() {
               <ClientDetail
                 selectedAccount={selectedAccount}
                 departmentId={curEmployee.departmentId}
+                teamId = {teamId}
               />
             </>
           )}

@@ -495,7 +495,7 @@ export function Component() {
             <Select
               mode="multiple"
               className="w-full"
-              placeholder="Select ticket statys"
+              placeholder="Select ticket status"
               value={ticketFilterOptions.status}
               onChange={(value) =>
                 setTicketFilterOptions({
@@ -703,7 +703,7 @@ export function Component() {
                         <h5 className="mb-0 text-lg">ANNOUNCEMENTS</h5>
                       </Popover>
                     </div>
-                    <Button type="link">View More</Button>
+                    {/* <Button type="link">View More</Button> */}
                   </div>
                 </div>
                 <div className="flex-auto p-6 pt-0">

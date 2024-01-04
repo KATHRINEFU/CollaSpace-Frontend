@@ -353,8 +353,8 @@ export function Component() {
           value: "in progress",
         },
         {
-          text: "in review",
-          value: "in review",
+          text: "under review",
+          value: "under review",
         },
         {
           text: "resolved",
@@ -455,15 +455,15 @@ export function Component() {
         }
       },
     },
-    {
-      title: "From Team",
-      dataIndex: "fromTeamName",
-      width: 180,
-      filters: fromTeamNameFilterArray,
-      onFilter: (value, record) =>
-        record.fromTeamName?.indexOf(value as string) === 0,
-      key: "fromTeamName",
-    },
+    // {
+    //   title: "From Team",
+    //   dataIndex: "fromTeamName",
+    //   width: 180,
+    //   filters: fromTeamNameFilterArray,
+    //   onFilter: (value, record) =>
+    //     record.fromTeamName?.indexOf(value as string) === 0,
+    //   key: "fromTeamName",
+    // },
     // {
     //   title: "To Team",
     //   dataIndex: "assigns",

@@ -215,7 +215,7 @@ export const getStatusColor = (status: string) => {
       return "#d3f261";
     case "in progress":
       return "#ffd666";
-    case "in review":
+    case "under review":
       return "#b37feb";
     case "resolved":
       return "#5cdbd3";

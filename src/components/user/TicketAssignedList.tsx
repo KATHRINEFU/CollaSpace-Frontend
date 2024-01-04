@@ -157,13 +157,13 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
           // Check if the ticket's status is in the selected status filter options
           const statusFilterMatch =
             filterOptions.status.length === 0 ||
-            filterOptions.status.includes(ticket.ticketStatus);
+            filterOptions.status.includes(ticket.ticketStatus.toLowerCase());
       
           // Check if the ticket's priority is in the selected priority filter options
           const priorityFilterMatch =
             filterOptions.priority.length === 0 ||
             filterOptions.priority.includes(ticket.priority.toString()); // Convert priority to string for comparison
-      
+
           if ( user?.id === ticket.ticketCreator && filterOptions.role?.includes("creator")) {
             return statusFilterMatch && priorityFilterMatch;
           }
@@ -178,6 +178,8 @@ const TicketAssignedList: React.FC<TicketAssignedListProps> = ({
                 }
                 return false;
               });
+
+              // console.log("ticket " + ticket.ticketId + " has match: " + statusFilterMatch && priorityFilterMatch && hasSelectedRole);
             return statusFilterMatch && priorityFilterMatch && hasSelectedRole;
           }
       

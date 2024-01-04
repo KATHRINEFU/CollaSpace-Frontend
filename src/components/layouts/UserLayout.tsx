@@ -39,9 +39,7 @@ export default function UserLayout() {
   let { pathname } = useLocation();
   pathname = pathname.split("/")[2];
   const navigate = useNavigate();
-  // console.log("current user id: ", user?.id);
   const { data: teams, isLoading } = useGetEmployeeTeamsQuery(user?.id);
-  console.log(teams);
   // const [myDepartment, setMyDepartment] = useState<ITeam>();
   // const [myTeams, setMyTeams] = useState<ITeam[]>([]);
 

@@ -159,10 +159,10 @@ function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: 
   };
 
   const handleSendClientInvitation = () => {
-    console.log(membersList);
+    // console.log(membersList);
     axios
       .put("/api/team/inviteclients/" + teamId, {
-        accountIds: membersList.map(account => account.accountId+1),
+        accountIds: membersList.map(account => account.accountId),
       })
       .then((r) => {
         if(!r.data){
@@ -177,7 +177,7 @@ function InviteClient({ existingTeamAccounts, teamId }: { existingTeamAccounts: 
           type: "success",
           message: "Add client success",
         });
-        // window.location.reload();
+        window.location.reload();
       })
       .catch(() => {
         notification.error({

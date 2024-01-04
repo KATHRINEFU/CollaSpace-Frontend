@@ -168,9 +168,9 @@ export function Component() {
           },
         ],
         onFilter: (value, record) => {
-          if ("Yes".indexOf(value as string)) {
+          if ("No".indexOf(value as string)) {
             return record.collaborations.length > 0;
-          } else if ("No".indexOf(value as string)) {
+          } else if ("Yes".indexOf(value as string)) {
             return record.collaborations.length === 0;
           }
           return false;
